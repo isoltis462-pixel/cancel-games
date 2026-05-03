@@ -2,129 +2,138 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PureDrop | Premium Gaming</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PureDrop | Premium</title>
     <style>
-        /* Палітра: Глибокий чорний та Електричний синій */
         :root {
-            --bg-color: #000000;
-            --card-bg: #0d0d0d;
-            --accent-blue: #007AFF; /* Колір Apple/Premium Blue */
-            --text-main: #ffffff;
-            --text-dim: #666666;
+            --bg-black: #000000;
+            --card-dark: #121212;
+            --happy-green: #57AF20; /* Той самий колір HappyMod, але для акцентів */
+            --text-white: #ffffff;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-black);
+            color: var(--text-white);
+            font-family: 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Шапка з назвою */
+        /* Анімація появи карток */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         header {
-            width: 100%;
-            padding: 30px 0;
+            background: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(15px);
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
             text-align: center;
-            border-bottom: 1px solid #111;
+            border-bottom: 1px solid #222;
         }
 
         .logo {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 900;
-            letter-spacing: -1.5px;
-            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .logo span {
-            color: var(--accent-blue);
-            text-shadow: 0 0 20px rgba(0, 122, 255, 0.4);
-        }
+        .logo span { color: var(--happy-green); }
 
-        /* Мінімалістичний пошук */
-        .search-container {
-            width: 90%;
-            max-width: 500px;
-            margin: 20px 0;
-        }
+        /* Пошук із фокусом */
+        .search-container { padding: 15px; }
 
-        input {
+        .search-input {
             width: 100%;
-            padding: 15px 20px;
-            background: #111;
-            border: 1px solid #222;
+            padding: 14px 20px;
+            background: #1c1c1e;
+            border: 2px solid transparent;
             border-radius: 15px;
             color: white;
             font-size: 16px;
-            outline: none;
+            box-sizing: border-box;
             transition: 0.3s;
+            outline: none;
         }
 
-        input:focus {
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 10px rgba(0, 122, 255, 0.2);
+        .search-input:focus {
+            border-color: var(--happy-green);
+            background: #252527;
+            box-shadow: 0 0 15px rgba(87, 175, 32, 0.2);
         }
 
-        /* Сітка карток (як у HappyMod, але чистіша) */
+        /* Контейнер ігор */
         .grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 15px;
-            width: 90%;
-            max-width: 1000px;
-            padding-bottom: 40px;
+            padding: 15px;
         }
 
-        .card {
-            background: var(--card-bg);
-            border-radius: 24px;
-            padding: 20px;
-            border: 1px solid #1a1a1a;
-            transition: 0.3s cubic-bezier(0.17, 0.67, 0.83, 0.67);
-            text-align: center;
+        .game-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.6s ease forwards;
         }
 
-        .card:active {
-            transform: scale(0.96);
-        }
-
-        .icon-box {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(145deg, #111, #000);
-            border-radius: 20px;
-            margin: 0 auto 15px;
+        .icon-wrapper {
+            width: 90px;
+            height: 90px;
+            background: var(--card-dark);
+            border-radius: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            font-size: 40px;
+            margin-bottom: 10px;
+            border: 1px solid #222;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
 
-        .game-title {
-            font-size: 15px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            display: block;
+        /* Ефект при натисканні */
+        .game-card:active .icon-wrapper {
+            transform: scale(0.85);
+            border-color: var(--happy-green);
         }
 
-        /* Кнопка Premium вигляду */
-        .action-btn {
-            background: var(--accent-blue);
-            color: white;
-            border: none;
-            padding: 10px 0;
-            width: 100%;
-            border-radius: 12px;
-            font-weight: 800;
+        .game-name {
             font-size: 12px;
-            letter-spacing: 0.5px;
-            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        /* Кнопка "Download" у стилі HappyMod */
+        .download-btn {
+            background: var(--happy-green);
+            color: black;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 900;
             text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .download-btn:active {
+            background: #ffffff;
+            transform: translateY(2px);
         }
     </style>
 </head>
@@ -135,34 +144,69 @@
     </header>
 
     <div class="search-container">
-        <input type="text" placeholder="Search premium games...">
+        <input type="text" class="search-input" placeholder="Search mods & games..." id="searchInput">
     </div>
 
-    <div class="grid">
-        <div class="card">
-            <div class="icon-box">🏎️</div>
-            <span class="game-title">Ukraine GTA</span>
-            <button class="action-btn">Remove</button>
+    <div class="grid" id="gameGrid">
+        <!-- Гра 1 -->
+        <div class="game-card">
+            <div class="icon-wrapper">🏎️</div>
+            <div class="game-name">UKRAINE GTA</div>
+            <button class="download-btn">Install</button>
         </div>
 
-        <div class="card">
-            <div class="icon-box">⚽</div>
-            <span class="game-title">Superkickoff</span>
-            <button class="action-btn">Remove</button>
+        <!-- Гра 2 -->
+        <div class="game-card">
+            <div class="icon-wrapper">🚛</div>
+            <div class="game-name">ETS 2 Mobile</div>
+            <button class="download-btn">Install</button>
         </div>
 
-        <div class="card">
-            <div class="icon-box">🎮</div>
-            <span class="game-title">Euro Truck 2</span>
-            <button class="action-btn">Remove</button>
+        <!-- Гра 3 -->
+        <div class="game-card">
+            <div class="icon-wrapper">🚓</div>
+            <div class="game-name">NPU Simulator</div>
+            <button class="download-btn">Install</button>
         </div>
 
-        <div class="card">
-            <div class="icon-box">🚛</div>
-            <span class="game-title">City Car Dr.</span>
-            <button class="action-btn">Remove</button>
+        <!-- Гра 4 -->
+        <div class="game-card">
+            <div class="icon-wrapper">⚽</div>
+            <div class="game-name">Shakhtar FC</div>
+            <button class="download-btn">Install</button>
+        </div>
+
+        <!-- Гра 5 -->
+        <div class="game-card">
+            <div class="icon-wrapper">🏗️</div>
+            <div class="game-name">BeamNG Dr.</div>
+            <button class="download-btn">Install</button>
+        </div>
+
+        <!-- Гра 6 -->
+        <div class="game-card">
+            <div class="icon-wrapper">🛰️</div>
+            <div class="game-name">ISS Space</div>
+            <button class="download-btn">Install</button>
         </div>
     </div>
+
+    <script>
+        // Простий пошук для твого списку ігор
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            let filter = e.target.value.toLowerCase();
+            let cards = document.querySelectorAll('.game-card');
+            
+            cards.forEach(card => {
+                let name = card.querySelector('.game-name').innerText.toLowerCase();
+                if (name.includes(filter)) {
+                    card.style.display = "flex";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>
