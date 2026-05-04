@@ -12,12 +12,12 @@
             --border: rgba(255,255,255,0.08);
             --text: #ffffff;
             --text-dim: #94949b;
+            --danger: #ff4444;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: var(--text); margin: 0; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; outline: none; }
+        body { background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
 
-        /* HEADER */
         header { 
             padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; 
             background: rgba(11,11,12,0.9); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border);
@@ -26,141 +26,197 @@
         .brand { font-size: 20px; font-weight: 900; }
         .brand span { color: var(--accent); }
 
-        /* GRID */
+        /* СІТКА КАРТОК */
         .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
-        .app-card { background: var(--surface); border-radius: 24px; padding: 15px; border: 1px solid var(--border); text-align: center; }
-        .app-card img { width: 80px; height: 80px; border-radius: 20px; object-fit: cover; margin-bottom: 10px; }
+        .app-card { background: var(--surface); border-radius: 24px; padding: 15px; border: 1px solid var(--border); text-align: center; transition: 0.2s; }
+        .app-card:active { transform: scale(0.96); }
+        .app-card img { width: 85px; height: 85px; border-radius: 22px; object-fit: cover; margin-bottom: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
+        .app-card b { display: block; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* MODAL */
-        .modal { position: fixed; inset: 0; background: var(--bg); z-index: 2000; transform: translateY(100%); transition: 0.4s; padding: 20px; overflow-y: auto; }
+        /* МОДАЛКА ГРИ */
+        .modal { position: fixed; inset: 0; background: var(--bg); z-index: 2000; transform: translateY(100%); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 20px; overflow-y: auto; }
         .modal.active { transform: translateY(0); }
-        .close-link { color: var(--accent); font-weight: bold; text-decoration: none; display: inline-block; margin-bottom: 20px; cursor: pointer; }
 
-        /* GALLERY (Слайдер що гортається) */
-        .gallery { 
-            display: flex; gap: 12px; overflow-x: auto; margin: 20px -20px; padding: 0 20px; 
-            scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
-        }
-        .gallery::-webkit-scrollbar { display: none; } /* Ховаємо полосу прокрутки */
-        .gallery img { 
-            height: 180px; border-radius: 14px; border: 1px solid var(--border); 
-            scroll-snap-align: start; flex-shrink: 0;
-        }
+        /* ГАЛЕРЕЯ ТА ПОВНИЙ ЕКРАН */
+        .gallery { display: flex; gap: 12px; overflow-x: auto; margin: 20px -20px; padding: 0 20px; scrollbar-width: none; scroll-snap-type: x mandatory; }
+        .gallery::-webkit-scrollbar { display: none; }
+        .gallery img { height: 170px; border-radius: 16px; border: 1px solid var(--border); flex-shrink: 0; cursor: pointer; scroll-snap-align: start; }
+        
+        #fullview { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
+        #fullview img { max-width: 100%; max-height: 90%; border-radius: 12px; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
 
         /* КНОПКИ */
-        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
-        .dl-btn { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; border-radius: 18px; font-weight: 800; font-size: 16px; cursor: pointer; }
-        .site-btn { width: 100%; padding: 15px; background: transparent; color: white; border: 1px solid #333; border-radius: 18px; font-weight: 600; text-decoration: none; display: block; text-align: center; }
+        .dl-btn { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; border-radius: 18px; font-weight: 800; font-size: 16px; margin-top: 15px; cursor: pointer; }
+        .site-btn { width: 100%; padding: 15px; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border); border-radius: 18px; font-weight: 600; text-decoration: none; display: block; text-align: center; margin-top: 10px; }
 
-        /* ADMIN */
+        /* ДИЗАЙН АДМІНКИ */
         #adminPanel { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
-        .admin-input { width: 100%; background: #111; border: 1px solid #333; padding: 12px; border-radius: 12px; color: white; margin-bottom: 10px; }
+        .admin-box { background: #111; padding: 20px; border-radius: 26px; border: 1px solid #222; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .admin-input { width: 100%; background: #080808; border: 1px solid #333; padding: 14px; border-radius: 14px; color: white; margin-bottom: 12px; font-size: 14px; transition: 0.3s; }
+        .admin-input:focus { border-color: var(--accent); background: #0a0a0a; }
+        
+        .manage-card { background: #0d0d0d; padding: 15px; border-radius: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1a1a1a; }
+        .edit-btn { color: var(--accent); background: rgba(87, 175, 32, 0.1); border: 1px solid var(--accent); padding: 7px 15px; border-radius: 10px; font-size: 12px; font-weight: bold; }
+        .delete-btn { color: var(--danger); background: rgba(255, 68, 68, 0.1); border: 1px solid var(--danger); padding: 7px 15px; border-radius: 10px; font-size: 12px; font-weight: bold; margin-left: 5px; }
     </style>
 </head>
 <body>
 
     <header>
         <div class="brand">PURE<span>DROP</span></div>
-        <div style="font-size:12px; color:var(--accent)">ONLINE: 142</div>
+        <div style="font-size:11px; color:var(--accent); font-weight:900; background:rgba(87,175,32,0.1); padding:4px 8px; border-radius:8px;">V9.1_SECURE</div>
     </header>
 
     <div class="main-grid" id="appGrid"></div>
 
-    <div onclick="toggleAdmin(true)" style="text-align:center; padding:40px; opacity:0.1; font-size:10px;">[ CONSOLE_V8 ]</div>
+    <!-- КНОПКА ВХОДУ В АДМІНКУ -->
+    <div onclick="loginAdmin()" style="text-align:center; padding:50px; opacity:0.1; font-size:10px; letter-spacing:2px; cursor:pointer;">[ DECRYPT_ACCESS_PORTAL ]</div>
 
-    <!-- MODAL -->
+    <!-- ВІКНО ГРИ -->
     <div id="appModal" class="modal">
-        <div class="close-link" onclick="closeApp()">✕ НАЗАД</div>
+        <div onclick="closeApp()" style="color:var(--accent); font-weight:900; margin-bottom:20px; display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <span style="font-size:20px;">✕</span> НАЗАД
+        </div>
         <div id="modalBody"></div>
     </div>
 
-    <!-- ADMIN -->
+    <!-- ПЕРЕГЛЯД ФОТО НА ВЕСЬ ЕКРАН -->
+    <div id="fullview" onclick="this.style.display='none'">
+        <img id="fullimg" src="">
+    </div>
+
+    <!-- ПАНЕЛЬ КЕРУВАННЯ -->
     <div id="adminPanel">
-        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-            <b style="color:var(--accent)">ADMIN_PANEL</b>
-            <button onclick="toggleAdmin(false)" style="background:red; color:white; border:none; border-radius:8px; padding:5px 15px;">EXIT</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+            <b style="color:var(--accent); font-size:20px; letter-spacing:-0.5px;">TERMINAL_MODE</b>
+            <button onclick="toggleAdmin(false)" style="background:var(--danger); color:white; border:none; border-radius:12px; padding:10px 25px; font-weight:bold;">LOCK</button>
         </div>
 
-        <input type="text" id="addName" class="admin-input" placeholder="Назва гри">
-        <input type="text" id="addIcon" class="admin-input" placeholder="URL Іконки (Аватарка)">
-        <input type="text" id="addScreens" class="admin-input" placeholder="Скріншоти через кому (,)">
-        <input type="text" id="addLink" class="admin-input" placeholder="Посилання на APK">
-        <input type="text" id="addSite" class="admin-input" placeholder="Посилання на офіційний сайт">
-        <textarea id="addDesc" class="admin-input" placeholder="Опис проєкту" style="height:80px"></textarea>
-        
-        <button onclick="saveData()" style="width:100%; padding:15px; background:var(--accent); border:none; border-radius:12px; color:white; font-weight:bold;">ОПУБЛІКУВАТИ</button>
-        
-        <div id="adminList" style="margin-top:20px"></div>
+        <div class="admin-box">
+            <h3 style="margin:0 0 15px 0; font-size:13px; color:var(--text-dim); text-transform:uppercase;">Content Manager</h3>
+            <input type="text" id="addName" class="admin-input" placeholder="Назва гри">
+            <input type="text" id="addIcon" class="admin-input" placeholder="URL Аватарки (логотип)">
+            <input type="text" id="addScreens" class="admin-input" placeholder="Скріншоти (через кому)">
+            <input type="text" id="addLink" class="admin-input" placeholder="URL для скачування (APK)">
+            <input type="text" id="addSite" class="admin-input" placeholder="URL Офіційного сайту">
+            <textarea id="addDesc" class="admin-input" placeholder="Опис гри..." style="height:110px"></textarea>
+            <button id="mainBtn" onclick="saveData()" style="width:100%; padding:16px; background:var(--accent); border:none; border-radius:14px; color:white; font-weight:900; font-size:15px; cursor:pointer; box-shadow: 0 5px 15px rgba(87,175,32,0.3);">ОПУБЛІКУВАТИ</button>
+        </div>
+
+        <div id="adminList"></div>
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('pd_v8')) || [];
+        // БАЗА ДАНИХ ТА ПАРОЛЬ
+        let db = JSON.parse(localStorage.getItem('puredrop_final')) || [];
+        let currentEditId = null;
+        const ADMIN_PASS = "2oo61985puredrop"; 
 
         function render() {
             const grid = document.getElementById('appGrid');
             grid.innerHTML = db.map(item => `
                 <div class="app-card" onclick="openApp(${item.id})">
-                    <img src="${item.icon}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/6831/6831000.png'">
-                    <div style="font-weight:bold; font-size:14px;">${item.name}</div>
+                    <img src="${item.icon || 'https://cdn-icons-png.flaticon.com/512/6831/6831000.png'}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/6831/6831000.png'">
+                    <b>${item.name}</b>
                 </div>
             `).join('');
 
-            document.getElementById('adminList').innerHTML = db.map(item => `
-                <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #222; font-size:12px;">
-                    <span>${item.name}</span>
-                    <button onclick="deleteItem(${item.id})" style="color:red; background:none; border:none;">Видалити</button>
+            const list = document.getElementById('adminList');
+            list.innerHTML = db.map(item => `
+                <div class="manage-card">
+                    <span style="font-weight:bold; font-size:14px;">${item.name}</span>
+                    <div>
+                        <button class="edit-btn" onclick="prepareEdit(${item.id})">EDIT</button>
+                        <button class="delete-btn" onclick="deleteItem(${item.id})">DEL</button>
+                    </div>
                 </div>
             `).join('');
+        }
+
+        function loginAdmin() {
+            let pass = prompt("Enter Access Key:");
+            if(pass === ADMIN_PASS) {
+                toggleAdmin(true);
+            } else if (pass !== null) {
+                alert("ACCESS DENIED!");
+            }
         }
 
         function saveData() {
             const name = document.getElementById('addName').value;
-            if(!name) return alert("Введіть назву!");
+            if(!name) return alert("Назва обов'язкова!");
 
-            db.push({
-                id: Date.now(),
-                name: name,
+            const payload = {
+                id: currentEditId || Date.now(),
+                name,
                 icon: document.getElementById('addIcon').value,
-                screens: document.getElementById('addScreens').value.split(','),
+                screens: document.getElementById('addScreens').value.split(',').map(s => s.trim()).filter(s => s !== ""),
                 link: document.getElementById('addLink').value,
                 site: document.getElementById('addSite').value,
                 desc: document.getElementById('addDesc').value
-            });
+            };
 
-            localStorage.setItem('pd_v8', JSON.stringify(db));
+            if(currentEditId) {
+                db = db.map(i => i.id === currentEditId ? payload : i);
+                currentEditId = null;
+                document.getElementById('mainBtn').innerText = "ОПУБЛІКУВАТИ";
+            } else {
+                db.push(payload);
+            }
+
+            localStorage.setItem('puredrop_final', JSON.stringify(db));
             render();
-            toggleAdmin(false);
-            // Очистка
+            alert("Дані успішно синхронізовано!");
             ['addName','addIcon','addScreens','addLink','addSite','addDesc'].forEach(id => document.getElementById(id).value = '');
+        }
+
+        function prepareEdit(id) {
+            const item = db.find(i => i.id === id);
+            document.getElementById('addName').value = item.name;
+            document.getElementById('addIcon').value = item.icon;
+            document.getElementById('addScreens').value = item.screens.join(', ');
+            document.getElementById('addLink').value = item.link;
+            document.getElementById('addSite').value = item.site;
+            document.getElementById('addDesc').value = item.desc;
+            currentEditId = id;
+            document.getElementById('mainBtn').innerText = "ОБНОВИТИ ДАНІ";
+            window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
         function openApp(id) {
             const item = db.find(i => i.id === id);
-            const imgs = item.screens.map(s => s.trim() ? `<img src="${s.trim()}">` : '').join('');
+            const imgs = item.screens.map(s => `<img src="${s}" onclick="fullView('${s}')" onerror="this.style.display='none'">`).join('');
             
             document.getElementById('modalBody').innerHTML = `
                 <div style="text-align:center">
-                    <img src="${item.icon}" style="width:110px; height:110px; border-radius:25px; border: 2px solid var(--accent); object-fit:cover;">
-                    <h1 style="margin:15px 0 5px 0">${item.name}</h1>
+                    <img src="${item.icon}" style="width:110px; height:110px; border-radius:28px; border:3px solid var(--accent); object-fit:cover; background:#000;">
+                    <h1 style="margin:15px 0 5px 0; font-size:26px; letter-spacing:-1px;">${item.name}</h1>
                     
-                    <div class="gallery">${imgs}</div>
+                    <div class="gallery">${imgs || '<p style="color:var(--text-dim)">Скріншоти відсутні</p>'}</div>
                     
-                    <div style="text-align:left; color:var(--text-dim); background:#1a1a1c; padding:18px; border-radius:20px; font-size:14px; line-height:1.6;">
-                        ${item.desc || 'Опис відсутній...'}
+                    <div style="text-align:left; color:var(--text-dim); background:rgba(255,255,255,0.03); padding:20px; border-radius:22px; font-size:14px; line-height:1.6; border:1px solid var(--border);">
+                        ${item.desc || 'Опис проєкту наразі відсутній...'}
                     </div>
 
-                    <div class="btn-group">
-                        <a href="${item.link}"><button class="dl-btn">ЗАВАНТАЖИТИ APK</button></a>
-                        ${item.site ? `<a href="${item.site}" class="site-btn" target="_blank">ВІДВІДАТИ САЙТ ПРОЄКТУ</a>` : ''}
+                    <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:30px;">
+                        <a href="${item.link}" target="_blank" style="text-decoration:none;">
+                            <button class="dl-btn">ЗАВАНТАЖИТИ APK</button>
+                        </a>
+                        ${item.site ? `<a href="${item.site}" target="_blank" class="site-btn">ВІДВІДАТИ САЙТ</a>` : ''}
                     </div>
                 </div>
             `;
             document.getElementById('appModal').classList.add('active');
         }
 
+        function fullView(src) {
+            document.getElementById('fullimg').src = src;
+            document.getElementById('fullview').style.display = 'flex';
+        }
+
         function toggleAdmin(s) { document.getElementById('adminPanel').style.display = s ? 'flex' : 'none'; }
         function closeApp() { document.getElementById('appModal').classList.remove('active'); }
-        function deleteItem(id) { if(confirm("Видалити?")) { db = db.filter(i => i.id !== id); localStorage.setItem('pd_v8', JSON.stringify(db)); render(); } }
+        function deleteItem(id) { if(confirm("Видалити цей пост назавжди?")) { db = db.filter(i => i.id !== id); localStorage.setItem('puredrop_final', JSON.stringify(db)); render(); } }
 
         render();
     </script>
