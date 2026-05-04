@@ -23,7 +23,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- АНІМАЦІЯ ІНТРО --- */
+        /* --- ІНТРО --- */
         #intro-screen {
             position: fixed;
             top: 0; left: 0;
@@ -33,234 +33,241 @@
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 0.8s ease;
         }
 
-        .intro-logo {
-            font-size: 35px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            animation: pulseIntro 1.8s infinite ease-in-out;
-        }
-        .intro-logo span { color: var(--green); }
+        .intro-logo { font-size: 30px; font-weight: 900; letter-spacing: 3px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
 
-        @keyframes pulseIntro {
-            0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.05); opacity: 1; }
-        }
-
-        /* --- ГОЛОВНИЙ ЕКРАН --- */
+        /* --- ГОЛОВНА --- */
         header {
-            background: rgba(28, 28, 30, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 18px;
-            text-align: center;
-            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             position: sticky; top: 0; z-index: 100;
         }
 
-        .logo { font-size: 22px; font-weight: 900; text-transform: uppercase; }
+        .logo { font-size: 20px; font-weight: 900; }
         .logo span { color: var(--green); }
 
-        .status-bar {
-            background: #151517;
-            margin: 15px;
-            padding: 10px;
-            border-radius: 12px;
+        .online-count {
             font-size: 11px;
+            background: rgba(87, 175, 32, 0.1);
+            color: var(--green);
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(87, 175, 32, 0.3);
+        }
+
+        /* ПОШУК */
+        .search-container { padding: 10px 15px; }
+        .search-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 12px;
+            color: white;
+            box-sizing: border-box;
+            outline: none;
+            transition: border 0.3s;
+        }
+        .search-box:focus { border-color: var(--green); }
+
+        /* КАТЕГОРІЇ (Файне від мене) */
+        .categories {
             display: flex;
-            align-items: center;
-            gap: 8px;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 10px 15px;
+            scrollbar-width: none;
+        }
+        .categories::-webkit-scrollbar { display: none; }
+        .cat-item {
+            background: var(--card);
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-size: 12px;
+            white-space: nowrap;
             border: 1px solid var(--border);
         }
-        .dot-online { width: 8px; height: 8px; background: var(--green); border-radius: 50%; box-shadow: 0 0 8px var(--green); }
+        .cat-item.active { background: var(--green); border-color: var(--green); }
 
         .grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px; padding: 0 15px 15px 15px;
+            gap: 12px; padding: 15px;
         }
 
         .game-card {
             background: var(--card);
-            border-radius: 22px;
+            border-radius: 20px;
             padding: 15px 5px;
             text-align: center;
             border: 1px solid var(--border);
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: 0.2s;
         }
-        .game-card:active { transform: scale(0.92); }
+        .game-card:active { transform: scale(0.95); }
 
         .game-icon-img {
-            width: 64px; height: 64px;
-            border-radius: 16px;
+            width: 60px; height: 60px;
+            border-radius: 14px;
             margin-bottom: 8px;
             object-fit: cover;
         }
 
-        .name-main { font-size: 11px; font-weight: 700; color: #efeff4; }
+        .name-main { font-size: 11px; font-weight: 700; }
 
-        /* --- СТОРІНКА ГРИ (ВИЇЗД) --- */
+        /* СТОРІНКА ГРИ */
         .full-page {
             position: fixed;
             top: 0; left: 100%;
             width: 100%; height: 100%;
             background: var(--bg);
             z-index: 2000;
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             overflow-y: auto;
         }
-
         .full-page.active { transform: translateX(-100%); }
 
-        .back-btn { padding: 20px; font-size: 18px; color: var(--green); cursor: pointer; font-weight: bold; }
+        .back-btn { padding: 20px; font-size: 18px; color: var(--green); font-weight: bold; }
         .content-padding { padding: 0 20px 80px 20px; }
 
-        .app-header { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; }
-        .app-header img { width: 95px; height: 95px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .app-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
+        .app-header img { width: 85px; height: 85px; border-radius: 20px; }
 
         .tech-info {
             background: var(--card);
-            border-radius: 20px;
-            padding: 20px;
+            border-radius: 15px;
+            padding: 15px;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            border: 1px solid var(--border);
+            gap: 10px;
         }
+        .info-label { font-size: 9px; color: var(--grey); text-transform: uppercase; }
+        .info-val { font-size: 12px; font-weight: 700; }
 
-        .info-item { display: flex; flex-direction: column; }
-        .info-label { font-size: 10px; color: var(--grey); text-transform: uppercase; margin-bottom: 4px; }
-        .info-val { font-size: 13px; font-weight: 700; }
-
-        .desc-title { font-size: 17px; font-weight: 800; margin: 30px 0 15px 0; color: var(--green); }
-        .detailed-desc { color: #d1d1d6; line-height: 1.7; font-size: 14px; }
+        .desc-title { font-size: 16px; font-weight: 800; margin: 25px 0 10px 0; color: var(--green); }
+        .detailed-desc { color: #d1d1d6; line-height: 1.6; font-size: 14px; }
 
         .big-dl-btn {
             background: var(--green);
             color: white; border: none;
-            width: 100%; padding: 22px;
-            border-radius: 22px;
-            font-size: 18px; font-weight: 900;
-            cursor: pointer;
-            margin-top: 40px;
-            box-shadow: 0 10px 20px rgba(87, 175, 32, 0.2);
+            width: 100%; padding: 20px;
+            border-radius: 18px;
+            font-size: 16px; font-weight: 900;
+            margin-top: 30px;
         }
 
-        /* --- ПРИХОВАНА ПАНЕЛЬ --- */
-        #secret-trigger {
-            text-align: center;
-            padding: 30px;
-            color: #1a1a1c; /* Майже колір фону */
-            user-select: none;
-            font-size: 10px;
-        }
-
+        /* АДМІНКА */
+        #secret-trigger { text-align: center; padding: 40px; color: #151517; font-size: 10px; user-select: none; }
         #admin-panel {
             position: fixed;
             bottom: -100%; left: 0;
             width: 100%; background: #0a0a0a;
             z-index: 3000;
-            padding: 40px 20px;
+            padding: 30px 20px;
             border-top: 1px solid var(--green);
-            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            box-sizing: border-box;
+            transition: 0.5s;
         }
         #admin-panel.open { bottom: 0; }
     </style>
 </head>
 <body>
 
-    <!-- Музика -->
-    <audio id="bgMusic" loop>
-        <source src="https://www.soundboard.com/handler/DownLoadTrack.ashx?cliptoken=8823f66c-54a7-4712-a7f4-d5f992386400" type="audio/mpeg">
-    </audio>
+    <audio id="bgMusic" loop><source src="https://www.soundboard.com/handler/DownLoadTrack.ashx?cliptoken=8823f66c-54a7-4712-a7f4-d5f992386400" type="audio/mpeg"></audio>
 
-    <div id="intro-screen">
-        <div class="intro-logo">PURE<span>DROP</span></div>
+    <div id="intro-screen"><div class="intro-logo">PURE<span>DROP</span></div></div>
+
+    <header>
+        <div class="logo">PURE<span>DROP</span></div>
+        <div class="online-count">● Онлайн: <span id="user-count">142</span></div>
+    </header>
+
+    <div class="search-container">
+        <input type="text" class="search-box" placeholder="Пошук ігор та модів...">
     </div>
 
-    <header><div class="logo">PURE<span>DROP</span></div></header>
-
-    <div class="status-bar">
-        <div class="dot-online"></div>
-        <span>PURE-KERNEL: ACTIVE | BYPASS: ENABLED</span>
+    <div class="categories">
+        <div class="cat-item active">Всі</div>
+        <div class="cat-item">Топ</div>
+        <div class="cat-item">Аркади</div>
+        <div class="cat-item">Симулятори</div>
+        <div class="cat-item">Нові</div>
     </div>
 
     <div class="grid">
-        <!-- Geometry Dash з твоєю фоткою -->
         <div class="game-card" onclick="openGame()">
-            <img src="https://play-lh.googleusercontent.com/9asY99v7r66N8YjXfC-E_8Y3U0vWc6FfK5E7-6YJ_I2f7V9GZ3n0_1-C-e5fG_Z5" class="game-icon-img" alt="GD">
+            <img src="Geometry_Dash_logo (1).webp" class="game-icon-img" alt="GD">
             <div class="name-main">Geometry Dash</div>
         </div>
         <div class="game-card">
-            <div style="font-size: 35px; margin: 10px 0;">⚽</div>
+            <div style="font-size: 30px; margin: 10px 0;">⚽</div>
             <div class="name-main">Superkickoff</div>
         </div>
         <div class="game-card">
-            <div style="font-size: 35px; margin: 10px 0;">🏗️</div>
-            <div class="name-main">In Dev...</div>
+            <div style="font-size: 30px; margin: 10px 0;">💎</div>
+            <div class="name-main">Brawl Stars</div>
         </div>
     </div>
 
-    <!-- Секретна точка внизу -->
     <div id="secret-trigger" onclick="toggleAdmin()">system_node</div>
 
     <div id="admin-panel">
-        <h3 style="margin-top: 0; color: var(--green);">[SYSTEM TERMINAL]</h3>
-        <p style="color: var(--grey); font-size: 12px; margin-bottom: 25px;">Керування базою PureDrop v.2.4</p>
-        <button onclick="alert('Логи очищені')" style="width: 100%; padding: 18px; background: #1c1c1e; color: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px;">Clear Logs</button>
-        <button onclick="toggleAdmin()" style="width: 100%; padding: 18px; background: var(--green); color: white; border: none; border-radius: 12px;">Exit Terminal</button>
+        <h3 style="color: var(--green);">[ADMIN_TERMINAL]</h3>
+        <button onclick="toggleAdmin()" style="width: 100%; padding: 15px; background: var(--green); border: none; border-radius: 10px; color: white; font-weight: bold;">Вийти</button>
     </div>
 
-    <!-- Сторінка гри -->
+    <!-- СТОРІНКА ГРИ -->
     <div id="fullPage" class="full-page">
-        <div class="back-btn" onclick="closeGame()">← К КАТАЛОГУ</div>
+        <div class="back-btn" onclick="closeGame()">← Назад</div>
         <div class="content-padding">
             <div class="app-header">
-                <img src="https://play-lh.googleusercontent.com/9asY99v7r66N8YjXfC-E_8Y3U0vWc6FfK5E7-6YJ_I2f7V9GZ3n0_1-C-e5fG_Z5">
+                <img src="Geometry_Dash_logo (1).webp">
                 <div>
-                    <h1 style="margin: 0; font-size: 26px;">Geometry Dash</h1>
-                    <span style="color: var(--green); font-size: 13px; font-weight: 800;">PREMIUM EDITION</span>
+                    <h1 style="margin: 0; font-size: 24px;">Geometry Dash</h1>
+                    <span style="color: var(--green); font-size: 12px; font-weight: 800;">ВЕРСІЯ: FULL</span>
                 </div>
             </div>
 
             <div class="tech-info">
-                <div class="info-item"><span class="info-label">ВЕРСІЯ</span><span class="info-val">2.2.13</span></div>
-                <div class="info-item"><span class="info-label">ВАГА</span><span class="info-val">160 МБ</span></div>
-                <div class="info-item"><span class="info-label">ДОСТУП</span><span class="info-val">FREE</span></div>
-                <div class="info-item"><span class="info-label">DEV</span><span class="info-val">RobTop</span></div>
+                <div class="info-item"><span class="info-label">РОЗМІР</span><span class="info-val">160 МБ</span></div>
+                <div class="info-item"><span class="info-label">ЗАВАНТАЖЕНЬ</span><span class="info-val">12.5K+</span></div>
             </div>
 
-            <div class="desc-title">ОПИС МОДУЛЯ</div>
+            <div class="desc-title">ПРО ГРУ</div>
             <div class="detailed-desc">
-                Повна версія легендарного ритм-платформера. Всі рівні, іконки та елементи кастомізації розблоковані. 
-                Версія оптимізована під високу частоту оновлення екрану (FPS).
+                Легендарна ритм-гра Geometry Dash тепер доступна на PureDrop у повному обсязі. 
+                У цій версії ви знайдете всі розблоковані іконки, скіни та кольори. 
+                Ми оптимізували APK для стабільної роботи на Android. Стрибайте, літайте та проходьте найскладніші рівні під круті саундтреки!
             </div>
 
-            <a href="https://www.dropbox.com/scl/fi/cys98ejzhcyiui2yyt0a1/APK-Geometry-Dash-PURE_DROP.apk?rlkey=x9t2scdpbudz48nc5wb01y085&st=y881ck8w&dl=1" style="text-decoration: none;">
-                <button class="big-dl-btn">ЗАВАНТАЖИТИ APK</button>
+            <a href="https://www.dropbox.com/scl/fi/cys98ejzhcyiui2yyt0a1/APK-Geometry-Dash-PURE_DROP.apk?rlkey=x9t2scdpbudz48nc5wb01y085&st=y881ck8w&dl=1">
+                <button class="big-dl-btn">СКАЧАТИ APK (160 MB)</button>
             </a>
         </div>
     </div>
 
     <script>
-        const intro = document.getElementById('intro-screen');
-        const music = document.getElementById('bgMusic');
+        // Рандомний онлайн
+        setInterval(() => {
+            const count = Math.floor(Math.random() * (155 - 140) + 140);
+            document.getElementById('user-count').innerText = count;
+        }, 5000);
 
-        // Прибираємо інтро
         window.onload = () => {
             setTimeout(() => {
-                intro.style.opacity = '0';
-                setTimeout(() => { intro.style.display = 'none'; }, 800);
-            }, 1500);
+                document.getElementById('intro-screen').style.opacity = '0';
+                setTimeout(() => { document.getElementById('intro-screen').style.display = 'none'; }, 800);
+            }, 1200);
         };
 
         function openGame() {
             document.getElementById('fullPage').classList.add('active');
             document.body.style.overflow = 'hidden';
-            music.play().catch(() => {}); // Музика при вході
+            document.getElementById('bgMusic').play().catch(() => {});
         }
 
         function closeGame() {
