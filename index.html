@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PureDrop | Superkickoff Edition</title>
+    <title>PureDrop | Geometry Dash</title>
     <style>
         :root {
             --bg: #1c1c1e;
@@ -11,7 +11,6 @@
             --green: #57AF20;
             --white: #ffffff;
             --grey-text: #a0a0a0;
-            --dark-overlay: rgba(0, 0, 0, 0.7);
         }
 
         body {
@@ -34,17 +33,6 @@
         .logo { font-size: 22px; font-weight: 900; text-transform: uppercase; }
         .logo span { color: var(--green); }
 
-        .search-container { padding: 12px; }
-        #searchInput {
-            width: 100%; padding: 14px;
-            background: var(--card);
-            border: 2px solid transparent;
-            border-radius: 12px;
-            color: white; outline: none;
-            box-sizing: border-box; transition: 0.3s;
-        }
-        #searchInput:focus { border-color: var(--green); }
-
         .grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -61,13 +49,11 @@
             border: 1px solid #3a3a3c;
         }
 
-        .game-card:hover { transform: scale(1.05); border-color: var(--green); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        .game-card:active { transform: scale(0.9); }
+        .game-card:hover { transform: scale(1.05); border-color: var(--green); }
 
         .icon-main { font-size: 40px; margin-bottom: 8px; }
         .name-main { font-size: 11px; font-weight: bold; }
 
-        /* Повноекранна сторінка */
         .full-page {
             position: fixed;
             top: 0; left: 100%;
@@ -80,18 +66,8 @@
 
         .full-page.active { left: 0; }
 
-        .back-btn {
-            padding: 20px;
-            font-size: 18px;
-            color: var(--green);
-            cursor: pointer;
-            font-weight: bold;
-            display: inline-block;
-        }
+        .back-btn { padding: 20px; font-size: 18px; color: var(--green); cursor: pointer; font-weight: bold; }
 
-        .content-padding { padding: 0 25px 50px 25px; }
-
-        /* Технічна інформація (як на скріншоті) */
         .tech-info {
             background: var(--card);
             border-radius: 15px;
@@ -105,14 +81,9 @@
 
         .info-item { display: flex; flex-direction: column; }
         .info-label { font-size: 10px; color: var(--grey-text); text-transform: uppercase; margin-bottom: 4px; }
-        .info-val { font-size: 13px; font-weight: bold; color: var(--white); }
+        .info-val { font-size: 13px; font-weight: bold; }
 
-        .description {
-            color: var(--grey-text);
-            line-height: 1.6;
-            font-size: 14px;
-            margin-bottom: 30px;
-        }
+        .content-padding { padding: 0 25px 50px 25px; }
 
         .big-dl-btn {
             background: var(--green);
@@ -124,55 +95,35 @@
             font-size: 18px;
             font-weight: 900;
             text-transform: uppercase;
-            box-shadow: 0 10px 25px rgba(87, 175, 32, 0.3);
             cursor: pointer;
             transition: 0.3s;
         }
 
         .big-dl-btn:active { transform: scale(0.95); background: white; color: black; }
-
-        .ver-tag {
-            display: inline-block;
-            background: rgba(87, 175, 32, 0.1);
-            color: var(--green);
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 10px;
-            font-weight: bold;
-            margin-top: 5px;
-        }
     </style>
 </head>
 <body>
 
     <header><div class="logo">PURE<span>DROP</span></div></header>
 
-    <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Пошук ігор...">
-    </div>
-
     <div class="grid">
-        <!-- Superkickoff Картка -->
-        <div class="game-card" onclick="openGame('Superkickoff', '⚽', 'Керуй улюбленими клубами! Тренуй Шахтар Донецьк або Рух Львів. Купуй гравців як Рубен Діаш та Саліба. Повна версія з усіма ліцензіями.', 'Bleutecmedia', '4.1.1', '2 травня 2026', '62.24 MB', 'https://dw.uptodown.net/dwn/L4BEt_GvTW8Oyj4UcMhlmi93zW9-I0Y4Hpo10u7QD-hiIuX8BC9ySclgfeaXGyfncwYncXbexbfxtHbadIV4yZBrYLuRSdNGruWSKd3qPQGRqmMF64QtvuXjF8LIx8rw/h3ZNB362gWF9hzm-hclaY22FmSbj0hlpd0aUu88XKGwvfXV0CCpu5cHra1Vwc3seCC37tIHo9Ft2FjBriLgKtuA8c8-NARn3z1ZsVeVwJA-jJxIns23XapDI3nrW8Grr/8YhYsykq-htBWZGmtmUutcT4R0Let9ybkxKrb9SfIB67J7I-GdjcepEo2eo_bBAvfbFPzhadklhH8dfsYphkk96fRfmUhvkFkWq8ci7kHfA=/uptodown-app.superkickoff.apk')">
-            <div class="icon-main">⚽</div>
-            <div class="name-main">Superkickoff</div>
-            <div class="ver-tag">v4.1.1</div>
+        <!-- Geometry Dash -->
+        <div class="game-card" onclick="openGame('Geometry Dash', '🔲', 'Прыгайте и летайте через опасности в этом ритм-платформере! Приготовьтесь к практически невозможному испытанию в мире Geometry Dash. Проверьте свои навыки, преодолевая шипы и препятствия под драйвовую музыку.', 'RobTop Games', '2.2.13', '4 мая 2026', '85.4 МБ', 'https://proxy4.androidapplications-files.site/fs47/fdl/409016/2118/s/1778109801/5/7a0d8e87da0b6296/6860289be330f7a9b0c55b61/')">
+            <div class="icon-main">🔲</div>
+            <div class="name-main">Geometry Dash</div>
         </div>
 
-        <!-- Інші ігри можна додавати аналогічно -->
         <div class="game-card">
             <div class="icon-main">🏎️</div>
             <div class="name-main">Ukraine GTA</div>
-            <div class="ver-tag">v2.5</div>
         </div>
+        
         <div class="game-card">
-            <div class="icon-box">🚓</div>
+            <div class="icon-main">🚓</div>
             <div class="name-main">NPU Sim</div>
-            <div class="ver-tag">v1.0</div>
         </div>
     </div>
 
-    <!-- Сторінка гри -->
     <div id="fullPage" class="full-page">
         <div class="back-btn" onclick="closeGame()">← Назад</div>
         
@@ -181,47 +132,43 @@
                 <div id="largeIcon" style="font-size: 60px; background: var(--card); padding: 15px; border-radius: 20px;"></div>
                 <div>
                     <h1 id="largeTitle" style="margin: 0; font-size: 28px;"></h1>
-                    <span style="color: var(--green); font-size: 12px;">🛡️ Перевірено антивірусом</span>
+                    <span style="color: var(--green); font-size: 12px;">✔️ Проверено и безопасно</span>
                 </div>
             </div>
 
-            <!-- Технічний блок як на скріншоті -->
+            <!-- Характеристики на русском (как на Знімок екрана 2026-05-04 020024.png) -->
             <div class="tech-info">
                 <div class="info-item">
-                    <span class="info-label">Розробник</span>
+                    <span class="info-label">Разработчик</span>
                     <span id="infoDev" class="info-val"></span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">Версія</span>
+                    <span class="info-label">Версия</span>
                     <span id="infoVer" class="info-val"></span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">Дата оновлення</span>
+                    <span class="info-label">Дата обновления</span>
                     <span id="infoDate" class="info-val"></span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">Розмір файлу</span>
+                    <span class="info-label">Размер файла</span>
                     <span id="infoSize" class="info-val"></span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">Ліцензія</span>
-                    <span class="info-val" style="color: var(--green);">Безкоштовно</span>
+                    <span class="info-label">Лицензия</span>
+                    <span class="info-val" style="color: var(--green);">Бесплатно</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">Тип файлу</span>
-                    <span class="info-val">XAPK / APK</span>
+                    <span class="info-label">Тип файла</span>
+                    <span class="info-val">APK</span>
                 </div>
             </div>
 
-            <p id="largeDesc" class="description"></p>
+            <p id="largeDesc" style="color: var(--grey-text); line-height: 1.6; margin-bottom: 30px;"></p>
 
             <a id="dlLink" href="#" style="text-decoration: none;">
-                <button class="big-dl-btn">ЗАВАНТАЖИТИ ЗАРАЗ</button>
+                <button class="big-dl-btn">СКАЧАТЬ APK</button>
             </a>
-            
-            <p style="text-align: center; font-size: 11px; color: var(--grey-text); margin-top: 20px;">
-                Без реклами • Без вірусів • Пряме посилання
-            </p>
         </div>
     </div>
 
@@ -244,14 +191,6 @@
             document.getElementById('fullPage').classList.remove('active');
             document.body.style.overflow = 'auto';
         }
-
-        document.getElementById('searchInput').addEventListener('input', function() {
-            let val = this.value.toLowerCase();
-            document.querySelectorAll('.game-card').forEach(card => {
-                let text = card.querySelector('.name-main').innerText.toLowerCase();
-                card.style.display = text.includes(val) ? "flex" : "none";
-            });
-        });
     </script>
 </body>
 </html>
