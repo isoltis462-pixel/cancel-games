@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PureDrop Hub | Admin Engine</title>
+    <title>PureDrop | Ultimate CMS</title>
     <style>
         :root {
             --accent: #57AF20;
@@ -13,53 +13,49 @@
             --text: #ffffff;
             --text-dim: #a1a1aa;
             --danger: #ff4444;
+            --warning: #ff9800;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text); margin: 0; padding-bottom: 50px; }
 
-        /* HEADER & MAIN */
+        /* HEADER */
         header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(13,13,15,0.9); backdrop-filter: blur(10px); z-index: 100; }
         .brand { font-size: 22px; font-weight: 900; }
         .brand span { color: var(--accent); }
-        
-        .search-box { padding: 20px; }
-        .search-input { width: 100%; background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: 14px; color: white; }
 
-        .grid { padding: 0 20px 100px; display: flex; flex-direction: column; gap: 12px; }
+        /* MAIN GRID */
+        .grid { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
         .card { background: var(--surface); border-radius: 20px; padding: 15px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border); }
-        .card img { width: 60px; height: 60px; border-radius: 14px; }
+        .card img { width: 65px; height: 65px; border-radius: 16px; object-fit: cover; }
         .card-info { flex: 1; }
-        .card-title { font-weight: 800; display: block; }
-        .card-type { font-size: 10px; color: var(--accent); text-transform: uppercase; font-weight: 900; }
-
-        /* ADMIN PANEL (THE CORE) */
-        #adminPanel {
-            position: fixed; inset: 0; background: #000; z-index: 9999;
-            display: none; flex-direction: column; padding: 20px; overflow-y: auto;
-        }
-        .admin-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
-        .admin-title { font-family: monospace; color: var(--accent); font-weight: bold; }
-        .exit-admin { padding: 8px 15px; background: var(--danger); border: none; border-radius: 8px; color: white; font-weight: bold; }
-
-        .admin-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .stat-card { background: #111; border: 1px solid #222; padding: 15px; border-radius: 12px; text-align: center; }
-        .stat-card small { display: block; color: #555; font-size: 10px; }
-        .stat-card b { color: var(--accent); font-size: 18px; }
-
-        .admin-form { background: #111; padding: 20px; border-radius: 15px; border: 1px solid #222; }
-        .admin-form h3 { margin-top: 0; font-size: 14px; color: var(--accent); }
-        .admin-form input, .admin-form textarea { width: 100%; background: #000; border: 1px solid #333; padding: 12px; border-radius: 8px; color: white; margin-bottom: 10px; }
-        .add-btn { width: 100%; padding: 15px; background: var(--accent); border: none; border-radius: 10px; color: white; font-weight: 800; }
-
-        .log-box { margin-top: 20px; background: #050505; border: 1px dashed #333; padding: 15px; font-family: monospace; font-size: 11px; color: #666; max-height: 150px; overflow-y: auto; }
-        .log-line { margin-bottom: 5px; border-left: 2px solid var(--accent); padding-left: 8px; }
+        .card-title { font-weight: 800; display: block; font-size: 16px; }
+        .card-type { font-size: 10px; color: var(--accent); text-transform: uppercase; font-weight: 900; letter-spacing: 1px; }
 
         /* MODAL */
-        .modal { position: fixed; inset: 0; background: var(--bg); z-index: 1000; transform: translateY(100%); transition: 0.4s; padding: 20px; }
+        .modal { position: fixed; inset: 0; background: var(--bg); z-index: 1000; transform: translateY(100%); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 20px; overflow-y: auto; }
         .modal.active { transform: translateY(0); }
+        .close-btn { background: none; border: none; color: var(--accent); font-weight: 900; font-size: 18px; margin-bottom: 20px; cursor: pointer; }
 
-        #admin-trigger { text-align: center; padding: 30px; opacity: 0.2; font-size: 10px; letter-spacing: 2px; cursor: pointer; }
+        .status-badge { padding: 10px; border-radius: 12px; text-align: center; font-weight: 800; margin-top: 20px; }
+        .status-closed { background: rgba(255, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
+        .dl-btn { width: 100%; padding: 20px; background: var(--accent); color: white; border: none; border-radius: 15px; font-weight: bold; font-size: 16px; margin-top: 20px; }
+
+        /* ADMIN PANEL */
+        #adminPanel { position: fixed; inset: 0; background: #000; z-index: 9999; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
+        .admin-nav { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px; }
+        .nav-tab { padding: 10px 20px; background: #222; border-radius: 10px; font-size: 12px; white-space: nowrap; }
+        .nav-tab.active { background: var(--accent); }
+
+        .admin-input { width: 100%; background: #111; border: 1px solid #333; padding: 12px; border-radius: 10px; color: white; margin-bottom: 10px; }
+        .admin-section { background: #111; padding: 15px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #222; }
+        
+        .manage-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #222; font-size: 13px; }
+        .edit-status-btn { padding: 5px 10px; background: var(--warning); border: none; border-radius: 5px; font-size: 10px; font-weight: bold; }
+        .del-btn { padding: 5px 10px; background: var(--danger); border: none; border-radius: 5px; font-size: 10px; font-weight: bold; margin-left: 5px; }
+
+        #admin-trigger { text-align: center; padding: 40px; opacity: 0.1; font-size: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -69,150 +65,167 @@
         <div id="online-count" style="font-size:12px; color:var(--accent)">ONLINE: 142</div>
     </header>
 
-    <div class="search-box">
-        <input type="text" id="searchInput" class="search-input" placeholder="Пошук контенту..." oninput="doSearch()">
+    <div class="grid" id="appGrid">
+        <!-- Картки тут -->
     </div>
 
-    <main class="grid" id="appGrid"></main>
+    <div id="admin-trigger" onclick="toggleAdmin(true)">[ CONSOLE_LOGIN ]</div>
 
-    <div id="admin-trigger" onclick="openAdmin()">[ OPEN_ADMIN_CONSOLE ]</div>
+    <!-- МОДАЛКА ДЕТАЛЕЙ -->
+    <div id="appModal" class="modal">
+        <button class="close-btn" onclick="closeApp()">✕ НАЗАД</button>
+        <div id="modalBody"></div>
+    </div>
 
     <!-- АДМІН ПАНЕЛЬ -->
     <div id="adminPanel">
         <div class="admin-header">
-            <div class="admin-title">> ROOT@PUREDROP:~#</div>
-            <button class="exit-admin" onclick="closeAdmin()">EXIT</button>
+            <div style="color:var(--accent); font-family:monospace; font-weight:bold;">> ADMIN_PANEL_v6</div>
+            <button onclick="toggleAdmin(false)" style="background:var(--danger); border:none; color:white; border-radius:8px; padding:5px 15px;">EXIT</button>
         </div>
 
-        <div class="admin-stats">
-            <div class="stat-card"><small>TOTAL_ITEMS</small><b id="st-total">0</b></div>
-            <div class="stat-card"><small>SYS_STATUS</small><b>ACTIVE</b></div>
+        <div class="admin-section">
+            <h3 style="margin-top:0; font-size:14px;">ДОДАТИ НОВИЙ КОНТЕНТ</h3>
+            <input type="text" id="addName" class="admin-input" placeholder="Назва">
+            <input type="text" id="addIcon" class="admin-input" placeholder="URL Аватарки (фото)">
+            <input type="text" id="addLink" class="admin-input" placeholder="Посилання на скачування">
+            <select id="addType" class="admin-input">
+                <option value="game">Гра</option>
+                <option value="app">Додаток</option>
+                <option value="mod">Мод</option>
+                <option value="sys">Система</option>
+            </select>
+            <textarea id="addDesc" class="admin-input" placeholder="Опис проєкту" style="height:80px;"></textarea>
+            <button onclick="saveNewItem()" style="width:100%; padding:15px; background:var(--accent); border:none; border-radius:10px; color:white; font-weight:bold;">ОПУБЛІКУВАТИ НА САЙТ</button>
         </div>
 
-        <div class="admin-form">
-            <h3>ADD NEW CONTENT</h3>
-            <input type="text" id="new-name" placeholder="Назва гри/програми">
-            <input type="text" id="new-icon" placeholder="URL іконки">
-            <input type="text" id="new-type" placeholder="Тип (game/app/mod)">
-            <textarea id="new-desc" placeholder="Опис"></textarea>
-            <button class="add-btn" onclick="addNewItem()">PUSH TO DATABASE</button>
+        <div class="admin-section">
+            <h3 style="font-size:14px;">КЕРУВАННЯ ІСНУЮЧИМИ (EDIT)</h3>
+            <div id="adminList"></div>
         </div>
 
-        <div class="log-box" id="sysLog">
-            <div class="log-line">System initialized...</div>
-            <div class="log-line">Admin session started...</div>
-        </div>
-    </div>
-
-    <!-- МОДАЛКА ДЕТАЛЕЙ -->
-    <div id="appModal" class="modal">
-        <button onclick="closeApp()" style="background:none; border:none; color:var(--accent); font-weight:900; font-size:20px; padding:0 0 20px 0;">✕ CLOSE</button>
-        <div id="modalBody"></div>
+        <button onclick="clearSystem()" style="width:100%; padding:10px; background:none; border:1px solid #333; color:#555; border-radius:10px; font-size:10px;">ПОВНЕ ОЧИЩЕННЯ СИСТЕМИ (RESET)</button>
     </div>
 
     <script>
-        // База даних
-        let database = [
-            { id: 1, name: 'Geometry Dash', type: 'game', icon: 'Geometry_Dash_logo (1).webp', desc: 'Повна версія 2.2', link: '#' },
-            { id: 2, name: 'Superkickoff', type: 'game', icon: 'https://play-lh.googleusercontent.com/9nF_Xy1h4w9aL-UfH6F7vE8S0_j_N_x9', desc: 'Футбольний менеджер', link: '#' }
+        // Ініціалізація бази даних з пам'яті браузера
+        let db = JSON.parse(localStorage.getItem('puredrop_db')) || [
+            { id: 1, name: 'Geometry Dash', type: 'game', icon: 'Geometry_Dash_logo (1).webp', desc: 'Повна версія гри.', link: 'https://google.com', status: 'active' }
         ];
 
-        // Рендер головного меню
-        function render() {
+        // Функція відображення на головній
+        function renderMain() {
             const grid = document.getElementById('appGrid');
-            grid.innerHTML = database.map(item => `
+            grid.innerHTML = db.map(item => `
                 <div class="card" onclick="openApp(${item.id})">
                     <img src="${item.icon}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/6831/6831000.png'">
                     <div class="card-info">
                         <span class="card-type">${item.type}</span>
                         <span class="card-title">${item.name}</span>
                     </div>
-                    <div style="color:var(--accent)">⚡</div>
+                    <div style="color:${item.status === 'active' ? 'var(--accent)' : 'var(--danger)'}">●</div>
                 </div>
             `).join('');
-            document.getElementById('st-total').innerText = database.length;
+            renderAdminList();
         }
 
-        // Пошук
-        function doSearch() {
-            const q = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = database.filter(i => i.name.toLowerCase().includes(q));
-            const grid = document.getElementById('appGrid');
-            grid.innerHTML = filtered.map(item => `
-                <div class="card" onclick="openApp(${item.id})">
-                    <img src="${item.icon}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/6831/6831000.png'">
-                    <div class="card-info">
-                        <span class="card-type">${item.type}</span>
-                        <span class="card-title">${item.name}</span>
+        // Рендер списку в адмінці для редагування
+        function renderAdminList() {
+            const list = document.getElementById('adminList');
+            list.innerHTML = db.map(item => `
+                <div class="manage-item">
+                    <span>${item.name} [${item.status}]</span>
+                    <div>
+                        <button class="edit-status-btn" onclick="toggleStatus(${item.id})">Змінити статус</button>
+                        <button class="del-btn" onclick="deleteItem(${item.id})">Видалити</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        // Адмінка: Відкрити/Закрити
-        function openAdmin() {
-            document.getElementById('adminPanel').style.display = 'flex';
-            addLog("Admin accessed console.");
-        }
-        function closeAdmin() {
-            document.getElementById('adminPanel').style.display = 'none';
-        }
-
-        // Адмінка: Додати елемент
-        function addNewItem() {
-            const name = document.getElementById('new-name').value;
-            const icon = document.getElementById('new-icon').value;
-            const type = document.getElementById('new-type').value;
-            const desc = document.getElementById('new-desc').value;
-
-            if(!name) return alert("Введіть назву!");
-
-            const newItem = {
-                id: Date.now(),
-                name: name,
-                type: type || 'app',
-                icon: icon || '',
-                desc: desc || 'Немає опису',
-                link: '#'
-            };
-
-            database.push(newItem);
-            render();
-            addLog(`Added new item: ${name}`);
-            
-            // Очистка форми
-            document.getElementById('new-name').value = '';
-            alert("Успішно додано!");
-        }
-
-        // Логування
-        function addLog(msg) {
-            const log = document.getElementById('sysLog');
-            const time = new Date().toLocaleTimeString();
-            log.innerHTML += `<div class="log-line">[${time}] ${msg}</div>`;
-            log.scrollTop = log.scrollHeight;
-        }
-
-        // Модалка
+        // Відкриття модалки
         function openApp(id) {
-            const item = database.find(i => i.id === id);
-            document.getElementById('modalBody').innerHTML = `
+            const item = db.find(i => i.id === id);
+            const body = document.getElementById('modalBody');
+            
+            let actionHtml = item.status === 'active' 
+                ? `<a href="${item.link}"><button class="dl-btn">СКАЧАТИ ЗАРАЗ</button></a>`
+                : `<div class="status-badge status-closed">⚠ ГРУ ЗАКРИТО / ТИМЧАСОВО НЕДОСТУПНО</div>`;
+
+            body.innerHTML = `
                 <div style="text-align:center">
-                    <img src="${item.icon}" style="width:100px; border-radius:20px; margin-bottom:20px;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/6831/6831000.png'">
-                    <h1>${item.name}</h1>
-                    <p style="color:var(--text-dim)">${item.desc}</p>
-                    <button style="width:100%; padding:20px; background:var(--accent); border:none; border-radius:15px; color:white; font-weight:bold; margin-top:30px;">DOWNLOAD APK</button>
+                    <img src="${item.icon}" style="width:120px; height:120px; border-radius:25px; margin-bottom:20px;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/6831/6831000.png'">
+                    <h1 style="margin:0">${item.name}</h1>
+                    <p style="color:var(--accent); font-weight:bold; font-size:12px; margin-bottom:20px;">${item.type.toUpperCase()}</p>
+                    <div style="text-align:left; background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; line-height:1.6; color:var(--text-dim)">
+                        ${item.desc}
+                    </div>
+                    ${actionHtml}
                 </div>
             `;
             document.getElementById('appModal').classList.add('active');
-            addLog(`Opened details for: ${item.name}`);
-        }
-        function closeApp() {
-            document.getElementById('appModal').classList.remove('active');
         }
 
-        // Старт
-        render();
+        // Збереження нового
+        function saveNewItem() {
+            const name = document.getElementById('addName').value;
+            const icon = document.getElementById('addIcon').value;
+            const link = document.getElementById('addLink').value;
+            const type = document.getElementById('addType').value;
+            const desc = document.getElementById('addDesc').value;
+
+            if(!name || !link) return alert("Назва та посилання обов'язкові!");
+
+            const newItem = {
+                id: Date.now(),
+                name, icon, link, type, desc,
+                status: 'active'
+            };
+
+            db.push(newItem);
+            sync();
+            alert("Опубліковано!");
+            
+            // Очистити поля
+            ['addName', 'addIcon', 'addLink', 'addDesc'].forEach(id => document.getElementById(id).value = '');
+        }
+
+        // Функції адмінки
+        function toggleStatus(id) {
+            const item = db.find(i => i.id === id);
+            item.status = item.status === 'active' ? 'closed' : 'active';
+            sync();
+        }
+
+        function deleteItem(id) {
+            if(confirm("Видалити назавжди?")) {
+                db = db.filter(i => i.id !== id);
+                sync();
+            }
+        }
+
+        function sync() {
+            localStorage.setItem('puredrop_db', JSON.stringify(db));
+            renderMain();
+        }
+
+        function toggleAdmin(show) {
+            document.getElementById('adminPanel').style.display = show ? 'flex' : 'none';
+        }
+
+        function closeApp() { document.getElementById('appModal').classList.remove('active'); }
+
+        function clearSystem() {
+            if(confirm("Це видалить ВСІ твої додані ігри. Продовжити?")) {
+                localStorage.removeItem('puredrop_db');
+                location.reload();
+            }
+        }
+
+        // Запуск
+        renderMain();
+
+        // Імітація онлайну
         setInterval(() => {
             const val = Math.floor(Math.random() * (160 - 130) + 130);
             document.getElementById('online-count').innerText = "ONLINE: " + val;
