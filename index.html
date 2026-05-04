@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PureDrop | Geometry Dash Full</title>
+    <title>PureDrop | Geometry Dash APK</title>
     <style>
         :root {
             --bg: #1c1c1e;
@@ -31,10 +31,9 @@
             position: sticky; top: 0; z-index: 100;
         }
 
-        .logo { font-size: 22px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+        .logo { font-size: 22px; font-weight: 900; text-transform: uppercase; }
         .logo span { color: var(--green); }
 
-        /* Сетка игр */
         .grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -57,12 +56,10 @@
             width: 55px; height: 55px;
             border-radius: 14px;
             margin-bottom: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         .name-main { font-size: 11px; font-weight: bold; }
 
-        /* Страница загрузки */
         .full-page {
             position: fixed;
             top: 0; left: 100%;
@@ -79,12 +76,10 @@
 
         .content-padding { padding: 0 20px 60px 20px; }
 
-        /* Шапка игры */
         .app-header { display: flex; align-items: center; gap: 20px; margin-bottom: 25px; }
         #largeIconImg { width: 90px; height: 90px; border-radius: 22px; }
         .app-header h1 { margin: 0; font-size: 26px; }
 
-        /* Технические характеристики (по фото) */
         .tech-section-title { font-size: 14px; font-weight: bold; margin: 20px 0 10px 0; color: var(--green); }
         
         .tech-info {
@@ -101,7 +96,6 @@
         .info-label { font-size: 10px; color: var(--grey-text); text-transform: uppercase; margin-bottom: 4px; }
         .info-val { font-size: 13px; font-weight: bold; }
 
-        /* Детальное описание */
         .detailed-desc {
             margin-top: 25px;
             line-height: 1.6;
@@ -109,15 +103,6 @@
             color: #d1d1d6;
         }
 
-        .feature-list {
-            margin: 15px 0;
-            padding-left: 20px;
-            color: var(--grey-text);
-        }
-
-        .feature-list li { margin-bottom: 8px; }
-
-        /* Кнопка */
         .big-dl-btn {
             background: var(--green);
             color: white; border: none;
@@ -138,7 +123,6 @@
     <header><div class="logo">PURE<span>DROP</span></div></header>
 
     <div class="grid">
-        <!-- Geometry Dash Карточка -->
         <div class="game-card" onclick="openGame()">
             <img src="Geometry_Dash_logo.webp" class="game-icon-img" alt="Geometry Dash">
             <div class="name-main">Geometry Dash</div>
@@ -155,7 +139,6 @@
         </div>
     </div>
 
-    <!-- Развернутая страница -->
     <div id="fullPage" class="full-page">
         <div class="back-btn" onclick="closeGame()">← Назад</div>
         
@@ -176,7 +159,7 @@
                 </div>
                 <div class="info-item">
                     <span class="info-label">Версия</span>
-                    <span class="info-val">2.2.13 (Последняя)</span>
+                    <span class="info-val">2.2.13</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">Дата обновления</span>
@@ -191,33 +174,20 @@
                     <span class="info-val" style="color: var(--green);">Бесплатно</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">Требования</span>
-                    <span class="info-val">Android 5.0+</span>
+                    <span class="info-label">Тип файла</span>
+                    <span class="info-val">APK</span>
                 </div>
             </div>
 
             <div class="detailed-desc">
                 <b>ОБ ИГРЕ:</b><br>
-                Geometry Dash — это динамичный ритм-платформер, который заставит ваши рефлексы работать на пределе. Прыгайте, летайте и совершайте перевороты в гравитации, проходя через опасные коридоры и колючие препятствия. 
-                <br><br>
-                <b>ОСОБЕННОСТИ ПОРТА:</b>
-                <ul class="feature-list">
-                    <li>Полная версия со всеми открытыми уровнями.</li>
-                    <li>Встроенный редактор уровней для создания собственных миров.</li>
-                    <li>Тысячи пользовательских онлайн-уровней.</li>
-                    <li>Эксклюзивные саундтреки от лучших исполнителей.</li>
-                    <li>Настройка персонажа: новые скины и цвета.</li>
-                </ul>
-                <i>Этот файл проверен на отсутствие вирусов и готов к установке на ваш Poco F7 или любой другой смартфон.</i>
+                Geometry Dash — это ритм-платформер с практически невозможными испытаниями. Прыгайте и прокладывайте себе путь через опасности в мире геометрических фигур.
             </div>
 
-            <a href="https://freeprograms.me/index.php?do=download&id=1606" style="text-decoration: none;">
+            <!-- Твоє нове посилання -->
+            <a href="https://www.dropbox.com/scl/fi/cys98ejzhcyiui2yyt0a1/APK-Geometry-Dash-PURE_DROP.apk?rlkey=x9t2scdpbudz48nc5wb01y085&st=y881ck8w&dl=1" style="text-decoration: none;">
                 <button class="big-dl-btn">СКАЧАТЬ (85.4 MB)</button>
             </a>
-
-            <div style="text-align: center; margin-top: 20px; color: var(--grey-text); font-size: 11px;">
-                ID: app.robtop.geometrydash | SHA256 Verified
-            </div>
         </div>
     </div>
 
