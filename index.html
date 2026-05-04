@@ -1,283 +1,232 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PureDrop | Premium Market</title>
+    <title>PureDrop | Next-Gen Ecosystem</title>
     <style>
         :root {
-            --bg: #0f0f10;
-            --card: #1c1c1e;
-            --green: #57AF20;
-            --white: #ffffff;
-            --grey: #8e8e93;
-            --border: #2c2c2e;
+            --accent: #57AF20;
+            --bg: #0a0a0b;
+            --surface: #161618;
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #ffffff;
+            --text-dim: #94949b;
         }
 
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             background-color: var(--bg);
-            color: var(--white);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--text);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0; padding: 0;
             overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- ІНТРО --- */
-        #intro-screen {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: var(--bg);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.8s ease;
+        /* Анімація завантаження */
+        #loader {
+            position: fixed; inset: 0; background: var(--bg);
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; z-index: 10000; transition: 0.5s;
         }
+        .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .intro-logo { font-size: 30px; font-weight: 900; letter-spacing: 3px; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
-
-        /* --- ГОЛОВНА --- */
+        /* Шапка */
         header {
-            background: var(--bg);
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky; top: 0; z-index: 100;
+            padding: 20px; display: flex; justify-content: space-between; align-items: center;
+            backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid var(--border); background: rgba(10, 10, 11, 0.8);
         }
+        .logo { font-size: 22px; font-weight: 900; letter-spacing: -1px; }
+        .logo span { color: var(--accent); }
+        .online { font-size: 10px; font-weight: 800; background: rgba(87, 175, 32, 0.1); color: var(--accent); padding: 5px 10px; border-radius: 20px; border: 1px solid rgba(87, 175, 32, 0.2); }
 
-        .logo { font-size: 20px; font-weight: 900; }
-        .logo span { color: var(--green); }
+        /* Пошук та фільтри */
+        .search-area { padding: 20px; }
+        .search-bar { width: 100%; background: var(--surface); border: 1px solid var(--border); padding: 15px 20px; border-radius: 14px; color: white; font-size: 16px; outline: none; transition: 0.3s; }
+        .search-bar:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(87, 175, 32, 0.15); }
 
-        .online-count {
-            font-size: 11px;
-            background: rgba(87, 175, 32, 0.1);
-            color: var(--green);
-            padding: 5px 12px;
-            border-radius: 20px;
-            border: 1px solid rgba(87, 175, 32, 0.3);
-        }
+        .filters { display: flex; gap: 10px; overflow-x: auto; padding: 0 20px 20px; scrollbar-width: none; }
+        .filters::-webkit-scrollbar { display: none; }
+        .chip { padding: 8px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; font-size: 13px; white-space: nowrap; transition: 0.2s; cursor: pointer; }
+        .chip.active { background: var(--accent); border-color: var(--accent); font-weight: bold; }
 
-        /* ПОШУК */
-        .search-container { padding: 10px 15px; }
-        .search-box {
-            background: var(--card);
-            border: 1px solid var(--border);
-            width: 100%;
-            padding: 12px 15px;
-            border-radius: 12px;
-            color: white;
-            box-sizing: border-box;
-            outline: none;
-            transition: border 0.3s;
-        }
-        .search-box:focus { border-color: var(--green); }
+        /* Контентна сітка */
+        .section-title { padding: 0 20px; font-size: 18px; font-weight: 800; margin-bottom: 15px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 0 20px 30px; }
+        .card { background: var(--surface); border-radius: 22px; padding: 12px; border: 1px solid var(--border); transition: 0.2s; text-align: center; position: relative; overflow: hidden; }
+        .card:active { transform: scale(0.93); background: #1c1c1e; }
+        .card-icon { width: 100%; aspect-ratio: 1/1; border-radius: 16px; object-fit: cover; margin-bottom: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .card-name { font-size: 11px; font-weight: 700; color: var(--text-dim); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* КАТЕГОРІЇ (Файне від мене) */
-        .categories {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding: 10px 15px;
-            scrollbar-width: none;
-        }
-        .categories::-webkit-scrollbar { display: none; }
-        .cat-item {
-            background: var(--card);
-            padding: 8px 18px;
-            border-radius: 10px;
-            font-size: 12px;
-            white-space: nowrap;
-            border: 1px solid var(--border);
-        }
-        .cat-item.active { background: var(--green); border-color: var(--green); }
+        /* Модальне вікно (Сторінка гри) */
+        .modal { position: fixed; inset: 0; background: var(--bg); z-index: 5000; transform: translateX(100%); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto; }
+        .modal.active { transform: translateX(0); }
+        .m-nav { padding: 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--bg); z-index: 10; }
+        .back-btn { font-size: 24px; color: var(--accent); font-weight: bold; cursor: pointer; }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px; padding: 15px;
-        }
+        .m-content { padding: 0 20px 100px; }
+        .m-header { display: flex; gap: 20px; align-items: center; margin-bottom: 30px; }
+        .m-icon { width: 90px; height: 90px; border-radius: 22px; }
+        .m-title h2 { margin: 0; font-size: 26px; }
+        .m-tag { color: var(--accent); font-weight: 800; font-size: 12px; }
 
-        .game-card {
-            background: var(--card);
-            border-radius: 20px;
-            padding: 15px 5px;
-            text-align: center;
-            border: 1px solid var(--border);
-            transition: 0.2s;
-        }
-        .game-card:active { transform: scale(0.95); }
+        .m-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 30px; }
+        .stat { background: var(--surface); padding: 15px; border-radius: 16px; border: 1px solid var(--border); }
+        .s-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; }
+        .s-value { font-size: 14px; font-weight: 700; margin-top: 4px; display: block; }
 
-        .game-icon-img {
-            width: 60px; height: 60px;
-            border-radius: 14px;
-            margin-bottom: 8px;
-            object-fit: cover;
-        }
+        .m-desc { line-height: 1.7; color: #d1d1d6; font-size: 15px; margin-bottom: 40px; }
+        .dl-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(transparent, var(--bg) 30%); }
+        .dl-btn { width: 100%; padding: 22px; background: var(--accent); color: white; border: none; border-radius: 20px; font-size: 17px; font-weight: 900; box-shadow: 0 10px 30px rgba(87, 175, 32, 0.3); }
 
-        .name-main { font-size: 11px; font-weight: 700; }
-
-        /* СТОРІНКА ГРИ */
-        .full-page {
-            position: fixed;
-            top: 0; left: 100%;
-            width: 100%; height: 100%;
-            background: var(--bg);
-            z-index: 2000;
-            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow-y: auto;
-        }
-        .full-page.active { transform: translateX(-100%); }
-
-        .back-btn { padding: 20px; font-size: 18px; color: var(--green); font-weight: bold; }
-        .content-padding { padding: 0 20px 80px 20px; }
-
-        .app-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
-        .app-header img { width: 85px; height: 85px; border-radius: 20px; }
-
-        .tech-info {
-            background: var(--card);
-            border-radius: 15px;
-            padding: 15px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        .info-label { font-size: 9px; color: var(--grey); text-transform: uppercase; }
-        .info-val { font-size: 12px; font-weight: 700; }
-
-        .desc-title { font-size: 16px; font-weight: 800; margin: 25px 0 10px 0; color: var(--green); }
-        .detailed-desc { color: #d1d1d6; line-height: 1.6; font-size: 14px; }
-
-        .big-dl-btn {
-            background: var(--green);
-            color: white; border: none;
-            width: 100%; padding: 20px;
-            border-radius: 18px;
-            font-size: 16px; font-weight: 900;
-            margin-top: 30px;
-        }
-
-        /* АДМІНКА */
-        #secret-trigger { text-align: center; padding: 40px; color: #151517; font-size: 10px; user-select: none; }
-        #admin-panel {
-            position: fixed;
-            bottom: -100%; left: 0;
-            width: 100%; background: #0a0a0a;
-            z-index: 3000;
-            padding: 30px 20px;
-            border-top: 1px solid var(--green);
-            transition: 0.5s;
-        }
-        #admin-panel.open { bottom: 0; }
+        /* Адмінка */
+        #admin-trigger { text-align: center; padding: 50px 20px; opacity: 0.1; font-size: 10px; letter-spacing: 2px; }
+        .term { position: fixed; inset: 0; background: #000; z-index: 9000; padding: 40px 20px; display: none; font-family: monospace; }
+        .term-out { color: var(--accent); font-size: 13px; line-height: 1.5; }
     </style>
 </head>
 <body>
 
-    <audio id="bgMusic" loop><source src="https://www.soundboard.com/handler/DownLoadTrack.ashx?cliptoken=8823f66c-54a7-4712-a7f4-d5f992386400" type="audio/mpeg"></audio>
-
-    <div id="intro-screen"><div class="intro-logo">PURE<span>DROP</span></div></div>
+    <div id="loader"><div class="spinner"></div><p style="margin-top:15px; font-size:12px; color:var(--text-dim)">INITIALIZING CORE...</p></div>
 
     <header>
         <div class="logo">PURE<span>DROP</span></div>
-        <div class="online-count">● Онлайн: <span id="user-count">142</span></div>
+        <div class="online">● ONLINE: <span id="online-val">142</span></div>
     </header>
 
-    <div class="search-container">
-        <input type="text" class="search-box" placeholder="Пошук ігор та модів...">
+    <div class="search-area">
+        <input type="text" class="search-bar" placeholder="Знайти ігри або програми...">
     </div>
 
-    <div class="categories">
-        <div class="cat-item active">Всі</div>
-        <div class="cat-item">Топ</div>
-        <div class="cat-item">Аркади</div>
-        <div class="cat-item">Симулятори</div>
-        <div class="cat-item">Нові</div>
+    <div class="filters">
+        <div class="chip active">Всі</div>
+        <div class="chip">Ігри</div>
+        <div class="chip">Програми</div>
+        <div class="chip">Моди</div>
+        <div class="chip">Система</div>
     </div>
 
-    <div class="grid">
-        <div class="game-card" onclick="openGame()">
-            <img src="Geometry_Dash_logo (1).webp" class="game-icon-img" alt="GD">
-            <div class="name-main">Geometry Dash</div>
-        </div>
-        <div class="game-card">
-            <div style="font-size: 30px; margin: 10px 0;">⚽</div>
-            <div class="name-main">Superkickoff</div>
-        </div>
-        <div class="game-card">
-            <div style="font-size: 30px; margin: 10px 0;">💎</div>
-            <div class="name-main">Brawl Stars</div>
-        </div>
+    <div class="section-title">Популярне</div>
+    <div class="grid" id="main-grid">
+        <!-- Картки генеруються скриптом -->
     </div>
 
-    <div id="secret-trigger" onclick="toggleAdmin()">system_node</div>
+    <div id="admin-trigger" onclick="toggleTerm()">SYS_NODE_v5.0</div>
 
-    <div id="admin-panel">
-        <h3 style="color: var(--green);">[ADMIN_TERMINAL]</h3>
-        <button onclick="toggleAdmin()" style="width: 100%; padding: 15px; background: var(--green); border: none; border-radius: 10px; color: white; font-weight: bold;">Вийти</button>
+    <div id="appModal" class="modal">
+        <div class="m-nav"><div class="back-btn" onclick="closeApp()">✕</div></div>
+        <div class="m-content" id="modal-body"></div>
     </div>
 
-    <!-- СТОРІНКА ГРИ -->
-    <div id="fullPage" class="full-page">
-        <div class="back-btn" onclick="closeGame()">← Назад</div>
-        <div class="content-padding">
-            <div class="app-header">
-                <img src="Geometry_Dash_logo (1).webp">
-                <div>
-                    <h1 style="margin: 0; font-size: 24px;">Geometry Dash</h1>
-                    <span style="color: var(--green); font-size: 12px; font-weight: 800;">ВЕРСІЯ: FULL</span>
-                </div>
-            </div>
-
-            <div class="tech-info">
-                <div class="info-item"><span class="info-label">РОЗМІР</span><span class="info-val">160 МБ</span></div>
-                <div class="info-item"><span class="info-label">ЗАВАНТАЖЕНЬ</span><span class="info-val">12.5K+</span></div>
-            </div>
-
-            <div class="desc-title">ПРО ГРУ</div>
-            <div class="detailed-desc">
-                Легендарна ритм-гра Geometry Dash тепер доступна на PureDrop у повному обсязі. 
-                У цій версії ви знайдете всі розблоковані іконки, скіни та кольори. 
-                Ми оптимізували APK для стабільної роботи на Android. Стрибайте, літайте та проходьте найскладніші рівні під круті саундтреки!
-            </div>
-
-            <a href="https://www.dropbox.com/scl/fi/cys98ejzhcyiui2yyt0a1/APK-Geometry-Dash-PURE_DROP.apk?rlkey=x9t2scdpbudz48nc5wb01y085&st=y881ck8w&dl=1">
-                <button class="big-dl-btn">СКАЧАТИ APK (160 MB)</button>
-            </a>
+    <div id="terminal" class="term" onclick="toggleTerm()">
+        <div class="term-out">
+            > PUREDROP OS [Version 5.0.4]<br>
+            > (c) 2026 PureDrop Corp. All rights reserved.<br><br>
+            > Checking system integrity... OK<br>
+            > Encrypted tunnel established...<br>
+            > Status: ROOT_ACCESS_GRANTED<br><br>
+            > Натисніть будь-де, щоб вийти.
         </div>
     </div>
 
     <script>
-        // Рандомний онлайн
-        setInterval(() => {
-            const count = Math.floor(Math.random() * (155 - 140) + 140);
-            document.getElementById('user-count').innerText = count;
-        }, 5000);
+        // База даних
+        const database = [
+            {
+                id: 'gd',
+                type: 'game',
+                name: 'Geometry Dash',
+                icon: 'Geometry_Dash_logo (1).webp',
+                version: '2.2.13',
+                size: '160 MB',
+                desc: 'Легендарний ритм-платформер. Повна версія з усіма розблокованими іконками та редактором рівнів. Оптимізовано для стабільної роботи.',
+                link: 'https://www.dropbox.com/scl/fi/cys98ejzhcyiui2yyt0a1/APK-Geometry-Dash-PURE_DROP.apk?rlkey=x9t2scdpbudz48nc5wb01y085&st=y881ck8w&dl=1'
+            },
+            {
+                id: 'sk',
+                type: 'game',
+                name: 'Superkickoff',
+                icon: 'https://play-lh.googleusercontent.com/9nF_Xy1h4w9aL-UfH6F7vE8S0_j_N_x9', /* Заглушка */
+                version: '3.1.2',
+                size: '85 MB',
+                desc: 'Кращий футбольний менеджер для мобільних пристроїв. Створюй команду мрії та вигравай чемпіонати.',
+                link: '#'
+            },
+            {
+                id: 'pt',
+                type: 'app',
+                name: 'PureTool v1',
+                icon: 'https://cdn-icons-png.flaticon.com/512/7075/7075345.png',
+                version: '1.0.0',
+                size: '12 MB',
+                desc: 'Власний інструмент для оптимізації вашого Android пристрою від розробників PureDrop.',
+                link: '#'
+            }
+        ];
 
-        window.onload = () => {
-            setTimeout(() => {
-                document.getElementById('intro-screen').style.opacity = '0';
-                setTimeout(() => { document.getElementById('intro-screen').style.display = 'none'; }, 800);
-            }, 1200);
-        };
-
-        function openGame() {
-            document.getElementById('fullPage').classList.add('active');
-            document.body.style.overflow = 'hidden';
-            document.getElementById('bgMusic').play().catch(() => {});
+        // Рендер сітки
+        function renderGrid() {
+            const grid = document.getElementById('main-grid');
+            grid.innerHTML = database.map(item => `
+                <div class="card" onclick="openApp('${item.id}')">
+                    <img src="${item.icon}" class="card-icon" onerror="this.src='https://cdn-icons-png.flaticon.com/512/6831/6831000.png'">
+                    <span class="card-name">${item.name}</span>
+                </div>
+            `).join('');
         }
 
-        function closeGame() {
-            document.getElementById('fullPage').classList.remove('active');
+        function openApp(id) {
+            const app = database.find(a => a.id === id);
+            const body = document.getElementById('modal-body');
+            body.innerHTML = `
+                <div class="m-header">
+                    <img src="${app.icon}" class="m-icon" onerror="this.src='https://cdn-icons-png.flaticon.com/512/6831/6831000.png'">
+                    <div class="m-title">
+                        <h2>${app.name}</h2>
+                        <span class="m-tag">${app.type.toUpperCase()} | PREMIUM</span>
+                    </div>
+                </div>
+                <div class="m-stats">
+                    <div class="stat"><span class="s-label">Версія</span><span class="s-value">${app.version}</span></div>
+                    <div class="stat"><span class="s-label">Розмір</span><span class="s-value">${app.size}</span></div>
+                </div>
+                <div class="m-desc">${app.desc}</div>
+                <div class="dl-bar">
+                    <a href="${app.link}" style="text-decoration:none">
+                        <button class="dl-btn">ЗАВАНТАЖИТИ APK</button>
+                    </a>
+                </div>
+            `;
+            document.getElementById('appModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeApp() {
+            document.getElementById('appModal').classList.remove('active');
             document.body.style.overflow = 'auto';
         }
 
-        function toggleAdmin() {
-            document.getElementById('admin-panel').classList.toggle('open');
+        function toggleTerm() {
+            const t = document.getElementById('terminal');
+            t.style.display = (t.style.display === 'block') ? 'none' : 'block';
         }
+
+        // Ініціалізація
+        window.onload = () => {
+            renderGrid();
+            setTimeout(() => {
+                document.getElementById('loader').style.opacity = '0';
+                setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
+            }, 1000);
+        };
+
+        // Живий онлайн
+        setInterval(() => {
+            const val = Math.floor(Math.random() * (165 - 138) + 138);
+            document.getElementById('online-val').innerText = val;
+        }, 4000);
     </script>
 </body>
 </html>
