@@ -1,401 +1,164 @@
-<!DOCTYPE html><html lang="uk">
-
+<!DOCTYPE html>
+<html lang="uk">
 <head>
-
 <meta charset="UTF-8" />
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Belegram FINAL</title>
 
-<title>Belegram</title> <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script> <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script> <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script> <style>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
+<style>
 *{box-sizing:border-box;font-family:Arial}
+body{margin:0;height:100vh;background:linear-gradient(135deg,#0b1220,#111827);color:white;display:flex;justify-content:center;align-items:center}
 
-body{
+#login{width:340px;padding:25px;background:#111827;border-radius:16px;text-align:center;border:1px solid #1f2937}
 
-margin:0;height:100vh;
+.app{width:1200px;height:720px;background:#0f172a;border-radius:16px;display:none;overflow:hidden}
 
-background:linear-gradient(135deg,#0b1220,#111827);
-
-color:white;display:flex;justify-content:center;align-items:center;
-
-}
-
-
-
-#login{
-
-width:320px;padding:25px;background:#111827;
-
-border:1px solid #1f2937;border-radius:16px;text-align:center;
-
-}
-
-
-
-.app{width:1100px;height:700px;background:#0f172a;
-
-border-radius:16px;display:none;overflow:hidden;
-
-}
-
-
-
-.sidebar{width:32%;background:#111827;padding:10px;overflow-y:auto}
-
-.chat{width:68%;display:flex;flex-direction:column}
-
-
+.sidebar{width:30%;background:#111827;padding:10px;overflow-y:auto}
+.chat{width:70%;display:flex;flex-direction:column}
 
 .item{padding:10px;margin:6px 0;background:#0b1220;border-radius:10px;cursor:pointer}
-
 .item:hover{background:#1f2937}
 
-
-
-.header{padding:12px;background:#111827;border-bottom:1px solid #1f2937;display:flex;justify-content:space-between}
-
-
+.header{padding:12px;background:#111827;border-bottom:1px solid #1f2937;display:flex;justify-content:space-between;align-items:center}
 
 .messages{flex:1;padding:10px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
 
-
-
-.msg{max-width:70%;padding:10px;border-radius:12px;background:#1f2937}
-
+.msg{max-width:70%;padding:10px;border-radius:12px;background:#1f2937;cursor:pointer}
 .me{background:#2563eb;align-self:flex-end}
 
-
-
-.time{font-size:10px;color:#9ca3af}
-
-
-
 .inputBox{display:flex;gap:6px;padding:10px;border-top:1px solid #1f2937}
-
-
-
 input{width:100%;padding:10px;border:none;border-radius:10px;background:#0b1220;color:white}
-
-
-
 button{padding:10px 12px;border:none;border-radius:10px;background:#2563eb;color:white;cursor:pointer}
+.small{font-size:11px;color:#9ca3af}
 
+.online{color:#22c55e;font-size:11px}
+.offline{color:#6b7280;font-size:11px}
 
+</style>
+</head>
+<body>
 
-.small{font-size:12px;color:#9ca3af}
-
-</style></head>
-
-<body><div id="login">
-
-<h1>Belegram</h1>
-
-<p>Увійдіть через Google</p>
-
-<button onclick="login()">Увійти</button>
-
-</div><div class="app" id="app"> <div class="sidebar">
-
-<input id="search" placeholder="Пошук @username..." oninput="searchUsers()" />
-
-<div id="users"></div>
-
-</div> <div class="chat"><div class="header">
-
-<div id="title">Belegram</div>
-
-<button onclick="openSettings()">⚙️</button>
-
+<div id="login">
+<h2>Belegram FINAL</h2>
+<button onclick="login()">Увійти Google</button>
 </div>
 
+<div class="app" id="app">
 
+<div class="sidebar">
+<div><b>Users</b></div>
+<div id="users"></div>
+<hr>
+<div><b>Friends</b></div>
+<div id="friends"></div>
+</div>
+
+<div class="chat">
+<div class="header">
+<div id="title">Belegram</div>
+<button onclick="callUser()">📞</button>
+</div>
 
 <div class="messages" id="messages"></div>
 
-
-
 <div class="inputBox">
-
-<input id="text" placeholder="Повідомлення..." onkeypress="if(event.key==='Enter')send()" />
-
+<input id="text" placeholder="Напиши..." onkeypress="if(event.key==='Enter')send()" />
 <button onclick="send()">➤</button>
-
+</div>
+</div>
 </div>
 
-
-
-</div>
-
-</div><!-- SETTINGS --><div id="settings" style="display:none;position:fixed;top:20%;left:40%;background:#111827;padding:20px;border-radius:12px">
-
-<h3>Налаштування</h3>
-
-<input id="username" placeholder="@username" />
-
-<button onclick="saveSettings()">Зберегти</button>
-
-</div><script>
-
+<script>
 const firebaseConfig = {
-
-apiKey: "AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
-
-authDomain: "keysbrawl-c4ae6.firebaseapp.com",
-
-projectId: "keysbrawl-c4ae6"
-
+apiKey:"AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
+authDomain:"keysbrawl-c4ae6.firebaseapp.com",
+projectId:"keysbrawl-c4ae6"
 };
-
-
 
 firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.firestore();
 
-const auth = firebase.auth();
+let current=null;
+let reply=null;
 
-const db = firebase.firestore();
+// LOGIN
+function login(){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())}
 
+// STATUS
+function setOnline(){if(auth.currentUser)db.collection("users").doc(auth.currentUser.uid).set({online:true,last:Date.now()},{merge:true})}
+setInterval(setOnline,5000)
 
-
-let current = null;
-
-let myData = {};
-
-
-
-function login(){
-
-auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-
-}
-
-
-
+// AUTH
 auth.onAuthStateChanged(async u=>{
-
 if(!u)return;
 
-
-
-document.getElementById("login").style.display="none";
-
-document.getElementById("app").style.display="flex";
-
-
-
-myData = {
-
+await db.collection("users").doc(u.uid).set({
 name:u.displayName,
+photo:u.photoURL||"",
+online:true
+},{merge:true});
 
-photo:u.photoURL,
-
-uid:u.uid,
-
-username:"user"+Math.floor(Math.random()*9999)
-
-};
-
-
-
-await db.collection("users").doc(u.uid).set(myData,{merge:true});
-
-
-
-loadUsers();
-
+loadUsers();loadFriends();
+document.getElementById("login").style.display="none";
+document.getElementById("app").style.display="flex";
 });
 
-
-
-function saveSettings(){
-
-let username=document.getElementById("username").value;
-
-if(!username) return;
-
-
-
-myData.username=username;
-
-db.collection("users").doc(auth.currentUser.uid).update({username});
-
-
-
-document.getElementById("settings").style.display="none";
-
-}
-
-
-
-function openSettings(){
-
-document.getElementById("settings").style.display="block";
-
-}
-
-
-
+// USERS
 function loadUsers(){
-
 db.collection("users").onSnapshot(s=>{
-
-let box=document.getElementById("users");
-
-box.innerHTML="";
-
-
-
+let box=document.getElementById("users");box.innerHTML="";
 s.forEach(d=>{
-
 if(d.id===auth.currentUser.uid)return;
-
-
-
 let u=d.data();
+box.innerHTML+=`<div class='item' onclick="openChat('${d.id}','${u.name}')">${u.name} ${u.online?'🟢':'⚫'}</div>`;
+})
+})}
 
-
-
-box.innerHTML+=`
-
-<div class='item' onclick="openChat('${d.id}','${u.name}')">
-
-${u.name}<div class='small'>@${u.username||'no'}</div>
-
-</div>`;
-
-});
-
-});
-
-}
-
-
-
-function searchUsers(){
-
-let val=document.getElementById("search").value.toLowerCase();
-
-
-
-db.collection("users").get().then(s=>{
-
-let box=document.getElementById("users");
-
-box.innerHTML="";
-
-
-
+// FRIENDS
+function loadFriends(){
+db.collection("friends").onSnapshot(s=>{
+let box=document.getElementById("friends");box.innerHTML="";
 s.forEach(d=>{
-
-let u=d.data();
-
-if(u.username && u.username.includes(val.replace("@",""))){
-
-box.innerHTML+=`
-
-<div class='item' onclick="openChat('${d.id}','${u.name}')">
-
-${u.name}<div class='small'>@${u.username}</div>
-
-</div>`;
-
+let f=d.data();
+if(f.to===auth.currentUser.uid&&f.status=="pending"){
+box.innerHTML+=`<div class='item'>${f.from}<button onclick="accept('${d.id}')">✔</button></div>`
 }
+})})}
 
-});
+function addFriend(){let id=prompt("User ID");if(!id)return;
+db.collection("friends").add({from:auth.currentUser.uid,to:id,status:"pending"})}
 
-});
+function accept(id){db.collection("friends").doc(id).update({status:"accepted"})}
 
-}
+// CHAT
+function openChat(id,name){current=id;document.getElementById("title").innerText=name;loadMessages()}
 
+function chatId(){return [auth.currentUser.uid,current].sort().join("_")}
 
+function send(){let t=document.getElementById("text").value;if(!t||!current)return;
+db.collection("chats").doc(chatId()).collection("m").add({text:t,uid:auth.currentUser.uid,time:Date.now(),reply})
+reply=null;document.getElementById("text").value=""}
 
-function openChat(id,name){
-
-current=id;
-
-document.getElementById("title").innerText=name;
-
-loadMessages();
-
-}
-
-
-
-function chatId(){
-
-return [auth.currentUser.uid,current].sort().join("_");
-
-}
-
-
-
-function send(){
-
-let text=document.getElementById("text").value;
-
-if(!text||!current)return;
-
-
-
-db.collection("chats").doc(chatId()).collection("m").add({
-
-text,
-
-uid:auth.currentUser.uid,
-
-time:Date.now()
-
-});
-
-
-
-document.getElementById("text").value="";
-
-}
-
-
-
-function loadMessages(){
-
-db.collection("chats").doc(chatId()).collection("m")
-
-.orderBy("time")
-
-.onSnapshot(s=>{
-
-let box=document.getElementById("messages");
-
-box.innerHTML="";
-
-
-
+function loadMessages(){db.collection("chats").doc(chatId()).collection("m").orderBy("time").onSnapshot(s=>{
+let box=document.getElementById("messages");box.innerHTML="";
 s.forEach(d=>{
-
-let m=d.data();
-
-let cls=m.uid===auth.currentUser.uid?'me':'msg';
-
-
-
-box.innerHTML+=`
-
-<div class='msg ${cls}'>
-
-${m.text}
-
-<div class='time'>${new Date(m.time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
-
-</div>`;
-
-});
-
-
-
+let m=d.data();let c=m.uid==auth.currentUser.uid?'me':'msg';
+box.innerHTML+=`<div class='msg ${c}' onclick="replyMsg('${m.text}')">${m.reply?"↩ "+m.reply+"<br>":""}${m.text}</div>`
+})
 box.scrollTop=box.scrollHeight;
+})}
 
-});
+function replyMsg(t){reply=t}
 
-}
+// CALL (stub)
+function callUser(){alert("📞 Дзвінки працюють через WebRTC (додамо стабільну версію наступним кроком)")}
 
-</script></body>
+</script>
 
+</body>
 </html>
