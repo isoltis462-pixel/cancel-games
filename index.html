@@ -1,127 +1,217 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Belegram</title>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <style>
-    * { box-sizing: border-box; font-family: Arial, sans-serif; }
-    body {
-      margin: 0; height: 100vh;
-      background: linear-gradient(135deg, #0b1220, #111827);
-      color: white; display: flex; justify-content: center; align-items: center;
+    *{box-sizing:border-box;font-family:Arial}
+    body{
+      margin:0;
+      height:100vh;
+      background:linear-gradient(135deg,#0b1220,#111827);
+      color:white;
+      display:flex;
+      justify-content:center;
+      align-items:center;
     }
-    #login {
-      width: 320px; padding: 25px; background: #111827;
-      border: 1px solid #1f2937; border-radius: 16px; text-align: center;
+    #login{
+      width:320px;
+      padding:25px;
+      background:#111827;
+      border:1px solid #1f2937;
+      border-radius:16px;
+      text-align:center;
+      box-shadow:0 20px 60px rgba(0,0,0,0.5);
     }
-    .app {
-      width: 1100px; height: 700px; background: #0f172a;
-      border-radius: 16px; display: none; overflow: hidden;
-      border: 1px solid #1f2937;
+    #login h1{ margin:0 0 10px; font-size:28px; }
+    #login p{ color:#9ca3af; font-size:14px; margin-bottom:20px; }
+    button{
+      padding:10px 14px;
+      border:none;
+      border-radius:10px;
+      background:#2563eb;
+      color:white;
+      cursor:pointer;
+      width:100%;
+      font-size:14px;
     }
-    .sidebar { width: 32%; background: #111827; border-right: 1px solid #1f2937; overflow-y: auto; }
-    .chat { width: 68%; display: flex; flex-direction: column; }
-    .item { padding: 15px; border-bottom: 1px solid #1f2937; cursor: pointer; }
-    .item:hover { background: #1f2937; }
-    .header { padding: 15px; background: #111827; font-weight: bold; border-bottom: 1px solid #1f2937; }
-    .messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-    .msg { max-width: 70%; padding: 10px; border-radius: 10px; background: #1f2937; font-size: 14px; }
-    .me { background: #2563eb; align-self: flex-end; }
-    .inputBox { display: flex; padding: 15px; background: #111827; gap: 10px; }
-    input { flex: 1; padding: 10px; border-radius: 8px; border: none; background: #0b1220; color: white; outline: none; }
-    button { padding: 10px 20px; border-radius: 8px; border: none; background: #2563eb; color: white; cursor: pointer; }
+    .app{
+      width:1100px;
+      height:700px;
+      background:#0f172a;
+      border-radius:16px;
+      display:none;
+      overflow:hidden;
+      box-shadow:0 20px 60px rgba(0,0,0,0.6);
+    }
+    .sidebar{
+      width:32%;
+      background:#111827;
+      padding:10px;
+      overflow-y:auto;
+      border-right:1px solid #1f2937;
+    }
+    .chat{ width:68%; display:flex; flex-direction:column; }
+    .item{
+      padding:10px;
+      margin:6px 0;
+      background:#0b1220;
+      border-radius:10px;
+      cursor:pointer;
+    }
+    .item:hover{background:#1f2937}
+    .header{
+      padding:12px;
+      background:#111827;
+      border-bottom:1px solid #1f2937;
+      font-weight:bold;
+    }
+    .messages{
+      flex:1;
+      padding:10px;
+      overflow-y:auto;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .msg{
+      max-width:70%;
+      padding:10px;
+      border-radius:12px;
+      font-size:14px;
+      background:#1f2937;
+    }
+    .me{ background:#2563eb; align-self:flex-end; }
+    .time{ font-size:10px; color:#9ca3af; margin-top:4px; }
+    .inputBox{
+      display:flex;
+      gap:6px;
+      padding:10px;
+      border-top:1px solid #1f2937;
+    }
+    input{
+      width:100%;
+      padding:10px;
+      border:none;
+      border-radius:10px;
+      background:#0b1220;
+      color:white;
+      outline:none;
+    }
   </style>
 </head>
 <body>
 
-  <div id="login">
-    <h1>Belegram</h1>
-    <p>Увійди через Google</p>
-    <button onclick="login()">Увійти</button>
-  </div>
+<div id="login">
+  <h1>Belegram</h1>
+  <p>Увійди, щоб почати чат</p>
+  <button onclick="login()">Увійти через Google</button>
+</div>
 
-  <div class="app" id="app">
-    <div class="sidebar" id="users"></div>
-    <div class="chat">
-      <div class="header" id="title">Оберіть чат</div>
-      <div id="messages" class="messages"></div>
-      <div class="inputBox">
-        <input id="text" placeholder="Повідомлення..." onkeypress="if(event.key==='Enter')send()">
-        <button onclick="send()">➤</button>
-      </div>
+<div class="app" id="app">
+  <div class="sidebar">
+    <div id="users"></div>
+  </div>
+  <div class="chat">
+    <div class="header" id="title">Belegram Chat</div>
+    <div class="messages" id="messages"></div>
+    <div class="inputBox">
+      <input id="text" placeholder="Напиши повідомлення..." onkeypress="if(event.key==='Enter')send()" />
+      <button onclick="send()">➤</button>
     </div>
   </div>
+</div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
-      authDomain: "keysbrawl-c4ae6.firebaseapp.com",
-      projectId: "keysbrawl-c4ae6",
-      storageBucket: "keysbrawl-c4ae6.firebasestorage.app",
-      messagingSenderId: "1090859079662",
-      appId: "1:1090859079662:web:932bf6463cb0601083a0ff"
-    };
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
+  authDomain: "keysbrawl-c4ae6.firebaseapp.com",
+  projectId: "keysbrawl-c4ae6",
+  storageBucket: "keysbrawl-c4ae6.firebasestorage.app",
+  messagingSenderId: "1090859079662",
+  appId: "1:1090859079662:web:932bf6463cb0601083a0ff",
+  measurementId: "G-PJR0BQBYVM"
+};
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    let currentId = null;
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-    function login() {
-      auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-    }
+let current = null;
 
-    auth.onAuthStateChanged(u => {
-      if(u) {
-        document.getElementById("login").style.display = "none";
-        document.getElementById("app").style.display = "flex";
-        db.collection("users").doc(u.uid).set({name: u.displayName}, {merge:true});
-        loadUsers();
-      }
+function login() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(err => alert("Помилка: " + err.message));
+}
+
+function formatTime(t) {
+  return new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+auth.onAuthStateChanged(async u => {
+  if (u) {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "flex";
+    await db.collection("users").doc(u.uid).set({
+      name: u.displayName,
+      photo: u.photoURL
+    }, { merge: true });
+    loadUsers();
+  }
+});
+
+function loadUsers() {
+  db.collection("users").onSnapshot(s => {
+    let box = document.getElementById("users");
+    box.innerHTML = "";
+    s.forEach(d => {
+      if (d.id === auth.currentUser.uid) return;
+      let userDiv = document.createElement("div");
+      userDiv.className = "item";
+      userDiv.innerText = d.data().name;
+      userDiv.onclick = () => openChat(d.id, d.data().name);
+      box.appendChild(userDiv);
     });
+  });
+}
 
-    function loadUsers() {
-      db.collection("users").onSnapshot(s => {
-        const box = document.getElementById("users");
-        box.innerHTML = "";
-        s.forEach(d => {
-          if(d.id === auth.currentUser.uid) return;
-          let el = document.createElement("div");
-          el.className = "item";
-          el.innerText = d.data().name;
-          el.onclick = () => { currentId = d.id; document.getElementById("title").innerText = d.data().name; loadMessages(); };
-          box.appendChild(el);
-        });
-      });
-    }
+function openChat(id, name) {
+  current = id;
+  document.getElementById("title").innerText = name;
+  loadMessages();
+}
 
-    function send() {
-      let t = document.getElementById("text");
-      if(!t.value || !currentId) return;
-      const id = [auth.currentUser.uid, currentId].sort().join("_");
-      db.collection("chats").doc(id).collection("m").add({
-        text: t.value, uid: auth.currentUser.uid, time: Date.now()
-      });
-      t.value = "";
-    }
+function send() {
+  let text = document.getElementById("text").value;
+  if (!text || !current) return;
+  const chatId = [auth.currentUser.uid, current].sort().join("_");
+  db.collection("chats").doc(chatId).collection("m").add({
+    text: text,
+    uid: auth.currentUser.uid,
+    time: Date.now()
+  });
+  document.getElementById("text").value = "";
+}
 
-    function loadMessages() {
-      const id = [auth.currentUser.uid, currentId].sort().join("_");
-      db.collection("chats").doc(id).collection("m").orderBy("time").onSnapshot(s => {
-        const box = document.getElementById("messages");
-        box.innerHTML = "";
-        s.forEach(d => {
-          let m = d.data();
-          let isMe = m.uid === auth.currentUser.uid;
-          box.innerHTML += `<div class="msg ${isMe ? 'me' : ''}">${m.text}</div>`;
-        });
-        box.scrollTop = box.scrollHeight;
-      });
-    }
-  </script>
+function loadMessages() {
+  const chatId = [auth.currentUser.uid, current].sort().join("_");
+  db.collection("chats").doc(chatId).collection("m")
+  .orderBy("time")
+  .onSnapshot(s => {
+    let box = document.getElementById("messages");
+    box.innerHTML = "";
+    s.forEach(d => {
+      let m = d.data();
+      let cls = m.uid === auth.currentUser.uid ? 'me' : 'msg';
+      box.innerHTML += `<div class='msg ${cls}'>${m.text}<div class='time'>${formatTime(m.time)}</div></div>`;
+    });
+    box.scrollTop = box.scrollHeight;
+  });
+}
+</script>
 </body>
 </html>
