@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Belegram FINAL</title>
+<title>Belegram PRO CALLS</title>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -11,153 +11,142 @@
 
 <style>
 *{box-sizing:border-box;font-family:Arial}
-body{margin:0;height:100vh;background:linear-gradient(135deg,#0b1220,#111827);color:white;display:flex;justify-content:center;align-items:center}
+body{margin:0;height:100vh;background:#0b1220;color:white;display:flex;justify-content:center;align-items:center}
 
-#login{width:340px;padding:25px;background:#111827;border-radius:16px;text-align:center;border:1px solid #1f2937}
-
-.app{width:1200px;height:720px;background:#0f172a;border-radius:16px;display:none;overflow:hidden}
-
-.sidebar{width:30%;background:#111827;padding:10px;overflow-y:auto}
+.app{width:1200px;height:720px;display:none;background:#111827;border-radius:16px;overflow:hidden}
+.sidebar{width:30%;background:#0f172a;padding:10px;overflow-y:auto}
 .chat{width:70%;display:flex;flex-direction:column}
-
-.item{padding:10px;margin:6px 0;background:#0b1220;border-radius:10px;cursor:pointer}
-.item:hover{background:#1f2937}
-
-.header{padding:12px;background:#111827;border-bottom:1px solid #1f2937;display:flex;justify-content:space-between;align-items:center}
-
-.messages{flex:1;padding:10px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
-
-.msg{max-width:70%;padding:10px;border-radius:12px;background:#1f2937;cursor:pointer}
+.item{padding:10px;margin:6px 0;background:#1f2937;border-radius:10px;cursor:pointer}
+.header{padding:10px;background:#111827;display:flex;justify-content:space-between}
+.messages{flex:1;padding:10px;overflow-y:auto}
+.msg{padding:8px;margin:5px;background:#1f2937;border-radius:10px;max-width:70%}
 .me{background:#2563eb;align-self:flex-end}
-
-.inputBox{display:flex;gap:6px;padding:10px;border-top:1px solid #1f2937}
-input{width:100%;padding:10px;border:none;border-radius:10px;background:#0b1220;color:white}
-button{padding:10px 12px;border:none;border-radius:10px;background:#2563eb;color:white;cursor:pointer}
-.small{font-size:11px;color:#9ca3af}
-
-.online{color:#22c55e;font-size:11px}
-.offline{color:#6b7280;font-size:11px}
-
+.inputBox{display:flex;padding:10px;gap:5px}
+input{flex:1;padding:10px;border-radius:10px;border:none;background:#0b1220;color:white}
+button{padding:10px;border:none;border-radius:10px;background:#2563eb;color:white;cursor:pointer}
+#callBox{position:fixed;top:10px;right:10px;background:#111827;padding:10px;border-radius:10px;display:none}
 </style>
 </head>
 <body>
 
-<div id="login">
-<h2>Belegram FINAL</h2>
-<button onclick="login()">Увійти Google</button>
-</div>
-
 <div class="app" id="app">
-
-<div class="sidebar">
-<div><b>Users</b></div>
-<div id="users"></div>
-<hr>
-<div><b>Friends</b></div>
-<div id="friends"></div>
-</div>
+<div class="sidebar" id="users"></div>
 
 <div class="chat">
 <div class="header">
-<div id="title">Belegram</div>
-<button onclick="callUser()">📞</button>
+<div id="title">Chat</div>
+<button onclick="startCall()">📞</button>
 </div>
 
 <div class="messages" id="messages"></div>
 
 <div class="inputBox">
-<input id="text" placeholder="Напиши..." onkeypress="if(event.key==='Enter')send()" />
+<input id="text" placeholder="message..." onkeypress="if(event.key==='Enter')send()" />
 <button onclick="send()">➤</button>
 </div>
 </div>
 </div>
 
+<div id="callBox">📞 Call active <button onclick="endCall()">End</button></div>
+
 <script>
-const firebaseConfig = {
-apiKey:"AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
-authDomain:"keysbrawl-c4ae6.firebaseapp.com",
-projectId:"keysbrawl-c4ae6"
-};
+const firebaseConfig={apiKey:"AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",authDomain:"keysbrawl-c4ae6.firebaseapp.com",projectId:"keysbrawl-c4ae6"}
+firebase.initializeApp(firebaseConfig)
+const auth=firebase.auth()
+const db=firebase.firestore()
 
-firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth();
-const db=firebase.firestore();
+let current=null
+let pc=null
+let localStream
 
-let current=null;
-let reply=null;
-
-// LOGIN
-function login(){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())}
-
-// STATUS
-function setOnline(){if(auth.currentUser)db.collection("users").doc(auth.currentUser.uid).set({online:true,last:Date.now()},{merge:true})}
-setInterval(setOnline,5000)
-
-// AUTH
-auth.onAuthStateChanged(async u=>{
-if(!u)return;
-
-await db.collection("users").doc(u.uid).set({
-name:u.displayName,
-photo:u.photoURL||"",
-online:true
-},{merge:true});
-
-loadUsers();loadFriends();
-document.getElementById("login").style.display="none";
-document.getElementById("app").style.display="flex";
-});
-
-// USERS
-function loadUsers(){
-db.collection("users").onSnapshot(s=>{
-let box=document.getElementById("users");box.innerHTML="";
-s.forEach(d=>{
-if(d.id===auth.currentUser.uid)return;
-let u=d.data();
-box.innerHTML+=`<div class='item' onclick="openChat('${d.id}','${u.name}')">${u.name} ${u.online?'🟢':'⚫'}</div>`;
+// LOGIN QUICK
+auth.signInAnonymously().then(()=>{
+ document.getElementById("app").style.display="flex"
+ loadUsers()
 })
-})}
-
-// FRIENDS
-function loadFriends(){
-db.collection("friends").onSnapshot(s=>{
-let box=document.getElementById("friends");box.innerHTML="";
-s.forEach(d=>{
-let f=d.data();
-if(f.to===auth.currentUser.uid&&f.status=="pending"){
-box.innerHTML+=`<div class='item'>${f.from}<button onclick="accept('${d.id}')">✔</button></div>`
-}
-})})}
-
-function addFriend(){let id=prompt("User ID");if(!id)return;
-db.collection("friends").add({from:auth.currentUser.uid,to:id,status:"pending"})}
-
-function accept(id){db.collection("friends").doc(id).update({status:"accepted"})}
-
-// CHAT
-function openChat(id,name){current=id;document.getElementById("title").innerText=name;loadMessages()}
 
 function chatId(){return [auth.currentUser.uid,current].sort().join("_")}
 
-function send(){let t=document.getElementById("text").value;if(!t||!current)return;
-db.collection("chats").doc(chatId()).collection("m").add({text:t,uid:auth.currentUser.uid,time:Date.now(),reply})
-reply=null;document.getElementById("text").value=""}
+// USERS (demo)
+function loadUsers(){
+ db.collection("users").onSnapshot(s=>{
+  let box=document.getElementById("users")
+  box.innerHTML=""
+  s.forEach(d=>{
+   if(d.id===auth.currentUser.uid)return
+   box.innerHTML+=`<div class='item' onclick="openChat('${d.id}')">${d.id}</div>`
+  })
+ })
+}
 
-function loadMessages(){db.collection("chats").doc(chatId()).collection("m").orderBy("time").onSnapshot(s=>{
-let box=document.getElementById("messages");box.innerHTML="";
+function openChat(id){current=id;loadMessages()}
+
+function send(){
+let t=document.getElementById("text").value
+if(!t||!current)return
+
+let id=chatId()
+db.collection("chats").doc(id).collection("m").add({text:t,uid:auth.currentUser.uid,time:Date.now()})
+document.getElementById("text").value=""
+}
+
+function loadMessages(){
+db.collection("chats").doc(chatId()).collection("m").orderBy("time")
+.onSnapshot(s=>{
+let box=document.getElementById("messages")
+box.innerHTML=""
 s.forEach(d=>{
-let m=d.data();let c=m.uid==auth.currentUser.uid?'me':'msg';
-box.innerHTML+=`<div class='msg ${c}' onclick="replyMsg('${m.text}')">${m.reply?"↩ "+m.reply+"<br>":""}${m.text}</div>`
+let m=d.data()
+let cls=m.uid==auth.currentUser.uid?'me':'msg'
+box.innerHTML+=`<div class='msg ${cls}'>${m.text}</div>`
 })
-box.scrollTop=box.scrollHeight;
+box.scrollTop=box.scrollHeight
 })}
 
-function replyMsg(t){reply=t}
+// =====================
+// 🔥 REAL DISCORD-LIKE CALLS (WEBRTC)
+// =====================
 
-// CALL (stub)
-function callUser(){alert("📞 Дзвінки працюють через WebRTC (додамо стабільну версію наступним кроком)")}
+const servers={iceServers:[{urls:"stun:stun.l.google.com:19302"}]}
 
+async function startCall(){
+ document.getElementById("callBox").style.display="block"
+
+ localStream=await navigator.mediaDevices.getUserMedia({audio:true,video:true})
+
+ pc=new RTCPeerConnection(servers)
+ localStream.getTracks().forEach(t=>pc.addTrack(t,localStream))
+
+ pc.ontrack=e=>{
+  let v=document.createElement("video")
+  v.srcObject=e.streams[0]
+  v.autoplay=true
+  document.body.appendChild(v)
+ }
+
+ const offer=await pc.createOffer()
+ await pc.setLocalDescription(offer)
+
+ db.collection("calls").doc(chatId()).set({offer})
+
+ db.collection("calls").doc(chatId()).onSnapshot(async doc=>{
+  let data=doc.data()
+  if(!pc.currentRemoteDescription && data?.answer){
+    await pc.setRemoteDescription(new RTCSessionDescription(data.answer))
+  }
+ })
+
+ pc.onicecandidate=e=>{
+  if(e.candidate){
+    db.collection("calls").doc(chatId()).update({candidate:e.candidate.toJSON()})
+  }
+ }
+}
+
+function endCall(){
+ if(pc) pc.close()
+ document.getElementById("callBox").style.display="none"
+}
 </script>
 
 </body>
