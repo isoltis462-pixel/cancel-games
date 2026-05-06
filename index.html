@@ -7,78 +7,89 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #3b82f6; --bg: #0b0b0c; --surface: #161618; --border: rgba(255,255,255,0.06); }
-        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
+        :root { 
+            --accent: #3b82f6; 
+            --bg: #0b0b0c; 
+            --surface: #161618; 
+            --text: #ffffff;
+            --border: rgba(255,255,255,0.06); 
+        }
+
+        /* Світла тема */
+        body.light-theme {
+            --bg: #f3f4f6;
+            --surface: #ffffff;
+            --text: #111827;
+            --border: rgba(0,0,0,0.1);
+        }
+
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; transition: 0.3s; margin: 0; }
         
-        .register-btn { position: absolute; top: 15px; right: 20px; font-size: 11px; color: #333; background: none; border: none; cursor: pointer; z-index: 100; font-weight: 800; text-transform: uppercase; }
+        .register-btn { position: absolute; top: 15px; right: 20px; font-size: 11px; color: #888; background: none; border: none; cursor: pointer; z-index: 100; font-weight: 800; text-transform: uppercase; }
         
         .menu-btn { position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
         .circle-btn { width: 50px; height: 50px; border-radius: 25px; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
         .circle-btn:hover { border-color: var(--accent); transform: scale(1.1); }
 
-        .game-card { background: var(--surface); border: 1px solid var(--border); border-radius: 28px; position: relative; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); animation: fadeIn 0.5s ease forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
+        .game-card { background: var(--surface); border: 1px solid var(--border); border-radius: 28px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .game-card:hover { transform: translateY(-8px); border-color: var(--accent); }
-        .fav-heart { position: absolute; top: 15px; right: 15px; font-size: 20px; cursor: pointer; z-index: 10; transition: 0.3s; filter: grayscale(1); }
-        .fav-heart.active { filter: grayscale(0); transform: scale(1.2); }
 
-        .full-modal { position: fixed; inset: 0; background: var(--bg); z-index: 8000; display: none; padding: 40px; animation: slideUp 0.4s ease; overflow-y: auto; }
+        .full-modal { position: fixed; inset: 0; background: var(--bg); z-index: 8000; display: none; padding: 40px; animation: slideUp 0.3s ease; overflow-y: auto; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-        .lang-card { background: var(--surface); border: 1px solid var(--border); padding: 20px; border-radius: 24px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.3s; }
-        .lang-card:hover { border-color: var(--accent); background: rgba(59, 130, 246, 0.1); }
-        .lang-card.active { border-color: var(--accent); background: rgba(59, 130, 246, 0.2); }
+        .lang-card, .theme-card { background: var(--surface); border: 1px solid var(--border); padding: 20px; border-radius: 24px; cursor: pointer; transition: 0.3s; margin-bottom: 10px; }
+        .active-item { border-color: var(--accent); background: rgba(59, 130, 246, 0.1); }
 
-        .search-bar { background: var(--surface); border: 1px solid var(--border); padding: 12px 24px; border-radius: 20px; width: 100%; max-width: 400px; color: white; outline: none; }
+        .search-bar { background: var(--surface); border: 1px solid var(--border); padding: 12px 24px; border-radius: 20px; width: 100%; max-width: 400px; color: var(--text); outline: none; }
         .admin-layer { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; overflow-y: auto; padding: 40px 20px; }
-        #editorModal { position: fixed; inset: 0; background: #0b0b0c; z-index: 6000; display: none; flex-direction: row; }
-        @media (max-width: 768px) { #editorModal { flex-direction: column; } .settings-side { width: 100% !important; } }
-        .settings-side { width: 400px; padding: 40px; background: #111; overflow-y: auto; }
-        .admin-input { width: 100%; background: #1a1a1c; border: 1px solid #333; padding: 14px; border-radius: 16px; color: white; margin-bottom: 15px; outline: none; }
         
-        #customAlert { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: none; background: #1a1a1c; border: 1px solid var(--accent); padding: 12px 25px; border-radius: 15px; font-weight: bold; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #customAlert { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: none; background: #1a1a1c; border: 1px solid var(--accent); padding: 12px 25px; border-radius: 15px; color: white; font-weight: bold; font-size: 13px; }
     </style>
 </head>
-<body>
+<body class="dark-theme">
 
     <div id="customAlert"></div>
-
     <button onclick="handleAuth()" class="register-btn" id="authBtn">register</button>
 
     <header class="py-16 text-center px-4">
-        <h1 class="text-6xl font-black italic text-blue-600">PURE<span class="text-white">DROP</span></h1>
-        <div class="mt-8 flex flex-col items-center gap-4">
-            <input type="text" id="searchInput" placeholder="Пошук..." class="search-bar" oninput="filterGames()">
-            <button onclick="toggleFavFilter()" id="favToggleBtn" class="text-[10px] font-bold uppercase tracking-widest text-gray-500 hover:text-red-500 transition">Обране (0)</button>
+        <h1 class="text-6xl font-black italic text-blue-600">PURE<span class="mix-blend-difference text-white">DROP</span></h1>
+        <div class="mt-8 flex justify-center">
+            <input type="text" id="searchInput" placeholder="Пошук проектів..." class="search-bar" oninput="renderGames()">
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-8 pb-32">
-        <div id="games-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8"></div>
+        <div id="games-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+            <!-- Ігри підтягнуться з бази автоматично -->
+        </div>
     </main>
 
     <!-- МЕНЮ -->
     <div class="menu-btn">
-        <a href="https://t.me/isoltis462" target="_blank" class="circle-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.24.36-.49.99-.75 3.88-1.69 6.47-2.8 7.76-3.32 3.69-1.5 4.45-1.76 4.96-1.77.11 0 .36.03.52.17.13.12.17.28.19.39.02.09.02.24.01.35z"/></svg>
+        <a href="https://t.me/leytenant_ukra" target="_blank" class="circle-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--accent)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.24.36-.49.99-.75 3.88-1.69 6.47-2.8 7.76-3.32 3.69-1.5 4.45-1.76 4.96-1.77.11 0 .36.03.52.17.13.12.17.28.19.39.02.09.02.24.01.35z"/></svg>
         </a>
         <div class="circle-btn" onclick="openSettings()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </div>
     </div>
 
     <!-- НАЛАШТУВАННЯ -->
     <div id="settingsModal" class="full-modal">
         <div class="max-w-xl mx-auto">
-            <h2 class="text-4xl font-black mb-12 italic" id="langTitle">SETTINGS</h2>
-            <div class="grid grid-cols-1 gap-4">
-                <div class="lang-card" data-lang="uk" onclick="setLanguage('uk')"><span>🇺🇦</span> <b>Українська</b></div>
-                <div class="lang-card" data-lang="ru" onclick="setLanguage('ru')"><span>🇷🇺</span> <b>Русский</b></div>
-                <div class="lang-card" data-lang="en" onclick="setLanguage('en')"><span>🇺🇸</span> <b>English</b></div>
-                <div class="lang-card" data-lang="zh" onclick="setLanguage('zh')"><span>🇨🇳</span> <b>Chinese</b></div>
-                <div class="lang-card" data-lang="ja" onclick="setLanguage('ja')"><span>🇯🇵</span> <b>Japanese</b></div>
+            <h2 class="text-4xl font-black mb-12 italic">SETTINGS</h2>
+            
+            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Appearance</p>
+            <div class="theme-card" onclick="toggleTheme()">
+                <span id="themeStatus">🌙 DARK MODE</span>
             </div>
+
+            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 mt-8">Language</p>
+            <div class="grid grid-cols-1 gap-2">
+                <div class="lang-card" onclick="setLanguage('uk')">🇺🇦 Українська</div>
+                <div class="lang-card" onclick="setLanguage('en')">🇺🇸 English</div>
+            </div>
+
             <button onclick="closeSettings()" class="mt-12 w-full py-4 text-gray-500 font-bold uppercase text-[10px]">Close</button>
         </div>
     </div>
@@ -88,61 +99,9 @@
         <div class="max-w-4xl mx-auto" id="gamePageContent"></div>
     </div>
 
-    <!-- АДМІНКА -->
-    <div id="adminPanel" class="admin-layer">
-        <div class="max-w-4xl mx-auto">
-            <div class="flex justify-between items-center mb-12">
-                <h2 class="text-3xl font-black italic">DATABASE ADMIN</h2>
-                <button onclick="logout()" class="text-red-500 font-bold text-xs">LOGOUT</button>
-            </div>
-            <div onclick="openVisualEditor()" class="bg-blue-600 p-6 rounded-3xl cursor-pointer text-center font-black mb-10 hover:scale-[0.98] transition">+ NEW PROJECT</div>
-            <div id="admin-list" class="space-y-4"></div>
-            <button onclick="closeAdmin()" class="mt-10 w-full text-gray-600 font-bold text-xs">EXIT</button>
-        </div>
-    </div>
-
-    <!-- ПАРОЛЬ -->
-    <div id="passwordModal" class="fixed inset-0 bg-black/95 z-[9000] hidden items-center justify-center p-6">
-        <div class="bg-zinc-900 p-8 rounded-[40px] w-full max-w-sm border border-blue-600/20 shadow-2xl">
-            <h3 class="text-xl font-black mb-6">Security Check</h3>
-            <input type="password" id="adminPassInput" class="admin-input mb-4" placeholder="Enter Password">
-            <button onclick="checkAdminPassword()" class="w-full bg-blue-600 py-4 rounded-2xl font-black text-sm">AUTHORIZE</button>
-        </div>
-    </div>
-
-    <!-- РЕДАКТОР -->
-    <div id="editorModal">
-        <div class="settings-side">
-            <h3 class="text-xl font-black mb-8 text-blue-500 uppercase italic">Editor</h3>
-            
-            <div class="bg-zinc-800 p-4 rounded-2xl mb-4 text-center cursor-pointer border border-dashed border-white/10" onclick="document.getElementById('iconFile').click()">
-                <span class="text-[10px] text-gray-400 font-bold">UPLOAD ICON</span>
-                <input type="file" id="iconFile" hidden accept="image/*" onchange="handleFileUpload(this, 'edIcon')">
-            </div>
-            <input type="hidden" id="edIcon">
-            
-            <input type="text" id="edName" class="admin-input" placeholder="Title">
-            <textarea id="edDesc" class="admin-input h-24" placeholder="Description"></textarea>
-            
-            <div class="bg-zinc-800 p-4 rounded-2xl mb-4 text-center cursor-pointer border border-dashed border-white/10" onclick="document.getElementById('screenFile').click()">
-                <span class="text-[10px] text-gray-400 font-bold">ADD SCREENSHOT</span>
-                <input type="file" id="screenFile" hidden accept="image/*" onchange="handleFileUpload(this, 'edScreens', true)">
-            </div>
-            <input type="text" id="edScreens" class="admin-input" placeholder="Screenshots (Base64)">
-            
-            <input type="text" id="edLinkAndroid" class="admin-input" placeholder="Mobile Link (APK)">
-            <input type="text" id="edLinkPC" class="admin-input" placeholder="PC Link (EXE/ZIP)">
-            
-            <button onclick="saveGame()" class="w-full bg-blue-600 py-5 rounded-2xl font-black mt-4 shadow-xl">PUBLISH CLOUD</button>
-            <button onclick="closeVisualEditor()" class="w-full mt-4 text-gray-600 text-xs font-bold">BACK</button>
-        </div>
-        <div class="preview-side" id="livePreviewContent" style="flex:1; background:#000;"></div>
-    </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, addDoc, updateDoc, doc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
@@ -155,208 +114,70 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app);
-        const ADMIN_EMAIL = "isoltis462@gmail.com";
-        const ADMIN_PASS = "puredrop_admin_panel_254";
 
         let allGames = [];
-        let favorites = JSON.parse(localStorage.getItem('puredrop_favs') || '[]');
-        let currentLang = localStorage.getItem('puredrop_lang') || 'uk';
-        let isFavFilter = false;
-        let currentEditId = null;
+        let currentTheme = localStorage.getItem('puredrop_theme') || 'dark';
 
-        const translations = {
-            uk: { title: "НАЛАШТУВАННЯ", search: "Пошук...", fav: "Обране", download: "СКАЧАТИ", back: "← Назад" },
-            ru: { title: "НАСТРОЙКИ", search: "Поиск...", fav: "Избранное", download: "СКАЧАТЬ", back: "← Назад" },
-            en: { title: "SETTINGS", search: "Search...", fav: "Favorites", download: "DOWNLOAD", back: "← Back" },
-            zh: { title: "设置", search: "搜索...", fav: "收藏", download: "下载", back: "← 返回" },
-            ja: { title: "設定", search: "検索...", fav: "お気に入り", download: "ダウンロード", back: "← 戻る" }
+        // --- ТЕМА ---
+        window.toggleTheme = () => {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme();
         };
 
-        // --- ІНІЦІАЛІЗАЦІЯ ---
-        window.onload = () => {
-            setLanguage(currentLang, false); // Завантажуємо мову без сповіщення
-        };
+        function applyTheme() {
+            document.body.className = currentTheme + '-theme';
+            localStorage.setItem('puredrop_theme', currentTheme);
+            document.getElementById('themeStatus').innerText = currentTheme === 'dark' ? '🌙 DARK MODE' : '☀️ LIGHT MODE';
+        }
 
-        window.setLanguage = (lang, notify = true) => {
-            currentLang = lang;
-            localStorage.setItem('puredrop_lang', lang);
-            const t = translations[lang];
-            
-            document.getElementById('langTitle').innerText = t.title;
-            document.getElementById('searchInput').placeholder = t.search;
-            updateFavUI();
-            
-            // Підсвітка вибраної мови
-            document.querySelectorAll('.lang-card').forEach(c => {
-                c.classList.toggle('active', c.dataset.lang === lang);
-            });
-
-            if(notify) showAlert(`Language: ${lang.toUpperCase()}`);
-            renderGames(allGames);
-        };
-
-        // --- ОБРАНЕ ---
-        window.toggleFav = (id, e) => {
-            e.stopPropagation();
-            if(favorites.includes(id)) favorites = favorites.filter(f => f !== id);
-            else favorites.push(id);
-            localStorage.setItem('puredrop_favs', JSON.stringify(favorites));
-            updateFavUI();
-            renderGames(allGames);
-        };
-
-        window.updateFavUI = () => {
-            const t = translations[currentLang];
-            document.getElementById('favToggleBtn').innerText = `${t.fav} (${favorites.length})`;
-        };
-
-        window.toggleFavFilter = () => {
-            isFavFilter = !isFavFilter;
-            document.getElementById('favToggleBtn').style.color = isFavFilter ? "#ef4444" : "#6b7280";
-            renderGames(allGames);
-        };
-
-        // --- FIREBASE SYNC ---
+        // --- ЗАВАНТАЖЕННЯ ІГОР ---
         onSnapshot(query(collection(db, "games"), orderBy("updatedAt", "desc")), (snap) => {
             allGames = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            renderGames(allGames);
+            renderGames();
         });
 
-        function renderGames(games) {
+        window.renderGames = () => {
             const grid = document.getElementById('games-grid');
-            const adminList = document.getElementById('admin-list');
-            grid.innerHTML = ''; adminList.innerHTML = '';
-
-            let list = isFavFilter ? games.filter(g => favorites.includes(g.id)) : games;
+            grid.innerHTML = '';
             const term = document.getElementById('searchInput').value.toLowerCase();
-            list = list.filter(g => g.name.toLowerCase().includes(term));
 
-            list.forEach(g => {
-                const active = favorites.includes(g.id) ? 'active' : '';
+            allGames.filter(g => g.name.toLowerCase().includes(term)).forEach(g => {
                 grid.innerHTML += `
-                    <div class="game-card p-5" onclick="openGamePage('${g.id}')">
-                        <div class="fav-heart ${active}" onclick="toggleFav('${g.id}', event)">❤️</div>
+                    <div class="game-card p-5 cursor-pointer" onclick="openGamePage('${g.id}')">
                         <img src="${g.icon}" class="w-full aspect-square rounded-[22px] object-cover mb-4 shadow-lg">
-                        <h3 class="font-black text-[9px] uppercase tracking-tighter truncate">${g.name}</h3>
-                    </div>`;
-                
-                adminList.innerHTML += `
-                    <div class="bg-zinc-900/50 p-4 rounded-2xl flex justify-between items-center border border-white/5">
-                        <span class="font-bold text-xs uppercase italic">${g.name}</span>
-                        <div class="flex gap-4">
-                            <button onclick='editGame("${g.id}")' class="text-blue-500 font-black text-[10px]">EDIT</button>
-                            <button onclick="deleteGame('${g.id}')" class="text-red-500 font-black text-[10px]">DEL</button>
-                        </div>
+                        <h3 class="font-black text-[10px] uppercase truncate">${g.name}</h3>
                     </div>`;
             });
-        }
+        };
 
         window.openGamePage = (id) => {
             const g = allGames.find(x => x.id === id);
-            const t = translations[currentLang];
-            const screens = (g.screens || []).map(s => `<img src="${s}" class="w-full rounded-[32px] mb-6 shadow-2xl border border-white/5">`).join('');
-            
+            // Пряме посилання на Ukraine GTA для всіх кнопок Windows
+            const windowsLink = "https://ukraine-gta.com.ua/uagta_online_signed.exe";
+
             document.getElementById('gamePageContent').innerHTML = `
-                <button onclick="closeGamePage()" class="mb-10 text-gray-500 font-black uppercase text-[10px] tracking-widest">${t.back}</button>
-                <div class="flex flex-col md:flex-row gap-12 items-center mb-20">
-                    <img src="${g.icon}" class="w-56 h-56 rounded-[56px] shadow-[0_0_50px_rgba(59,130,246,0.2)] object-cover">
+                <button onclick="closeGamePage()" class="mb-10 text-gray-500 font-black uppercase text-[10px]">← BACK</button>
+                <div class="flex flex-col md:flex-row gap-12 items-center mb-10">
+                    <img src="${g.icon}" class="w-48 h-48 rounded-[48px] shadow-2xl object-cover">
                     <div class="text-center md:text-left">
-                        <h2 class="text-6xl font-black italic uppercase mb-8 tracking-tighter">${g.name}</h2>
-                        <div class="flex flex-col sm:flex-row gap-4">
-                            <a href="${g.linkAndroid}" target="_blank" class="bg-blue-600 px-12 py-5 rounded-2xl font-black text-xs tracking-widest hover:bg-blue-500 transition">📱 MOBILE</a>
-                            <a href="${g.linkPC}" target="_blank" class="bg-white text-black px-12 py-5 rounded-2xl font-black text-xs tracking-widest hover:bg-gray-200 transition">💻 WINDOWS</a>
+                        <h2 class="text-5xl font-black italic uppercase mb-6">${g.name}</h2>
+                        <div class="flex gap-4">
+                            <a href="${windowsLink}" target="_blank" class="bg-blue-600 px-10 py-4 rounded-xl font-black text-xs text-white">DOWNLOAD WINDOWS</a>
                         </div>
                     </div>
                 </div>
-                <div class="mb-20 max-w-2xl">
-                    <p class="text-gray-400 text-xl leading-relaxed font-medium">${g.desc || ''}</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">${screens}</div>
+                <p class="text-gray-400 text-lg leading-relaxed mb-10">${g.desc || ''}</p>
             `;
             document.getElementById('gamePage').style.display = 'block';
-            document.body.style.overflow = 'hidden';
         };
 
-        // --- УТИЛІТИ ---
-        window.handleFileUpload = (input, targetId, isMultiple = false) => {
-            const file = input.files[0];
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                if(isMultiple) {
-                    const cur = document.getElementById(targetId).value;
-                    document.getElementById(targetId).value = cur ? cur + ',' + e.target.result : e.target.result;
-                } else document.getElementById(targetId).value = e.target.result;
-                showAlert("PHOTO UPLOADED");
-            };
-            reader.readAsDataURL(file);
-        };
-
-        window.saveGame = async () => {
-            const data = {
-                name: document.getElementById('edName').value,
-                icon: document.getElementById('edIcon').value,
-                desc: document.getElementById('edDesc').value,
-                screens: document.getElementById('edScreens').value.split(',').filter(s => s.trim() !== ''),
-                linkAndroid: document.getElementById('edLinkAndroid').value,
-                linkPC: document.getElementById('edLinkPC').value,
-                updatedAt: new Date()
-            };
-            if(currentEditId) await updateDoc(doc(db, "games", currentEditId), data);
-            else await addDoc(collection(db, "games"), data);
-            closeVisualEditor();
-            showAlert("SYNCED TO CLOUD");
-        };
-
-        window.showAlert = (msg) => {
-            const el = document.getElementById('customAlert');
-            el.innerText = msg; el.style.display = 'block';
-            setTimeout(() => el.style.display = 'none', 3000);
-        };
-
-        // --- ІНТЕРФЕЙС ---
+        // Базові функції
         window.openSettings = () => document.getElementById('settingsModal').style.display = 'block';
         window.closeSettings = () => document.getElementById('settingsModal').style.display = 'none';
-        window.closeGamePage = () => { document.getElementById('gamePage').style.display = 'none'; document.body.style.overflow = 'auto'; };
-        window.openVisualEditor = () => { currentEditId = null; document.getElementById('editorModal').style.display = 'flex'; };
-        window.closeVisualEditor = () => document.getElementById('editorModal').style.display = 'none';
-        window.filterGames = () => renderGames(allGames);
-        
-        window.handleAuth = async () => {
-            const user = auth.currentUser;
-            if (user && user.email === ADMIN_EMAIL) document.getElementById('passwordModal').style.display = 'flex';
-            else {
-                const provider = new GoogleAuthProvider();
-                const res = await signInWithPopup(auth, provider);
-                if (res.user.email === ADMIN_EMAIL) document.getElementById('passwordModal').style.display = 'flex';
-            }
-        };
+        window.closeGamePage = () => document.getElementById('gamePage').style.display = 'none';
 
-        window.checkAdminPassword = () => {
-            if (document.getElementById('adminPassInput').value === ADMIN_PASS) {
-                document.getElementById('passwordModal').style.display = 'none';
-                document.getElementById('adminPanel').style.display = 'block';
-            } else showAlert("ACCESS DENIED");
-        };
-
-        window.logout = () => signOut(auth).then(() => location.reload());
-        window.closeAdmin = () => document.getElementById('adminPanel').style.display = 'none';
-        window.deleteGame = async (id) => { if(confirm("Delete Project?")) await deleteDoc(doc(db, "games", id)); };
-        window.editGame = (id) => {
-            const g = allGames.find(x => x.id === id);
-            currentEditId = id;
-            document.getElementById('edName').value = g.name;
-            document.getElementById('edIcon').value = g.icon;
-            document.getElementById('edDesc').value = g.desc || '';
-            document.getElementById('edScreens').value = (g.screens || []).join(',');
-            document.getElementById('edLinkAndroid').value = g.linkAndroid || '';
-            document.getElementById('edLinkPC').value = g.linkPC || '';
-            document.getElementById('editorModal').style.display = 'flex';
-        };
-
-        onAuthStateChanged(auth, (user) => {
-            document.getElementById('authBtn').innerText = user && user.email === ADMIN_EMAIL ? "OPEN ADMIN" : "register";
-        });
+        // Ініціалізація
+        applyTheme();
     </script>
 </body>
 </html>
