@@ -3,88 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PureDrop Cloud Admin Edition</title>
+    <title>PureDrop Cloud Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
         :root { --accent: #3b82f6; --bg: #0b0b0c; --surface: #161618; --border: rgba(255,255,255,0.06); }
         body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
         
-        /* Кнопка входу */
-        .register-btn { position: absolute; top: 15px; right: 20px; font-size: 11px; color: #333; background: none; border: none; cursor: pointer; z-index: 100; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
-        .register-btn:hover { color: var(--accent); }
-
-        /* Сітка ігор */
-        .game-card { background: var(--surface); border: 1px solid var(--border); border-radius: 28px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .game-card:hover { transform: translateY(-8px); border-color: var(--accent); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-
-        /* Адмін панель */
-        .admin-layer { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; overflow-y: auto; padding: 40px 20px; }
+        .register-btn { position: absolute; top: 15px; right: 20px; font-size: 11px; color: #333; background: none; border: none; cursor: pointer; z-index: 100; font-weight: 800; text-transform: uppercase; }
         
-        /* Редактор */
+        .menu-btn { position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
+        .circle-btn { width: 50px; height: 50px; border-radius: 25px; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .circle-btn:hover { border-color: var(--accent); transform: scale(1.1); }
+
+        .game-card { background: var(--surface); border: 1px solid var(--border); border-radius: 28px; position: relative; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); animation: fadeIn 0.5s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .game-card:hover { transform: translateY(-8px); border-color: var(--accent); }
+        .fav-heart { position: absolute; top: 15px; right: 15px; font-size: 20px; cursor: pointer; z-index: 10; transition: 0.3s; filter: grayscale(1); }
+        .fav-heart.active { filter: grayscale(0); transform: scale(1.2); }
+
+        .full-modal { position: fixed; inset: 0; background: var(--bg); z-index: 8000; display: none; padding: 40px; animation: slideUp 0.4s ease; overflow-y: auto; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        .lang-card { background: var(--surface); border: 1px solid var(--border); padding: 20px; border-radius: 24px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.3s; }
+        .lang-card:hover { border-color: var(--accent); background: rgba(59, 130, 246, 0.1); }
+        .lang-card.active { border-color: var(--accent); background: rgba(59, 130, 246, 0.2); }
+
+        .search-bar { background: var(--surface); border: 1px solid var(--border); padding: 12px 24px; border-radius: 20px; width: 100%; max-width: 400px; color: white; outline: none; }
+        .admin-layer { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; overflow-y: auto; padding: 40px 20px; }
         #editorModal { position: fixed; inset: 0; background: #0b0b0c; z-index: 6000; display: none; flex-direction: row; }
-        @media (max-width: 768px) { #editorModal { flex-direction: column; } }
-
-        .preview-side { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; border-right: 1px solid var(--border); padding: 20px; }
+        @media (max-width: 768px) { #editorModal { flex-direction: column; } .settings-side { width: 100% !important; } }
         .settings-side { width: 400px; padding: 40px; background: #111; overflow-y: auto; }
-
-        .admin-input { width: 100%; background: #1a1a1c; border: 1px solid #333; padding: 14px; border-radius: 16px; color: white; margin-bottom: 15px; font-size: 14px; outline: none; }
-        .admin-input:focus { border-color: var(--accent); }
-
-        .btn-accent { background: var(--accent); color: white; width: 100%; padding: 16px; border-radius: 18px; font-weight: 900; cursor: pointer; border: none; transition: 0.3s; }
-        .btn-accent:hover { transform: scale(1.02); background: #2563eb; }
-
-        .empty-state { text-align: center; padding: 100px 20px; color: #333; }
+        .admin-input { width: 100%; background: #1a1a1c; border: 1px solid #333; padding: 14px; border-radius: 16px; color: white; margin-bottom: 15px; outline: none; }
+        
+        #customAlert { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: none; background: #1a1a1c; border: 1px solid var(--accent); padding: 12px 25px; border-radius: 15px; font-weight: bold; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
 
+    <div id="customAlert"></div>
+
     <button onclick="handleAuth()" class="register-btn" id="authBtn">register</button>
 
-    <header class="py-16 text-center">
-        <h1 class="text-6xl font-black tracking-tighter italic text-blue-600">PURE<span class="text-white">DROP</span></h1>
-        <p class="text-gray-600 text-sm mt-4 font-bold tracking-[0.3em]">CLOUD ARCHIVE v12.0</p>
+    <header class="py-16 text-center px-4">
+        <h1 class="text-6xl font-black italic text-blue-600">PURE<span class="text-white">DROP</span></h1>
+        <div class="mt-8 flex flex-col items-center gap-4">
+            <input type="text" id="searchInput" placeholder="Пошук..." class="search-bar" oninput="filterGames()">
+            <button onclick="toggleFavFilter()" id="favToggleBtn" class="text-[10px] font-bold uppercase tracking-widest text-gray-500 hover:text-red-500 transition">Обране (0)</button>
+        </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-8 pb-32">
         <div id="games-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8"></div>
-        <div id="empty-msg" class="empty-state hidden">
-            <p class="font-bold uppercase tracking-widest text-[10px]">Хмара порожня. Зайдіть в адмінку для завантаження.</p>
-        </div>
     </main>
 
-    <!-- ПАНЕЛЬ КЕРУВАННЯ -->
-    <div id="adminPanel" class="admin-layer">
-        <div class="max-w-4xl mx-auto">
-            <div class="flex justify-between items-center mb-12">
-                <h2 class="text-4xl font-black italic">DATABASE<span class="text-blue-600">.</span></h2>
-                <button onclick="logout()" class="text-red-500 font-bold text-xs uppercase">Logout</button>
-            </div>
-
-            <div onclick="openVisualEditor()" class="bg-blue-600 p-8 rounded-[32px] cursor-pointer hover:bg-blue-500 transition mb-10 text-center">
-                <div class="text-xl font-black">+ ДОДАТИ НОВИЙ ПРОЕКТ</div>
-            </div>
-
-            <div id="admin-list" class="space-y-4"></div>
-            <button onclick="closeAdmin()" class="mt-12 w-full py-4 text-gray-700 font-bold uppercase text-[10px]">Закрити</button>
+    <!-- МЕНЮ -->
+    <div class="menu-btn">
+        <a href="https://t.me/isoltis462" target="_blank" class="circle-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.24.36-.49.99-.75 3.88-1.69 6.47-2.8 7.76-3.32 3.69-1.5 4.45-1.76 4.96-1.77.11 0 .36.03.52.17.13.12.17.28.19.39.02.09.02.24.01.35z"/></svg>
+        </a>
+        <div class="circle-btn" onclick="openSettings()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </div>
     </div>
 
-    <!-- ВІЗУАЛЬНИЙ РЕДАКТОР -->
+    <!-- НАЛАШТУВАННЯ -->
+    <div id="settingsModal" class="full-modal">
+        <div class="max-w-xl mx-auto">
+            <h2 class="text-4xl font-black mb-12 italic" id="langTitle">SETTINGS</h2>
+            <div class="grid grid-cols-1 gap-4">
+                <div class="lang-card" data-lang="uk" onclick="setLanguage('uk')"><span>🇺🇦</span> <b>Українська</b></div>
+                <div class="lang-card" data-lang="ru" onclick="setLanguage('ru')"><span>🇷🇺</span> <b>Русский</b></div>
+                <div class="lang-card" data-lang="en" onclick="setLanguage('en')"><span>🇺🇸</span> <b>English</b></div>
+                <div class="lang-card" data-lang="zh" onclick="setLanguage('zh')"><span>🇨🇳</span> <b>Chinese</b></div>
+                <div class="lang-card" data-lang="ja" onclick="setLanguage('ja')"><span>🇯🇵</span> <b>Japanese</b></div>
+            </div>
+            <button onclick="closeSettings()" class="mt-12 w-full py-4 text-gray-500 font-bold uppercase text-[10px]">Close</button>
+        </div>
+    </div>
+
+    <!-- СТОРІНКА ГРИ -->
+    <div id="gamePage" class="full-modal" style="z-index: 7000;">
+        <div class="max-w-4xl mx-auto" id="gamePageContent"></div>
+    </div>
+
+    <!-- АДМІНКА -->
+    <div id="adminPanel" class="admin-layer">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex justify-between items-center mb-12">
+                <h2 class="text-3xl font-black italic">DATABASE ADMIN</h2>
+                <button onclick="logout()" class="text-red-500 font-bold text-xs">LOGOUT</button>
+            </div>
+            <div onclick="openVisualEditor()" class="bg-blue-600 p-6 rounded-3xl cursor-pointer text-center font-black mb-10 hover:scale-[0.98] transition">+ NEW PROJECT</div>
+            <div id="admin-list" class="space-y-4"></div>
+            <button onclick="closeAdmin()" class="mt-10 w-full text-gray-600 font-bold text-xs">EXIT</button>
+        </div>
+    </div>
+
+    <!-- ПАРОЛЬ -->
+    <div id="passwordModal" class="fixed inset-0 bg-black/95 z-[9000] hidden items-center justify-center p-6">
+        <div class="bg-zinc-900 p-8 rounded-[40px] w-full max-w-sm border border-blue-600/20 shadow-2xl">
+            <h3 class="text-xl font-black mb-6">Security Check</h3>
+            <input type="password" id="adminPassInput" class="admin-input mb-4" placeholder="Enter Password">
+            <button onclick="checkAdminPassword()" class="w-full bg-blue-600 py-4 rounded-2xl font-black text-sm">AUTHORIZE</button>
+        </div>
+    </div>
+
+    <!-- РЕДАКТОР -->
     <div id="editorModal">
-        <div class="preview-side">
-            <div id="livePreviewContent" class="w-full max-w-sm"></div>
-        </div>
         <div class="settings-side">
-            <h3 class="text-2xl font-black mb-8 text-blue-500">Editor</h3>
-            <input type="text" id="edName" class="admin-input" placeholder="Назва" oninput="updatePreview()">
-            <input type="text" id="edIcon" class="admin-input" placeholder="URL іконки" oninput="updatePreview()">
-            <textarea id="edDesc" class="admin-input h-32" placeholder="Опис" oninput="updatePreview()"></textarea>
-            <input type="text" id="edScreens" class="admin-input" placeholder="Скріншоти (через кому)" oninput="updatePreview()">
-            <input type="text" id="edLink" class="admin-input" placeholder="Прямий лінк на APK">
-            <button onclick="saveGame()" class="btn-accent mt-4">ОПУБЛІКУВАТИ</button>
-            <button onclick="closeVisualEditor()" class="w-full mt-4 text-gray-500 font-bold text-xs">BACK</button>
+            <h3 class="text-xl font-black mb-8 text-blue-500 uppercase italic">Editor</h3>
+            
+            <div class="bg-zinc-800 p-4 rounded-2xl mb-4 text-center cursor-pointer border border-dashed border-white/10" onclick="document.getElementById('iconFile').click()">
+                <span class="text-[10px] text-gray-400 font-bold">UPLOAD ICON</span>
+                <input type="file" id="iconFile" hidden accept="image/*" onchange="handleFileUpload(this, 'edIcon')">
+            </div>
+            <input type="hidden" id="edIcon">
+            
+            <input type="text" id="edName" class="admin-input" placeholder="Title">
+            <textarea id="edDesc" class="admin-input h-24" placeholder="Description"></textarea>
+            
+            <div class="bg-zinc-800 p-4 rounded-2xl mb-4 text-center cursor-pointer border border-dashed border-white/10" onclick="document.getElementById('screenFile').click()">
+                <span class="text-[10px] text-gray-400 font-bold">ADD SCREENSHOT</span>
+                <input type="file" id="screenFile" hidden accept="image/*" onchange="handleFileUpload(this, 'edScreens', true)">
+            </div>
+            <input type="text" id="edScreens" class="admin-input" placeholder="Screenshots (Base64)">
+            
+            <input type="text" id="edLinkAndroid" class="admin-input" placeholder="Mobile Link (APK)">
+            <input type="text" id="edLinkPC" class="admin-input" placeholder="PC Link (EXE/ZIP)">
+            
+            <button onclick="saveGame()" class="w-full bg-blue-600 py-5 rounded-2xl font-black mt-4 shadow-xl">PUBLISH CLOUD</button>
+            <button onclick="closeVisualEditor()" class="w-full mt-4 text-gray-600 text-xs font-bold">BACK</button>
         </div>
+        <div class="preview-side" id="livePreviewContent" style="flex:1; background:#000;"></div>
     </div>
 
     <script type="module">
@@ -106,107 +158,138 @@
         const auth = getAuth(app);
         const ADMIN_EMAIL = "isoltis462@gmail.com";
         const ADMIN_PASS = "puredrop_admin_panel_254";
+
+        let allGames = [];
+        let favorites = JSON.parse(localStorage.getItem('puredrop_favs') || '[]');
+        let currentLang = localStorage.getItem('puredrop_lang') || 'uk';
+        let isFavFilter = false;
         let currentEditId = null;
 
-        // Перевірка стану
-        onAuthStateChanged(auth, (user) => {
-            const btn = document.getElementById('authBtn');
-            if (user && user.email === ADMIN_EMAIL) {
-                btn.innerText = "OPEN ADMIN";
-                btn.style.color = "#3b82f6";
-            } else {
-                btn.innerText = "register";
-                btn.style.color = "#333";
-            }
-        });
-
-        // Вхід + Пароль
-        window.handleAuth = async () => {
-            const user = auth.currentUser;
-            
-            const openPanelWithPassword = () => {
-                const pass = prompt("Введіть пароль до адмін-панелі:");
-                if (pass === ADMIN_PASS) {
-                    document.getElementById('adminPanel').style.display = 'block';
-                } else if (pass !== null) {
-                    alert("Невірний пароль!");
-                }
-            };
-
-            if (user && user.email === ADMIN_EMAIL) {
-                openPanelWithPassword();
-            } else {
-                const provider = new GoogleAuthProvider();
-                provider.setCustomParameters({ prompt: 'select_account' });
-                try {
-                    const result = await signInWithPopup(auth, provider);
-                    if (result.user.email === ADMIN_EMAIL) {
-                        openPanelWithPassword();
-                    } else {
-                        alert("Доступ заборонено.");
-                        await signOut(auth);
-                    }
-                } catch (e) {
-                    alert("Помилка! Перевір чи додав ти домен у Authorized domains в Firebase.");
-                }
-            }
+        const translations = {
+            uk: { title: "НАЛАШТУВАННЯ", search: "Пошук...", fav: "Обране", download: "СКАЧАТИ", back: "← Назад" },
+            ru: { title: "НАСТРОЙКИ", search: "Поиск...", fav: "Избранное", download: "СКАЧАТЬ", back: "← Назад" },
+            en: { title: "SETTINGS", search: "Search...", fav: "Favorites", download: "DOWNLOAD", back: "← Back" },
+            zh: { title: "设置", search: "搜索...", fav: "收藏", download: "下载", back: "← 返回" },
+            ja: { title: "設定", search: "検索...", fav: "お気に入り", download: "ダウンロード", back: "← 戻る" }
         };
 
-        window.logout = () => signOut(auth).then(() => location.reload());
-        window.closeAdmin = () => document.getElementById('adminPanel').style.display = 'none';
+        // --- ІНІЦІАЛІЗАЦІЯ ---
+        window.onload = () => {
+            setLanguage(currentLang, false); // Завантажуємо мову без сповіщення
+        };
 
-        // Дані в реальному часі
-        const q = query(collection(db, "games"), orderBy("updatedAt", "desc"));
-        onSnapshot(q, (snapshot) => {
+        window.setLanguage = (lang, notify = true) => {
+            currentLang = lang;
+            localStorage.setItem('puredrop_lang', lang);
+            const t = translations[lang];
+            
+            document.getElementById('langTitle').innerText = t.title;
+            document.getElementById('searchInput').placeholder = t.search;
+            updateFavUI();
+            
+            // Підсвітка вибраної мови
+            document.querySelectorAll('.lang-card').forEach(c => {
+                c.classList.toggle('active', c.dataset.lang === lang);
+            });
+
+            if(notify) showAlert(`Language: ${lang.toUpperCase()}`);
+            renderGames(allGames);
+        };
+
+        // --- ОБРАНЕ ---
+        window.toggleFav = (id, e) => {
+            e.stopPropagation();
+            if(favorites.includes(id)) favorites = favorites.filter(f => f !== id);
+            else favorites.push(id);
+            localStorage.setItem('puredrop_favs', JSON.stringify(favorites));
+            updateFavUI();
+            renderGames(allGames);
+        };
+
+        window.updateFavUI = () => {
+            const t = translations[currentLang];
+            document.getElementById('favToggleBtn').innerText = `${t.fav} (${favorites.length})`;
+        };
+
+        window.toggleFavFilter = () => {
+            isFavFilter = !isFavFilter;
+            document.getElementById('favToggleBtn').style.color = isFavFilter ? "#ef4444" : "#6b7280";
+            renderGames(allGames);
+        };
+
+        // --- FIREBASE SYNC ---
+        onSnapshot(query(collection(db, "games"), orderBy("updatedAt", "desc")), (snap) => {
+            allGames = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderGames(allGames);
+        });
+
+        function renderGames(games) {
             const grid = document.getElementById('games-grid');
             const adminList = document.getElementById('admin-list');
             grid.innerHTML = ''; adminList.innerHTML = '';
-            
-            if (snapshot.empty) document.getElementById('empty-msg').classList.remove('hidden');
-            else document.getElementById('empty-msg').classList.add('hidden');
 
-            snapshot.forEach((d) => {
-                const g = d.data(); const id = d.id;
+            let list = isFavFilter ? games.filter(g => favorites.includes(g.id)) : games;
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            list = list.filter(g => g.name.toLowerCase().includes(term));
+
+            list.forEach(g => {
+                const active = favorites.includes(g.id) ? 'active' : '';
                 grid.innerHTML += `
-                    <div class="game-card p-6 text-center">
-                        <img src="${g.icon}" class="w-20 h-20 mx-auto rounded-[28px] object-cover mb-4 shadow-xl">
-                        <h3 class="font-black text-[11px] uppercase truncate">${g.name}</h3>
-                        <a href="${g.link}" target="_blank" class="block mt-4 bg-white text-black py-2 rounded-xl text-[9px] font-black uppercase">Download</a>
+                    <div class="game-card p-5" onclick="openGamePage('${g.id}')">
+                        <div class="fav-heart ${active}" onclick="toggleFav('${g.id}', event)">❤️</div>
+                        <img src="${g.icon}" class="w-full aspect-square rounded-[22px] object-cover mb-4 shadow-lg">
+                        <h3 class="font-black text-[9px] uppercase tracking-tighter truncate">${g.name}</h3>
                     </div>`;
                 
                 adminList.innerHTML += `
-                    <div class="bg-zinc-900 p-4 rounded-2xl flex justify-between items-center border border-white/5">
-                        <div class="flex items-center gap-3">
-                            <img src="${g.icon}" class="w-10 h-10 rounded-lg object-cover">
-                            <span class="font-bold text-sm">${g.name}</span>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick='editGame("${id}", ${JSON.stringify(g).replace(/'/g, "&apos;")})' class="text-blue-500 font-bold text-xs px-2">EDIT</button>
-                            <button onclick="deleteGame('${id}')" class="text-red-500 font-bold text-xs px-2">DEL</button>
+                    <div class="bg-zinc-900/50 p-4 rounded-2xl flex justify-between items-center border border-white/5">
+                        <span class="font-bold text-xs uppercase italic">${g.name}</span>
+                        <div class="flex gap-4">
+                            <button onclick='editGame("${g.id}")' class="text-blue-500 font-black text-[10px]">EDIT</button>
+                            <button onclick="deleteGame('${g.id}')" class="text-red-500 font-black text-[10px]">DEL</button>
                         </div>
                     </div>`;
             });
-        });
+        }
 
-        // Логіка редактора
-        window.openVisualEditor = () => {
-            currentEditId = null;
-            document.querySelectorAll('.admin-input').forEach(i => i.value = '');
-            document.getElementById('editorModal').style.display = 'flex';
-            updatePreview();
+        window.openGamePage = (id) => {
+            const g = allGames.find(x => x.id === id);
+            const t = translations[currentLang];
+            const screens = (g.screens || []).map(s => `<img src="${s}" class="w-full rounded-[32px] mb-6 shadow-2xl border border-white/5">`).join('');
+            
+            document.getElementById('gamePageContent').innerHTML = `
+                <button onclick="closeGamePage()" class="mb-10 text-gray-500 font-black uppercase text-[10px] tracking-widest">${t.back}</button>
+                <div class="flex flex-col md:flex-row gap-12 items-center mb-20">
+                    <img src="${g.icon}" class="w-56 h-56 rounded-[56px] shadow-[0_0_50px_rgba(59,130,246,0.2)] object-cover">
+                    <div class="text-center md:text-left">
+                        <h2 class="text-6xl font-black italic uppercase mb-8 tracking-tighter">${g.name}</h2>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <a href="${g.linkAndroid}" target="_blank" class="bg-blue-600 px-12 py-5 rounded-2xl font-black text-xs tracking-widest hover:bg-blue-500 transition">📱 MOBILE</a>
+                            <a href="${g.linkPC}" target="_blank" class="bg-white text-black px-12 py-5 rounded-2xl font-black text-xs tracking-widest hover:bg-gray-200 transition">💻 WINDOWS</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-20 max-w-2xl">
+                    <p class="text-gray-400 text-xl leading-relaxed font-medium">${g.desc || ''}</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">${screens}</div>
+            `;
+            document.getElementById('gamePage').style.display = 'block';
+            document.body.style.overflow = 'hidden';
         };
 
-        window.closeVisualEditor = () => document.getElementById('editorModal').style.display = 'none';
-
-        window.updatePreview = () => {
-            const name = document.getElementById('edName').value || "Project Name";
-            const icon = document.getElementById('edIcon').value || "https://cdn-icons-png.flaticon.com/512/6831/6831000.png";
-            document.getElementById('livePreviewContent').innerHTML = `
-                <div class="bg-zinc-900 p-10 rounded-[45px] text-center shadow-2xl border border-white/5">
-                    <img src="${icon}" class="w-24 h-24 mx-auto rounded-[32px] mb-6 shadow-2xl object-cover">
-                    <h2 class="text-2xl font-black italic uppercase">${name}</h2>
-                    <div class="mt-8 py-4 bg-blue-600 rounded-2xl font-black text-xs uppercase">Preview</div>
-                </div>`;
+        // --- УТИЛІТИ ---
+        window.handleFileUpload = (input, targetId, isMultiple = false) => {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if(isMultiple) {
+                    const cur = document.getElementById(targetId).value;
+                    document.getElementById(targetId).value = cur ? cur + ',' + e.target.result : e.target.result;
+                } else document.getElementById(targetId).value = e.target.result;
+                showAlert("PHOTO UPLOADED");
+            };
+            reader.readAsDataURL(file);
         };
 
         window.saveGame = async () => {
@@ -214,27 +297,66 @@
                 name: document.getElementById('edName').value,
                 icon: document.getElementById('edIcon').value,
                 desc: document.getElementById('edDesc').value,
-                screens: document.getElementById('edScreens').value.split(','),
-                link: document.getElementById('edLink').value,
+                screens: document.getElementById('edScreens').value.split(',').filter(s => s.trim() !== ''),
+                linkAndroid: document.getElementById('edLinkAndroid').value,
+                linkPC: document.getElementById('edLinkPC').value,
                 updatedAt: new Date()
             };
             if(currentEditId) await updateDoc(doc(db, "games", currentEditId), data);
             else await addDoc(collection(db, "games"), data);
             closeVisualEditor();
+            showAlert("SYNCED TO CLOUD");
         };
 
-        window.editGame = (id, data) => {
+        window.showAlert = (msg) => {
+            const el = document.getElementById('customAlert');
+            el.innerText = msg; el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
+        };
+
+        // --- ІНТЕРФЕЙС ---
+        window.openSettings = () => document.getElementById('settingsModal').style.display = 'block';
+        window.closeSettings = () => document.getElementById('settingsModal').style.display = 'none';
+        window.closeGamePage = () => { document.getElementById('gamePage').style.display = 'none'; document.body.style.overflow = 'auto'; };
+        window.openVisualEditor = () => { currentEditId = null; document.getElementById('editorModal').style.display = 'flex'; };
+        window.closeVisualEditor = () => document.getElementById('editorModal').style.display = 'none';
+        window.filterGames = () => renderGames(allGames);
+        
+        window.handleAuth = async () => {
+            const user = auth.currentUser;
+            if (user && user.email === ADMIN_EMAIL) document.getElementById('passwordModal').style.display = 'flex';
+            else {
+                const provider = new GoogleAuthProvider();
+                const res = await signInWithPopup(auth, provider);
+                if (res.user.email === ADMIN_EMAIL) document.getElementById('passwordModal').style.display = 'flex';
+            }
+        };
+
+        window.checkAdminPassword = () => {
+            if (document.getElementById('adminPassInput').value === ADMIN_PASS) {
+                document.getElementById('passwordModal').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+            } else showAlert("ACCESS DENIED");
+        };
+
+        window.logout = () => signOut(auth).then(() => location.reload());
+        window.closeAdmin = () => document.getElementById('adminPanel').style.display = 'none';
+        window.deleteGame = async (id) => { if(confirm("Delete Project?")) await deleteDoc(doc(db, "games", id)); };
+        window.editGame = (id) => {
+            const g = allGames.find(x => x.id === id);
             currentEditId = id;
-            document.getElementById('edName').value = data.name;
-            document.getElementById('edIcon').value = data.icon;
-            document.getElementById('edDesc').value = data.desc;
-            document.getElementById('edScreens').value = data.screens.join(',');
-            document.getElementById('edLink').value = data.link;
+            document.getElementById('edName').value = g.name;
+            document.getElementById('edIcon').value = g.icon;
+            document.getElementById('edDesc').value = g.desc || '';
+            document.getElementById('edScreens').value = (g.screens || []).join(',');
+            document.getElementById('edLinkAndroid').value = g.linkAndroid || '';
+            document.getElementById('edLinkPC').value = g.linkPC || '';
             document.getElementById('editorModal').style.display = 'flex';
-            updatePreview();
         };
 
-        window.deleteGame = async (id) => { if(confirm("Видалити цей проект?")) await deleteDoc(doc(db, "games", id)); };
+        onAuthStateChanged(auth, (user) => {
+            document.getElementById('authBtn').innerText = user && user.email === ADMIN_EMAIL ? "OPEN ADMIN" : "register";
+        });
     </script>
 </body>
 </html>
