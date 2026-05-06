@@ -3,130 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PureDrop Cloud Admin Edition</title>
+    <title>PureDrop Cloud v12.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     <style>
         :root { --accent: #3b82f6; --bg: #0b0b0c; --surface: #161618; --border: rgba(255,255,255,0.06); }
         body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; }
         
-        .register-btn { position: absolute; top: 15px; right: 20px; font-size: 11px; color: #333; background: none; border: none; cursor: pointer; z-index: 100; }
+        .register-btn { position: absolute; top: 15px; right: 20px; font-size: 11px; font-weight: bold; cursor: pointer; z-index: 100; transition: 0.3s; }
         
-        /* Скляний ефект для карток */
-        .game-card { 
-            background: var(--surface); 
-            border: 1px solid var(--border); 
-            border-radius: 28px; 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        }
-        .game-card:hover { transform: translateY(-8px); border-color: var(--accent); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .game-card { background: var(--surface); border: 1px solid var(--border); border-radius: 28px; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .game-card:hover { transform: translateY(-5px); border-color: var(--accent); }
 
-        /* Адмін панель на весь екран */
         .admin-layer { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; overflow-y: auto; padding: 40px 20px; }
-        
-        /* Візуальний редактор */
         #editorModal { position: fixed; inset: 0; background: #0b0b0c; z-index: 6000; display: none; flex-direction: row; }
+        
         @media (max-width: 768px) { #editorModal { flex-direction: column; } }
 
-        .preview-side { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; border-right: 1px solid var(--border); padding: 20px; }
+        .preview-side { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; padding: 20px; border-right: 1px solid var(--border); }
         .settings-side { width: 400px; padding: 40px; background: #111; overflow-y: auto; }
         @media (max-width: 768px) { .settings-side { width: 100%; } }
 
         .admin-input { width: 100%; background: #1a1a1c; border: 1px solid #333; padding: 14px; border-radius: 16px; color: white; margin-bottom: 15px; font-size: 14px; outline: none; }
         .admin-input:focus { border-color: var(--accent); }
 
-        .btn { padding: 14px 24px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: 0.3s; border: none; text-align: center; }
-        .btn-accent { background: var(--accent); color: white; width: 100%; }
-        .btn-accent:hover { background: #2563eb; transform: scale(1.02); }
-
-        .gallery-preview { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; }
-        .gallery-preview img { height: 140px; border-radius: 12px; border: 1px solid var(--border); }
-
-        .empty-state { text-align: center; padding: 100px 20px; color: #444; }
+        .btn-accent { background: var(--accent); color: white; width: 100%; padding: 14px; border-radius: 16px; font-weight: 800; cursor: pointer; border: none; }
     </style>
 </head>
 <body>
 
-    <button onclick="handleAuth()" class="register-btn">register</button>
+    <!-- Кнопка стану авторизації -->
+    <button onclick="handleAuth()" class="register-btn" id="mainAuthBtn">register</button>
 
     <header class="py-16 text-center">
         <h1 class="text-6xl font-black tracking-tighter italic text-blue-600">PURE<span class="text-white">DROP</span></h1>
         <p class="text-gray-600 text-sm mt-4 font-bold tracking-[0.3em]">CLOUD ARCHIVE v12.0</p>
     </header>
 
-    <main class="max-w-7xl mx-auto px-8 pb-32">
+    <main class="max-w-7xl mx-auto px-8 pb-32 text-center">
         <div id="games-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
-            <!-- Сюди летять ігри -->
+            <!-- Ігри -->
         </div>
-        <div id="empty-msg" class="empty-state hidden">
-            <div class="text-5xl mb-4">📦</div>
-            <p class="font-bold uppercase tracking-widest text-xs">Хмара порожня. Зайдіть в адмінку, щоб додати ігри.</p>
+        <div id="empty-msg" class="py-20 hidden">
+            <p class="text-zinc-700 font-bold uppercase tracking-widest text-xs">База даних порожня. Увійдіть в адмінку.</p>
         </div>
     </main>
 
-    <!-- ПАНЕЛЬ УПРАВЛІННЯ -->
+    <!-- АДМІН ПАНЕЛЬ -->
     <div id="adminPanel" class="admin-layer">
         <div class="max-w-4xl mx-auto">
             <div class="flex justify-between items-center mb-12">
-                <div>
-                    <h2 class="text-4xl font-black">Admin Panel</h2>
-                    <p class="text-blue-500 font-medium">Керування контентом Keysbrawl</p>
-                </div>
-                <button onclick="logout()" class="bg-zinc-900 px-6 py-3 rounded-2xl font-bold text-red-500 border border-red-500/20">LOGOUT</button>
+                <h2 class="text-4xl font-black italic">Cloud Control</h2>
+                <button onclick="logout()" class="text-red-500 font-bold text-xs uppercase tracking-widest">Вийти з аккаунта</button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                <div onclick="openVisualEditor()" class="bg-blue-600 p-8 rounded-[32px] cursor-pointer hover:bg-blue-500 transition shadow-2xl shadow-blue-600/20">
-                    <div class="text-3xl mb-2">➕</div>
-                    <div class="text-xl font-black">ДОДАТИ НОВИЙ ПРОЕКТ</div>
-                    <p class="text-blue-200 text-sm mt-1">Створити картку гри в базі</p>
-                </div>
-                <div class="bg-zinc-900 p-8 rounded-[32px] border border-zinc-800">
-                    <div class="text-3xl mb-2">📊</div>
-                    <div class="text-xl font-black">СТАТУС БАЗИ</div>
-                    <p id="stats-count" class="text-gray-500 text-sm mt-1">Завантаження...</p>
-                </div>
+            <div onclick="openVisualEditor()" class="bg-blue-600 p-8 rounded-[32px] cursor-pointer mb-10 text-center shadow-2xl shadow-blue-600/20">
+                <div class="text-xl font-black">+ ДОДАТИ НОВУ ГРУ</div>
             </div>
 
-            <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
-                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                АКТИВНІ ПРОЕКТИ
-            </h3>
             <div id="admin-list" class="space-y-4">
-                <!-- Список ігор для редагування -->
+                <!-- Список проектів -->
             </div>
             
-            <button onclick="closeAdmin()" class="mt-12 w-full py-4 text-gray-600 font-bold uppercase tracking-widest text-xs">Закрити панель</button>
+            <button onclick="closeAdmin()" class="mt-12 w-full text-zinc-500 font-bold text-[10px] uppercase">Закрити панель</button>
         </div>
     </div>
 
-    <!-- ВІЗУАЛЬНИЙ РЕДАКТОР -->
+    <!-- РЕДАКТОР -->
     <div id="editorModal">
         <div class="preview-side">
             <div id="livePreviewContent" class="w-full max-w-sm"></div>
         </div>
         <div class="settings-side">
-            <h3 class="text-2xl font-black mb-8 text-blue-500 italic">Project Editor</h3>
+            <h3 class="text-2xl font-black mb-8 italic text-blue-500">Editor</h3>
+            <input type="text" id="edName" class="admin-input" placeholder="Назва гри" oninput="updatePreview()">
+            <input type="text" id="edIcon" class="admin-input" placeholder="URL іконки" oninput="updatePreview()">
+            <textarea id="edDesc" class="admin-input h-32" placeholder="Опис" oninput="updatePreview()"></textarea>
+            <input type="text" id="edScreens" class="admin-input" placeholder="Скріншоти через кому" oninput="updatePreview()">
+            <input type="text" id="edLink" class="admin-input" placeholder="Лінк на файл (APK/Zip)">
             
-            <label class="text-[10px] font-bold text-gray-500 uppercase ml-2 mb-2 block">Назва</label>
-            <input type="text" id="edName" class="admin-input" placeholder="GTA Ukraine..." oninput="updatePreview()">
-            
-            <label class="text-[10px] font-bold text-gray-500 uppercase ml-2 mb-2 block">Іконка (URL)</label>
-            <input type="text" id="edIcon" class="admin-input" placeholder="https://..." oninput="updatePreview()">
-            
-            <label class="text-[10px] font-bold text-gray-500 uppercase ml-2 mb-2 block">Опис проекту</label>
-            <textarea id="edDesc" class="admin-input h-32" placeholder="Опишіть гру..." oninput="updatePreview()"></textarea>
-            
-            <label class="text-[10px] font-bold text-gray-500 uppercase ml-2 mb-2 block">Скріншоти (через кому)</label>
-            <input type="text" id="edScreens" class="admin-input" placeholder="url1, url2, url3" oninput="updatePreview()">
-            
-            <label class="text-[10px] font-bold text-gray-500 uppercase ml-2 mb-2 block">Прямий лінк на APK</label>
-            <input type="text" id="edLink" class="admin-input" placeholder="https://dropbox.com/...">
-            
-            <div class="flex gap-4 mt-8">
-                <button onclick="saveGame()" class="btn btn-accent">ЗБЕРЕГТИ В ХМАРУ</button>
-                <button onclick="closeVisualEditor()" class="py-4 px-6 text-gray-500 font-bold">BACK</button>
-            </div>
+            <button onclick="saveGame()" class="btn-accent mt-4">ОПУБЛІКУВАТИ</button>
+            <button onclick="closeVisualEditor()" class="w-full mt-4 text-zinc-500 text-xs font-bold">СКАСУВАТИ</button>
         </div>
     </div>
 
@@ -135,6 +92,7 @@
         import { getFirestore, collection, onSnapshot, addDoc, updateDoc, doc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+        // Твої ключі Keysbrawl
         const firebaseConfig = {
             apiKey: "AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
             authDomain: "keysbrawl-c4ae6.firebaseapp.com",
@@ -147,95 +105,75 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        let currentEditId = null;
         const ADMIN_EMAIL = "isoltis462@gmail.com";
+        let currentEditId = null;
 
-        // ПЕРЕВІРКА АВТОРИЗАЦІЇ (Щоб вікно не закривалось)
+        const authBtn = document.getElementById('mainAuthBtn');
+
+        // СТЕЖИМО ЗА СТАТУСОМ
         onAuthStateChanged(auth, (user) => {
             if (user && user.email === ADMIN_EMAIL) {
-                console.log("Адмін авторизований");
-                // Ми не відкриваємо панель автоматично, щоб не заважати юзеру, 
-                // але тепер кнопка register буде відкривати її миттєво без вікна логіну
+                authBtn.innerText = "OPEN ADMIN";
+                authBtn.style.color = "#3b82f6";
+            } else {
+                authBtn.innerText = "register";
+                authBtn.style.color = "#333";
             }
         });
 
         window.handleAuth = async () => {
-            const user = auth.currentUser;
-            if (user && user.email === ADMIN_EMAIL) {
+            if (auth.currentUser && auth.currentUser.email === ADMIN_EMAIL) {
                 document.getElementById('adminPanel').style.display = 'block';
-            } else {
-                const provider = new GoogleAuthProvider();
-                try {
-                    const result = await signInWithPopup(auth, provider);
-                    if(result.user.email === ADMIN_EMAIL) {
-                        document.getElementById('adminPanel').style.display = 'block';
-                    } else {
-                        alert("Доступ лише для адміна!");
-                        await signOut(auth);
-                    }
-                } catch (e) { alert("Помилка входу: " + e.message); }
+                return;
             }
+
+            const provider = new GoogleAuthProvider();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                if (result.user.email !== ADMIN_EMAIL) {
+                    alert("Доступ заборонено!");
+                    await signOut(auth);
+                }
+            } catch (e) { console.error(e); }
         };
 
-        window.logout = async () => {
-            await signOut(auth);
-            location.reload();
-        };
-
+        window.logout = () => signOut(auth).then(() => location.reload());
         window.closeAdmin = () => document.getElementById('adminPanel').style.display = 'none';
 
-        // REAL-TIME DATA
+        // РЕАЛЬНИЙ ЧАС (onSnapshot)
         const q = query(collection(db, "games"), orderBy("updatedAt", "desc"));
-        onSnapshot(q, (snapshot) => {
+        onSnapshot(q, (snap) => {
             const grid = document.getElementById('games-grid');
-            const adminList = document.getElementById('admin-list');
-            const emptyMsg = document.getElementById('empty-msg');
+            const list = document.getElementById('admin-list');
+            grid.innerHTML = ''; list.innerHTML = '';
             
-            grid.innerHTML = '';
-            adminList.innerHTML = '';
-            
-            document.getElementById('stats-count').innerText = `Загалом ігор: ${snapshot.size}`;
+            if (snap.empty) document.getElementById('empty-msg').classList.remove('hidden');
+            else document.getElementById('empty-msg').classList.add('hidden');
 
-            if (snapshot.empty) {
-                emptyMsg.classList.remove('hidden');
-            } else {
-                emptyMsg.classList.add('hidden');
-                snapshot.forEach((doc) => {
-                    const game = doc.data();
-                    const id = doc.id;
-
-                    // Grid Card
-                    grid.innerHTML += `
-                        <div class="game-card p-6 text-center">
-                            <img src="${game.icon}" class="w-24 h-24 mx-auto rounded-[32px] object-cover shadow-2xl mb-4 border-4 border-black/20">
-                            <h3 class="font-black text-sm truncate uppercase tracking-tight">${game.name}</h3>
-                            <div class="flex items-center justify-center gap-2 mt-4">
-                                <a href="${game.link}" target="_blank" class="bg-white text-black px-6 py-2 rounded-xl text-[10px] font-black hover:bg-blue-600 hover:text-white transition w-full">GET</a>
-                            </div>
+            snap.forEach((d) => {
+                const g = d.data(); const id = d.id;
+                grid.innerHTML += `
+                    <div class="game-card p-6">
+                        <img src="${g.icon}" class="w-20 h-20 mx-auto rounded-[28px] mb-4 object-cover shadow-xl">
+                        <h3 class="font-black text-xs uppercase truncate">${g.name}</h3>
+                        <a href="${g.link}" target="_blank" class="block mt-4 bg-white text-black py-2 rounded-xl text-[10px] font-black hover:bg-blue-600 hover:text-white transition">DOWNLOAD</a>
+                    </div>`;
+                
+                list.innerHTML += `
+                    <div class="bg-zinc-900 p-4 rounded-2xl flex justify-between items-center border border-white/5">
+                        <div class="flex items-center gap-3">
+                            <img src="${g.icon}" class="w-10 h-10 rounded-lg">
+                            <span class="font-bold text-sm">${g.name}</span>
                         </div>
-                    `;
-
-                    // Admin Row
-                    adminList.innerHTML += `
-                        <div class="bg-zinc-900/50 p-5 rounded-3xl flex justify-between items-center border border-white/5">
-                            <div class="flex items-center gap-4">
-                                <img src="${game.icon}" class="w-12 h-12 rounded-2xl object-cover">
-                                <div>
-                                    <div class="font-black text-sm">${game.name}</div>
-                                    <div class="text-[10px] text-gray-500 uppercase">Cloud ID: ${id.slice(0,6)}</div>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="editGame('${id}', ${JSON.stringify(game).replace(/"/g, '&quot;')})" class="bg-blue-600/10 text-blue-500 px-4 py-2 rounded-xl font-bold text-xs">EDIT</button>
-                                <button onclick="deleteGame('${id}')" class="bg-red-600/10 text-red-500 px-4 py-2 rounded-xl font-bold text-xs">DEL</button>
-                            </div>
+                        <div class="flex gap-2">
+                            <button onclick='editGame("${id}", ${JSON.stringify(g).replace(/'/g, "&apos;")})' class="text-blue-500 font-bold text-xs">EDIT</button>
+                            <button onclick="deleteGame('${id}')" class="text-red-500 font-bold text-xs">DEL</button>
                         </div>
-                    `;
-                });
-            }
+                    </div>`;
+            });
         });
 
-        // EDITOR LOGIC
+        // ЕДИТОР
         window.openVisualEditor = () => {
             currentEditId = null;
             document.querySelectorAll('.admin-input').forEach(i => i.value = '');
@@ -246,22 +184,14 @@
         window.closeVisualEditor = () => document.getElementById('editorModal').style.display = 'none';
 
         window.updatePreview = () => {
-            const name = document.getElementById('edName').value || "Назва гри";
+            const name = document.getElementById('edName').value || "Назва";
             const icon = document.getElementById('edIcon').value || "https://cdn-icons-png.flaticon.com/512/6831/6831000.png";
-            const desc = document.getElementById('edDesc').value || "Опис проекту з'явиться тут...";
-            const screens = document.getElementById('edScreens').value.split(',').filter(s => s.trim());
-
             document.getElementById('livePreviewContent').innerHTML = `
-                <div class="bg-zinc-900 p-8 rounded-[40px] border border-white/10 shadow-2xl text-center">
-                    <img src="${icon}" class="w-28 h-28 mx-auto rounded-[35px] shadow-2xl mb-6 object-cover border-4 border-blue-600/20">
-                    <h2 class="text-2xl font-black uppercase italic">${name}</h2>
-                    <div class="gallery-preview mt-6">
-                        ${screens.map(s => `<img src="${s.trim()}">`).join('') || '<div class="w-full h-24 bg-black/50 rounded-2xl flex items-center justify-center text-[10px] text-zinc-700">No Screenshots</div>'}
-                    </div>
-                    <p class="text-xs text-gray-500 mt-6 leading-relaxed text-left">${desc}</p>
-                    <div class="mt-8 py-4 bg-white text-black rounded-2xl font-black uppercase text-xs">Download APK</div>
-                </div>
-            `;
+                <div class="bg-zinc-900 p-10 rounded-[45px] text-center shadow-2xl border border-white/5">
+                    <img src="${icon}" class="w-24 h-24 mx-auto rounded-[32px] mb-6 shadow-2xl">
+                    <h2 class="text-2xl font-black italic uppercase">${name}</h2>
+                    <div class="mt-8 py-4 bg-blue-600 rounded-2xl font-black text-xs uppercase">Preview Button</div>
+                </div>`;
         };
 
         window.saveGame = async () => {
@@ -269,19 +199,13 @@
                 name: document.getElementById('edName').value,
                 icon: document.getElementById('edIcon').value,
                 desc: document.getElementById('edDesc').value,
-                screens: document.getElementById('edScreens').value.split(',').map(s => s.trim()),
+                screens: document.getElementById('edScreens').value.split(','),
                 link: document.getElementById('edLink').value,
                 updatedAt: new Date()
             };
-
-            try {
-                if(currentEditId) {
-                    await updateDoc(doc(db, "games", currentEditId), data);
-                } else {
-                    await addDoc(collection(db, "games"), data);
-                }
-                closeVisualEditor();
-            } catch (e) { alert("Помилка: " + e.message); }
+            if(currentEditId) await updateDoc(doc(db, "games", currentEditId), data);
+            else await addDoc(collection(db, "games"), data);
+            closeVisualEditor();
         };
 
         window.editGame = (id, data) => {
@@ -295,9 +219,7 @@
             updatePreview();
         };
 
-        window.deleteGame = async (id) => {
-            if(confirm("Видалити гру?")) await deleteDoc(doc(db, "games", id));
-        };
+        window.deleteGame = async (id) => { if(confirm("Видалити?")) await deleteDoc(doc(db, "games", id)); };
     </script>
 </body>
 </html>
