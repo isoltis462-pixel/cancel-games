@@ -1,84 +1,104 @@
-<!DOCTYPE html><html lang="uk">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bio Links</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: 'Inter', sans-serif;
-      background: radial-gradient(circle at top, #1e293b, #020617 70%);
-      color: white;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .card {
-      width: 100%;
-      max-width: 380px;
-      background: rgba(15, 23, 42, 0.75);
-      border: 1px solid rgba(255,255,255,0.08);
-      backdrop-filter: blur(14px);
-      border-radius: 28px;
-      padding: 32px;
-      text-align: center;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.45);
-    }
-    .avatar {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid #3b82f6;
-      margin-bottom: 16px;
-    }
-    h1 { margin: 0; font-size: 28px; }
-    p {
-      margin: 10px 0 24px;
-      color: #cbd5e1;
-      font-size: 14px;
-    }
-    .link {
-      display: block;
-      text-decoration: none;
-      color: white;
-      padding: 14px;
-      margin: 12px 0;
-      border-radius: 14px;
-      font-weight: 600;
-      background: linear-gradient(135deg, #2563eb, #7c3aed);
-      transition: .25s ease;
-      box-shadow: 0 8px 20px rgba(37,99,235,0.25);
-    }
-    .link:hover {
-      transform: translateY(-3px) scale(1.02);
-      box-shadow: 0 12px 25px rgba(124,58,237,0.35);
-    }
-    .footer {
-      margin-top: 18px;
-      font-size: 12px;
-      color: #64748b;
-    }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <img class="avatar" src="https://via.placeholder.com/100" alt="Avatar">
-    <h1>@yourname</h1>
-    <p>Creator • Gamer • Content Maker</p><a class="link" href="https://t.me/yourusername" target="_blank">Telegram</a>
-<a class="link" href="https://instagram.com/yourusername" target="_blank">Instagram</a>
-<a class="link" href="https://youtube.com/@yourchannel" target="_blank">YouTube</a>
-<a class="link" href="https://tiktok.com/@yourusername" target="_blank">TikTok</a>
-<a class="link" href="https://github.com/yourusername" target="_blank">GitHub</a>
+async function startCall(){
+  localStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+  document.getElementById("localVideo").srcObject=localStream;
 
-<div class="footer">Hosted with GitHub Pages</div>
+  pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
 
-  </div>
-</body>
+  localStream.getTracks().forEach(t=>pc.addTrack(t,localStream));
+
+  pc.ontrack=e=>{
+    document.getElementById("remoteVideo").srcObject=e.streams[0];
+  };
+
+  const callDoc=db.collection("calls").doc(roomId);
+  const offerCandidates=callDoc.collection("offerCandidates");
+  const answerCandidates=callDoc.collection("answerCandidates");
+
+  pc.onicecandidate=e=>{
+    if(e.candidate){
+      offerCandidates.add(e.candidate.toJSON());
+    }
+  };
+
+  const offer=await pc.createOffer();
+  await pc.setLocalDescription(offer);
+
+  await callDoc.set({
+    offer:{
+      type:offer.type,
+      sdp:offer.sdp
+    },
+    caller:auth.currentUser.uid,
+    callee:current
+  });
+
+  callDoc.onSnapshot(async snap=>{
+    const data=snap.data();
+    if(!pc.currentRemoteDescription && data?.answer){
+      const answer=new RTCSessionDescription(data.answer);
+      await pc.setRemoteDescription(answer);
+    }
+  });
+
+  answerCandidates.onSnapshot(snap=>{
+    snap.docChanges().forEach(c=>{
+      if(c.type==='added'){
+        pc.addIceCandidate(new RTCIceCandidate(c.doc.data()));
+      }
+    });
+  });
+}
+
+async function listenCalls(){
+  db.collection("calls").onSnapshot(snap=>{
+    snap.docChanges().forEach(async change=>{
+      if(change.type!=='added')return;
+
+      const data=change.doc.data();
+
+      if(data.callee!==auth.currentUser.uid)return;
+
+      roomId=change.doc.id;
+
+      const callDoc=change.doc.ref;
+      const offerCandidates=callDoc.collection("offerCandidates");
+      const answerCandidates=callDoc.collection("answerCandidates");
+
+      pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
+
+      pc.ontrack=e=>{
+        document.getElementById("remoteVideo").srcObject=e.streams[0];
+      };
+
+      pc.onicecandidate=e=>{
+        if(e.candidate){
+          answerCandidates.add(e.candidate.toJSON());
+        }
+      };
+
+      const offerDesc=new RTCSessionDescription(data.offer);
+      await pc.setRemoteDescription(offerDesc);
+
+      const answer=await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+
+      await callDoc.update({answer:{type:answer.type,sdp:answer.sdp}});
+
+      offerCandidates.onSnapshot(snap=>{
+        snap.docChanges().forEach(c=>{
+          if(c.type==='added'){
+            pc.addIceCandidate(new RTCIceCandidate(c.doc.data()));
+          }
+        });
+      });
+    });
+  });
+}
+
+function endCall(){
+  if(localStream) localStream.getTracks().forEach(t=>t.stop());
+  if(pc) pc.close();
+}
+
+</script></body>
 </html>
