@@ -3,46 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>СОНЕЧКО ☀️ — OFFICIAL</title>
+    <title>СОНЕЧКО ☀️ — OFFICIAL MARKET</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     <style>
         :root { --bg: #ffffff; --text: #000000; --card: #f3f4f6; --accent: #facc15; }
         .dark-mode { --bg: #0a0a0a; --text: #ffffff; --card: #1a1a1a; --accent: #fbbf24; }
 
-        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.3s; overflow: hidden; }
+        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.3s; overflow: hidden; margin: 0; }
         
-        /* ГАРНИЙ НАПИС */
         .logo-font { font-family: 'Unbounded', sans-serif; font-weight: 900; letter-spacing: -1px; }
 
-        /* ЛОАДЕР (Найвищий рівень) */
-        #loader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; transition: 0.8s; pointer-events: none; }
+        /* ФІКС ДЛЯ ПК: pointer-events none щоб не блокувати кліки */
+        #loader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; transition: 1s; pointer-events: none; }
         .loader-content { text-align: center; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } }
 
-        /* ЗАМОК (Під лоадером) */
-        #siteLock { position: fixed; inset: 0; z-index: 9000; background: rgba(0,0,0,0.8); backdrop-filter: blur(40px); display: flex; align-items: center; justify-content: center; transition: 0.6s; }
-        .lock-box { background: var(--bg); padding: 50px; border-radius: 50px; text-align: center; box-shadow: 0 20px 80px rgba(0,0,0,0.5); max-width: 400px; width: 90%; position: relative; z-index: 9001; }
+        /* ЗАХИСТ */
+        #siteLock { position: fixed; inset: 0; z-index: 9000; background: rgba(0,0,0,0.9); backdrop-filter: blur(40px); display: flex; align-items: center; justify-content: center; transition: 0.6s; }
+        .lock-box { background: var(--bg); padding: 50px; border-radius: 50px; text-align: center; box-shadow: 0 20px 80px rgba(0,0,0,0.5); max-width: 400px; width: 90%; pointer-events: auto; }
 
         /* ПОВІДОМЛЕННЯ */
         #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-150px); background: #000; color: #fff; padding: 15px 40px; border-radius: 100px; font-weight: 800; z-index: 11000; transition: 0.5s; border: 2px solid var(--accent); }
         #toast.show { transform: translateX(-50%) translateY(0); }
+        .dark-mode #toast { background: #fff; color: #000; }
 
-        /* РОЗМИТТЯ */
-        #mainWrapper { transition: 0.5s ease; }
-        body.menu-open #mainWrapper { filter: blur(20px) scale(0.98); }
+        /* РОЗМИТТЯ ПРИ МЕНЮ */
+        #mainWrapper { transition: 0.5s ease; width: 100%; height: 100vh; overflow-y: auto; }
+        body.menu-open #mainWrapper { filter: blur(20px) scale(0.98); pointer-events: none; }
         
-        #sideMenu { position: fixed; top: 0; left: -350px; width: 320px; height: 100%; background: var(--bg); z-index: 8000; transition: 0.5s; padding: 40px; }
+        #sideMenu { position: fixed; top: 0; left: -350px; width: 320px; height: 100%; background: var(--bg); z-index: 9500; transition: 0.5s; padding: 40px; border-right: 1px solid rgba(128,128,128,0.2); }
         #sideMenu.open { left: 0; }
 
         .bento { background: var(--card); border-radius: 30px; border: 1px solid rgba(128,128,128,0.1); }
-        .modal { position: fixed; inset: 0; z-index: 7000; display: none; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); align-items: center; justify-content: center; }
+        .modal { position: fixed; inset: 0; z-index: 9100; display: none; background: rgba(0,0,0,0.5); backdrop-filter: blur(15px); align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
         
-        .btn-yellow { background: #facc15 !important; color: #000 !important; font-weight: 900; border-radius: 20px; transition: 0.3s; cursor: pointer; }
+        .btn-yellow { background: #facc15 !important; color: #000 !important; font-weight: 900; border-radius: 20px; transition: 0.3s; cursor: pointer; border: none; }
         .btn-yellow:hover { transform: scale(1.03); }
-        
-        input { border: none; outline: none; }
+
+        .slide-up { animation: slideUp 0.5s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body id="body">
@@ -57,12 +58,12 @@
     </div>
 
     <div id="siteLock">
-        <div class="lock-box">
-            <h2 class="logo-font text-2xl mb-2 text-[var(--text)]">🚧 В РОЗРОБЦІ</h2>
-            <p class="opacity-50 text-sm mb-8 font-bold text-[var(--text)]">Доступ тільки для розробників</p>
-            <input type="password" id="passInput" maxlength="4" placeholder="****" autofocus
-                   class="w-full p-5 bento text-center text-4xl font-black mb-6 border-2 border-yellow-400 focus:border-orange-500 transition-all text-[var(--text)]">
-            <button onclick="checkLock()" class="w-full btn-yellow p-5 text-xl uppercase">Увійти на сайт</button>
+        <div class="lock-box slide-up">
+            <h2 class="logo-font text-2xl mb-2">🚧 В РОЗРОБЦІ</h2>
+            <p class="opacity-50 text-sm mb-8 font-bold">Введіть код доступу (4 цифри)</p>
+            <input type="password" id="passInput" maxlength="4" placeholder="****" 
+                   class="w-full p-5 bento text-center text-4xl font-black mb-6 border-2 border-yellow-400 focus:border-orange-500 outline-none transition-all">
+            <button onclick="checkLock()" class="w-full btn-yellow p-5 text-xl uppercase">УВІЙТИ</button>
         </div>
     </div>
 
@@ -77,13 +78,13 @@
 
         <main class="max-w-7xl mx-auto p-6 space-y-8">
             <div class="w-full h-48 rounded-[40px] bg-gradient-to-br from-yellow-400 to-orange-500 p-10 text-white flex flex-col justify-center shadow-xl">
-                <h2 class="text-4xl font-900 italic">OFFICIAL SHOP</h2>
-                <p class="font-bold opacity-80 uppercase">by Lvivskyi Batiar</p>
+                <h2 class="text-4xl font-900 italic">OFFICIAL MARKET</h2>
+                <p class="font-bold opacity-80 uppercase tracking-widest">by Lvivskyi Batiar</p>
             </div>
 
             <div class="bento p-2 flex items-center px-6">
                 <span class="mr-3">🔍</span>
-                <input type="text" id="search" oninput="draw()" placeholder="Пошук товарів..." class="w-full p-4 bg-transparent outline-none font-bold text-[var(--text)]">
+                <input type="text" id="search" oninput="draw()" placeholder="Пошук товарів..." class="w-full p-4 bg-transparent outline-none font-bold">
             </div>
 
             <div id="grid" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
@@ -103,7 +104,7 @@
     </div>
 
     <div id="profilePage" class="modal">
-        <div class="bg-[var(--bg)] p-10 rounded-[40px] w-full max-w-sm text-center">
+        <div class="bg-[var(--bg)] p-10 rounded-[40px] w-full max-w-sm text-center slide-up">
             <div id="authContent">
                 <h2 class="logo-font text-2xl mb-8">LOGIN</h2>
                 <button onclick="login()" class="btn-yellow w-full p-5 flex items-center justify-center gap-3">
@@ -115,12 +116,19 @@
     </div>
 
     <div id="settingsPage" class="modal">
-        <div class="bg-[var(--bg)] p-10 rounded-[40px] w-full max-w-md">
+        <div class="bg-[var(--bg)] p-10 rounded-[40px] w-full max-w-md slide-up">
             <h2 class="logo-font text-2xl mb-10 text-center">SETTINGS</h2>
             <div class="space-y-4">
                 <div onclick="toggleTheme()" class="bento p-6 flex justify-between items-center cursor-pointer">
                     <span class="font-bold" id="txtTheme">Тема інтерфейсу</span>
                     <span id="themeIndicator">☀️</span>
+                </div>
+                <div class="bento p-6">
+                    <span class="font-bold block mb-4" id="txtLang">Мова</span>
+                    <div class="flex gap-2">
+                        <button onclick="setLang('UA')" class="bg-yellow-400 px-4 py-2 rounded-xl text-black font-black">UA</button>
+                        <button onclick="setLang('EN')" class="bg-gray-200 px-4 py-2 rounded-xl text-black font-black">EN</button>
+                    </div>
                 </div>
             </div>
             <button onclick="closeAll()" class="w-full mt-10 opacity-30 font-bold">ЗАКРИТИ</button>
@@ -128,22 +136,22 @@
     </div>
 
     <div id="adminPage" class="modal">
-        <div class="bg-[var(--bg)] p-8 rounded-[40px] w-full max-w-4xl">
+        <div class="bg-[var(--bg)] p-8 rounded-[40px] w-full max-w-4xl max-h-[90vh] overflow-y-auto slide-up">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="logo-font text-xl uppercase">Admin panel</h2>
                 <button onclick="closeAll()" class="text-red-500 font-black">EXIT</button>
             </div>
             <div class="grid md:grid-cols-2 gap-10">
                 <div class="space-y-4">
-                    <input type="text" id="adName" placeholder="Назва" class="w-full p-4 bento text-[var(--text)]">
-                    <input type="number" id="adPrice" placeholder="Ціна" class="w-full p-4 bento text-[var(--text)]">
+                    <input type="text" id="adName" placeholder="Назва" class="w-full p-4 bento outline-none">
+                    <input type="number" id="adPrice" placeholder="Ціна" class="w-full p-4 bento outline-none">
                     <input type="file" id="adFile" class="hidden" onchange="readImg(this)">
-                    <button onclick="document.getElementById('adFile').click()" class="w-full p-4 border-2 border-dashed rounded-2xl font-bold opacity-30">ФОТО</button>
+                    <button onclick="document.getElementById('adFile').click()" class="w-full p-4 border-2 border-dashed rounded-2xl font-bold opacity-30">ДОДАТИ ФОТО</button>
                     <button onclick="send()" class="w-full bg-black text-white p-5 rounded-3xl font-black">ОПУБЛІКУВАТИ</button>
                 </div>
-                <div class="bento p-6 h-64 overflow-y-auto">
-                    <p class="text-[10px] font-black opacity-30 mb-4">КОРИСТУВАЧІ (<span id="userCount">0</span>)</p>
-                    <div id="userList" class="space-y-2"></div>
+                <div class="bento p-6">
+                    <p class="text-[10px] font-black opacity-30 mb-4 uppercase">Користувачі (<span id="userCount">0</span>)</p>
+                    <div id="userList" class="space-y-2 max-h-64 overflow-y-auto"></div>
                 </div>
             </div>
         </div>
@@ -152,7 +160,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
@@ -170,37 +178,37 @@
 
         let items = []; let imgData = "";
 
-        // ЛОАДЕР (закривається через 2.5 сек)
+        // ЛОАДЕР (закриття)
         window.onload = () => {
             setTimeout(() => {
-                document.getElementById('loader').style.opacity = "0";
-                setTimeout(() => {
-                    document.getElementById('loader').style.display = "none";
-                    document.getElementById('passInput').focus();
-                }, 800);
-            }, 2500);
+                const loader = document.getElementById('loader');
+                loader.style.opacity = "0";
+                setTimeout(() => loader.style.display = "none", 1000);
+            }, 2000);
         };
 
         // ПАРОЛЬ (2555)
         window.checkLock = () => {
-            const val = document.getElementById('passInput').value;
-            if(val === "2555") {
+            if(document.getElementById('passInput').value === "2555") {
                 document.getElementById('siteLock').style.opacity = "0";
                 setTimeout(() => {
                     document.getElementById('siteLock').style.display = "none";
                     document.body.style.overflow = "auto";
                 }, 600);
-                localStorage.setItem('site_unlocked', 'true');
-            } else {
-                alert("Невірний пароль!");
-                document.getElementById('passInput').value = "";
-            }
+                localStorage.setItem('site_access', 'true');
+            } else { alert("Невірний код! ❌"); }
         };
-        
-        if(localStorage.getItem('site_unlocked') === 'true') {
+        if(localStorage.getItem('site_access')) {
             document.getElementById('siteLock').style.display = "none";
             document.body.style.overflow = "auto";
         }
+
+        // ПОВІДОМЛЕННЯ
+        window.notify = (msg) => {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        };
 
         // ТЕМА
         window.toggleTheme = () => {
@@ -210,16 +218,26 @@
         };
         if(localStorage.getItem('theme') === 'dark') toggleTheme();
 
-        // AUTH
+        // МОВИ
+        window.setLang = (l) => {
+            const isUA = l === 'UA';
+            document.getElementById('txtTheme').innerText = isUA ? "Тема інтерфейсу" : "Interface Theme";
+            document.getElementById('txtLang').innerText = isUA ? "Мова" : "Language";
+            document.getElementById('search').placeholder = isUA ? "Пошук товарів..." : "Search products...";
+            notify(isUA ? "Мову змінено! ✅" : "Language changed! ✅");
+        };
+
+        // AUTH (Google)
         window.login = async () => {
             try {
                 const res = await signInWithPopup(auth, provider);
                 const u = res.user;
                 const q = query(collection(db, "sonechko_users"), where("uid", "==", u.uid));
-                const s = await getDocs(q);
-                if(s.empty) await addDoc(collection(db, "sonechko_users"), { uid: u.uid, name: u.displayName, photo: u.photoURL, email: u.email });
+                const snap = await getDocs(q);
+                if(snap.empty) await addDoc(collection(db, "sonechko_users"), { uid: u.uid, name: u.displayName, photo: u.photoURL, email: u.email });
+                notify("Привіт, " + u.displayName);
                 closeAll();
-            } catch(e) { console.error(e); }
+            } catch(e) { notify("Помилка авторизації ❌"); }
         };
 
         onAuthStateChanged(auth, (u) => {
@@ -227,13 +245,15 @@
                 document.getElementById('userIcon').src = u.photoURL;
                 document.getElementById('authContent').innerHTML = `
                     <img src="${u.photoURL}" class="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-yellow-400">
-                    <p class="font-black mb-6 text-[var(--text)]">${u.displayName}</p>
-                    <button onclick="auth.signOut().then(()=>location.reload())" class="bg-red-500 text-white p-4 rounded-2xl font-bold w-full">ВИЙТИ</button>
+                    <p class="font-black mb-6">${u.displayName}</p>
+                    <button onclick="window.logoutUser()" class="bg-red-500 text-white p-4 rounded-2xl font-bold w-full">ВИЙТИ З АКАУНТА</button>
                 `;
             }
         });
 
-        // МАГАЗИН
+        window.logoutUser = () => signOut(auth).then(() => location.reload());
+
+        // МАГАЗИН (Firestore)
         onSnapshot(query(collection(db, "sonechko_items"), orderBy("date", "desc")), (snap) => {
             items = snap.docs.map(d => d.data());
             draw();
@@ -246,27 +266,26 @@
             items.filter(i => i.title.toLowerCase().includes(search)).forEach(i => {
                 grid.innerHTML += `
                     <div class="bento p-4 slide-up">
-                        <img src="${i.img}" class="w-full h-40 object-cover rounded-2xl mb-4">
-                        <h4 class="font-black text-[10px] uppercase">${i.title}</h4>
-                        <p class="text-yellow-500 font-black">${i.price} грн</p>
+                        <img src="${i.img}" class="w-full h-32 md:h-40 object-cover rounded-2xl mb-4 shadow-sm">
+                        <h4 class="font-black text-[10px] uppercase truncate">${i.title}</h4>
+                        <p class="text-yellow-500 font-black text-lg">${i.price} грн</p>
                     </div>`;
             });
         };
 
-        // АДМІНКА
-        window.tryAdmin = () => { if(prompt("Пароль:") === "254") openPage('adminPage'); };
+        // АДМІНКА (254)
+        window.tryAdmin = () => { if(prompt("Введіть пароль адміна:") === "254") openPage('adminPage'); else notify("Відмовлено 🔒"); };
         window.readImg = (i) => { const r = new FileReader(); r.onload = (e) => imgData = e.target.result; r.readAsDataURL(i.files[0]); };
         window.send = async () => {
             const n = document.getElementById('adName').value;
             const p = document.getElementById('adPrice').value;
-            if(!n || !p || !imgData) return;
+            if(!n || !p || !imgData) return notify("Заповніть всі поля! ⚠️");
             await addDoc(collection(db, "sonechko_items"), { title: n, price: p, img: imgData, date: Date.now() });
-            const t = document.getElementById('toast');
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
+            notify("✅ Опубліковано!");
             closeAll();
         };
 
+        // СПИСОК ЮЗЕРІВ
         onSnapshot(collection(db, "sonechko_users"), (snap) => {
             document.getElementById('userCount').innerText = snap.size;
             const uL = document.getElementById('userList'); uL.innerHTML = '';
@@ -278,7 +297,7 @@
             });
         });
 
-        // NAV
+        // НАВІГАЦІЯ
         window.toggleMenu = (s) => {
             document.getElementById('sideMenu').classList.toggle('open', s);
             document.body.classList.toggle('menu-open', s);
