@@ -1,155 +1,145 @@
-[07.05.2026 0:09] Deniska: <!DOCTYPE html><html lang="uk">
+<!DOCTYPE html>
+<html lang="uk">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Belegram</title>  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>  <style>
-    *{box-sizing:border-box;font-family:Arial}
-
-    body{
-      margin:0;
-      height:100vh;
-      background:linear-gradient(135deg,#0b1220,#111827);
-      color:white;
-      display:flex;
-      justify-content:center;
-      align-items:center;
+  <title>Belegram</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #0b1220, #111827);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
-
     /* LOGIN */
-    #login{
-      width:320px;
-      padding:25px;
-      background:#111827;
-      border:1px solid #1f2937;
-      border-radius:16px;
-      text-align:center;
-      box-shadow:0 20px 60px rgba(0,0,0,0.5);
+    #login {
+      width: 320px;
+      padding: 30px;
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
     }
-
-    #login h1{
-      margin:0 0 10px;
-      font-size:28px;
+    #login h1 { margin: 0 0 10px; font-size: 32px; color: #2563eb; }
+    #login p { color: #9ca3af; font-size: 14px; margin-bottom: 25px; }
+    button {
+      padding: 12px 14px;
+      border: none;
+      border-radius: 12px;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+      width: 100%;
+      font-size: 15px;
+      font-weight: bold;
+      transition: 0.2s;
     }
-
-    #login p{
-      color:#9ca3af;
-      font-size:14px;
-      margin-bottom:20px;
-    }
-
-    button{
-      padding:10px 14px;
-      border:none;
-      border-radius:10px;
-      background:#2563eb;
-      color:white;
-      cursor:pointer;
-      width:100%;
-      font-size:14px;
-    }
-
+    button:hover { background: #1d4ed8; }
     /* APP */
-    .app{
-      width:1100px;
-      height:700px;
-      background:#0f172a;
-      border-radius:16px;
-      display:none;
-      overflow:hidden;
-      box-shadow:0 20px 60px rgba(0,0,0,0.6);
+    .app {
+      width: 1000px;
+      height: 650px;
+      background: #0f172a;
+      border-radius: 16px;
+      display: none;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      border: 1px solid #1f2937;
     }
-
-    .sidebar{
-      width:32%;
-      background:#111827;
-      padding:10px;
-      overflow-y:auto;
-      border-right:1px solid #1f2937;
+    .sidebar {
+      width: 30%;
+      background: #111827;
+      padding: 10px;
+      overflow-y: auto;
+      border-right: 1px solid #1f2937;
     }
-
-    .chat{
-      width:68%;
-      display:flex;
-      flex-direction:column;
+    .chat { width: 70%; display: flex; flex-direction: column; background: #0b1220; }
+    .item {
+      padding: 15px;
+      margin: 4px 0;
+      background: #0f172a;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: 0.2s;
     }
-
-    .item{
-      padding:10px;
-      margin:6px 0;
-      background:#0b1220;
-      border-radius:10px;
-      cursor:pointer;
+    .item:hover { background: #1f2937; }
+    .header {
+      padding: 15px;
+      background: #111827;
+      border-bottom: 1px solid #1f2937;
+      font-weight: bold;
+      font-size: 18px;
     }
-
-    .item:hover{background:#1f2937}
-
-    .header{
-      padding:12px;
-      background:#111827;
-      border-bottom:1px solid #1f2937;
-      font-weight:bold;
+    .messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
-
-    .messages{
-      flex:1;
-      padding:10px;
-      overflow-y:auto;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
+    .msg {
+      max-width: 70%;
+      padding: 10px 14px;
+      border-radius: 15px;
+      font-size: 14px;
+      background: #1f2937;
+      line-height: 1.4;
+      position: relative;
     }
-
-    .msg{
-      max-width:70%;
-      padding:10px;
-      border-radius:12px;
-      font-size:14px;
-      background:#1f2937;
+    .me { background: #2563eb; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .msg:not(.me) { align-self: flex-start; border-bottom-left-radius: 4px; }
+    .time { font-size: 10px; color: #9ca3af; margin-top: 5px; text-align: right; }
+    .inputBox {
+      display: flex;
+      gap: 8px;
+      padding: 15px;
+      background: #111827;
+      border-top: 1px solid #1f2937;
     }
-
-    .me{
-      background:#2563eb;
-      align-self:flex-end;
+    input {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: #0b1220;
+      color: white;
+      outline: none;
     }
+    .sendBtn { width: 50px; }
+  </style>
+</head>
+<body>
 
-    .time{
-      font-size:10px;
-      color:#9ca3af;
-      margin-top:4px;
-    }
+  <div id="login">
+    <h1>Belegram</h1>
+    <p>Твій приватний месенджер</p>
+    <button onclick="login()">Увійти через Google</button>
+  </div>
 
-    .inputBox{
-      display:flex;
-      gap:6px;
-      padding:10px;
-      border-top:1px solid #1f2937;
-    }
+  <div class="app" id="app">
+    <div class="sidebar">
+      <div id="users"></div>
+    </div>
+    <div class="chat">
+      <div class="header" id="title">Оберіть чат</div>
+      <div class="messages" id="messages"></div>
+      <div class="inputBox">
+        <input id="text" placeholder="Напиши повідомлення..." onkeypress="if(event.key==='Enter')send()" />
+        <button class="sendBtn" onclick="send()">➤</button>
+      </div>
+    </div>
+  </div>
 
-    input{
-      width:100%;
-      padding:10px;
-      border:none;
-      border-radius:10px;
-      background:#0b1220;
-      color:white;
-      outline:none;
-    }
-  </style></head>
-<body><!-- LOGIN --><div id="login">
-  <h1>Belegram</h1>
-  <p>Увійди, щоб почати чат</p>
-  <button onclick="login()">Увійти через Google</button>
-</div><!-- APP --><div class="app" id="app">  <div class="sidebar">
-    <div id="users"></div>
-  </div>  <div class="chat">
-    <div class="header" id="title">Belegram Chat</div><div class="messages" id="messages"></div>
-
-<div class="inputBox">
-  <input id="text" placeholder="Напиши повідомлення..." onkeypress="if(event.key==='Enter')send()" />
-  <button onclick="send()">➤</button>
-</div>
-
-  </div></div><script>
+<script>
 const firebaseConfig = {
   apiKey: "AIzaSyC2fGoE-epXf6a71bvRHFrs0_e8wl5k8No",
   authDomain: "belegrami-90368.firebaseapp.com",
@@ -157,83 +147,93 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth();
-const db=firebase.firestore();
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-let current=null;
+let currentChatId = null;
 
-function login(){
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+function login() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(err => alert("Помилка: " + err.message));
 }
 
-function formatTime(t){
-  return new Date(t).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+function formatTime(t) {
+  return new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-auth.onAuthStateChanged(async u=>{
-  if(u){
-    document.getElementById("login").style.display="none";
-    document.getElementById("app").style.display="flex";
+auth.onAuthStateChanged(async u => {
+  if (u) {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "flex";
 
     await db.collection("users").doc(u.uid).set({
-      name:u.displayName,
-      photo:u.photoURL
-    },{merge:true});
+      name: u.displayName,
+      photo: u.photoURL,
+      lastSeen: Date.now()
+    }, { merge: true });
 
     loadUsers();
   }
 });
-[07.05.2026 0:09] Deniska: function loadUsers(){
-  db.collection("users").onSnapshot(s=>{
-    let box=document.getElementById("users");
-    box.innerHTML="";
 
-    s.forEach(d=>{
-      if(d.id===auth.currentUser.uid)return;
-      box.innerHTML+=<div class='item' onclick="openChat('${d.id}','${d.data().name}')">${d.data().name}</div>;
+function loadUsers() {
+  db.collection("users").onSnapshot(s => {
+    let box = document.getElementById("users");
+    box.innerHTML = "";
+    s.forEach(d => {
+      if (d.id === auth.currentUser.uid) return;
+      let userData = d.data();
+      let div = document.createElement("div");
+      div.className = "item";
+      div.innerText = userData.name;
+      div.onclick = () => openChat(d.id, userData.name);
+      box.appendChild(div);
     });
   });
 }
 
-function openChat(id,name){
-  current=id;
-  document.getElementById("title").innerText=name;
+function openChat(id, name) {
+  currentChatId = id;
+  document.getElementById("title").innerText = name;
   loadMessages();
 }
 
-function send(){
-  let text=document.getElementById("text").value;
-  if(!text||!current)return;
+function send() {
+  let textInput = document.getElementById("text");
+  let text = textInput.value;
+  if (!text || !currentChatId) return;
 
-  db.collection("chats").doc([auth.currentUser.uid,current].sort().join("_")).collection("m").add({
-    text,
-    uid:auth.currentUser.uid,
-    time:Date.now()
+  const chatId = [auth.currentUser.uid, currentChatId].sort().join("_");
+
+  db.collection("chats").doc(chatId).collection("m").add({
+    text: text,
+    uid: auth.currentUser.uid,
+    time: Date.now()
   });
 
-  document.getElementById("text").value="";
+  textInput.value = "";
 }
 
-function loadMessages(){
-  db.collection("chats").doc([auth.currentUser.uid,current].sort().join("_")).collection("m")
-  .orderBy("time")
-  .onSnapshot(s=>{
-    let box=document.getElementById("messages");
-    box.innerHTML="";
-
-    s.forEach(d=>{
-      let m=d.data();
-      let cls=m.uid===auth.currentUser.uid?'me':'msg';
-
-      box.innerHTML+=
-      <div class='msg ${cls}'>
-        ${m.text}
-        <div class='time'>${formatTime(m.time)}</div>
-      </div>;
+function loadMessages() {
+  const chatId = [auth.currentUser.uid, currentChatId].sort().join("_");
+  db.collection("chats").doc(chatId).collection("m")
+    .orderBy("time")
+    .onSnapshot(s => {
+      let box = document.getElementById("messages");
+      box.innerHTML = "";
+      s.forEach(d => {
+        let m = d.data();
+        let isMe = m.uid === auth.currentUser.uid;
+        
+        box.innerHTML += `
+          <div class="msg ${isMe ? 'me' : ''}">
+            ${m.text}
+            <div class="time">${formatTime(m.time)}</div>
+          </div>`;
+      });
+      box.scrollTop = box.scrollHeight;
     });
-
-    box.scrollTop=box.scrollHeight;
-  });
 }
-</script></body>
+</script>
+</body>
 </html>
