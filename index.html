@@ -3,105 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PureDrop Cloud Edition</title>
+    <title>PureDrop Cloud</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --accent: #3b82f6; 
-            --bg: #0b0b0c; 
-            --surface: #161618; 
-            --text: #ffffff;
-            --border: rgba(255,255,255,0.06); 
+            --bg: #0b0b0c; --surface: #161618; --text: #ffffff; --accent: #3b82f6; --border: rgba(255,255,255,0.06); 
         }
-
-        /* Світла тема */
-        body.light-theme {
-            --bg: #f3f4f6;
-            --surface: #ffffff;
-            --text: #111827;
-            --border: rgba(0,0,0,0.1);
+        body.light-mode { 
+            --bg: #f3f4f6; --surface: #ffffff; --text: #111827; --border: rgba(0,0,0,0.1); 
         }
 
         body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; transition: 0.3s; margin: 0; }
         
-        .register-btn { position: absolute; top: 15px; right: 20px; font-size: 11px; color: #888; background: none; border: none; cursor: pointer; z-index: 100; font-weight: 800; text-transform: uppercase; }
+        /* Кнопка Register */
+        .register-btn { position: absolute; top: 20px; right: 20px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #666; cursor: pointer; z-index: 100; border: none; background: none; }
+        .register-btn:hover { color: var(--accent); }
+
+        .game-card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; transition: 0.3s; cursor: pointer; }
+        .game-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+
+        /* Повноекранні вікна */
+        .modal-full { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: none; padding: 40px; overflow-y: auto; }
         
-        .menu-btn { position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
-        .circle-btn { width: 50px; height: 50px; border-radius: 25px; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        .circle-btn:hover { border-color: var(--accent); transform: scale(1.1); }
+        .circle-btn { width: 50px; height: 50px; border-radius: 25px; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; margin-top: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
 
-        .game-card { background: var(--surface); border: 1px solid var(--border); border-radius: 28px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .game-card:hover { transform: translateY(-8px); border-color: var(--accent); }
-
-        .full-modal { position: fixed; inset: 0; background: var(--bg); z-index: 8000; display: none; padding: 40px; animation: slideUp 0.3s ease; overflow-y: auto; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-        .lang-card, .theme-card { background: var(--surface); border: 1px solid var(--border); padding: 20px; border-radius: 24px; cursor: pointer; transition: 0.3s; margin-bottom: 10px; }
-        .active-item { border-color: var(--accent); background: rgba(59, 130, 246, 0.1); }
-
-        .search-bar { background: var(--surface); border: 1px solid var(--border); padding: 12px 24px; border-radius: 20px; width: 100%; max-width: 400px; color: var(--text); outline: none; }
-        .admin-layer { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; overflow-y: auto; padding: 40px 20px; }
-        
-        #customAlert { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: none; background: #1a1a1c; border: 1px solid var(--accent); padding: 12px 25px; border-radius: 15px; color: white; font-weight: bold; font-size: 13px; }
+        .admin-input { width: 100%; background: #1a1a1c; border: 1px solid #333; padding: 15px; border-radius: 12px; color: white; margin-bottom: 10px; outline: none; }
+        #customAlert { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: none; background: var(--accent); color: white; padding: 10px 20px; border-radius: 10px; font-weight: bold; }
     </style>
 </head>
-<body class="dark-theme">
+<body class="dark-mode">
 
     <div id="customAlert"></div>
-    <button onclick="handleAuth()" class="register-btn" id="authBtn">register</button>
 
-    <header class="py-16 text-center px-4">
-        <h1 class="text-6xl font-black italic text-blue-600">PURE<span class="mix-blend-difference text-white">DROP</span></h1>
-        <div class="mt-8 flex justify-center">
-            <input type="text" id="searchInput" placeholder="Пошук проектів..." class="search-bar" oninput="renderGames()">
-        </div>
+    <button onclick="openAuth()" class="register-btn">Register / Login</button>
+
+    <header class="py-16 text-center">
+        <h1 class="text-6xl font-black italic text-blue-600">PURE<span class="text-white mix-blend-difference">DROP</span></h1>
+        <div class="mt-8 px-4"><input type="text" id="search" oninput="drawGames()" placeholder="Пошук ігор..." class="w-full max-w-md p-4 rounded-2xl border-none outline-none" style="background: var(--surface); color: var(--text);"></div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-8 pb-32">
-        <div id="games-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
-            <!-- Ігри підтягнуться з бази автоматично -->
-        </div>
+    <main class="max-w-6xl mx-auto px-6 pb-20">
+        <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
     </main>
 
-    <!-- МЕНЮ -->
-    <div class="menu-btn">
+    <div style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
         <a href="https://t.me/leytenant_ukra" target="_blank" class="circle-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--accent)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.24.36-.49.99-.75 3.88-1.69 6.47-2.8 7.76-3.32 3.69-1.5 4.45-1.76 4.96-1.77.11 0 .36.03.52.17.13.12.17.28.19.39.02.09.02.24.01.35z"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#3b82f6"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.24.36-.49.99-.75 3.88-1.69 6.47-2.8 7.76-3.32 3.69-1.5 4.45-1.76 4.96-1.77.11 0 .36.03.52.17.13.12.17.28.19.39.02.09.02.24.01.35z"/></svg>
         </a>
-        <div class="circle-btn" onclick="openSettings()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <div class="circle-btn" onclick="toggleModal('settingsModal', true)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </div>
     </div>
 
-    <!-- НАЛАШТУВАННЯ -->
-    <div id="settingsModal" class="full-modal">
-        <div class="max-w-xl mx-auto">
-            <h2 class="text-4xl font-black mb-12 italic">SETTINGS</h2>
-            
-            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Appearance</p>
-            <div class="theme-card" onclick="toggleTheme()">
-                <span id="themeStatus">🌙 DARK MODE</span>
+    <div id="settingsModal" class="modal-full">
+        <div class="max-w-md mx-auto">
+            <h2 class="text-3xl font-black mb-10 italic">SETTINGS</h2>
+            <div class="mb-6">
+                <p class="text-xs font-bold text-gray-500 mb-2">APPEARANCE</p>
+                <button onclick="switchTheme()" class="w-full p-5 rounded-2xl text-left bg-zinc-800 text-white font-bold" id="themeBtn">🌙 DARK MODE</button>
             </div>
-
-            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 mt-8">Language</p>
-            <div class="grid grid-cols-1 gap-2">
-                <div class="lang-card" onclick="setLanguage('uk')">🇺🇦 Українська</div>
-                <div class="lang-card" onclick="setLanguage('en')">🇺🇸 English</div>
+            <div class="mb-6">
+                <p class="text-xs font-bold text-gray-500 mb-2">LANGUAGE</p>
+                <div class="grid grid-cols-1 gap-2">
+                    <button class="w-full p-4 rounded-xl bg-zinc-800 text-white text-left">🇺🇦 Українська</button>
+                    <button class="w-full p-4 rounded-xl bg-zinc-800 text-white text-left">🇺🇸 English</button>
+                </div>
             </div>
-
-            <button onclick="closeSettings()" class="mt-12 w-full py-4 text-gray-500 font-bold uppercase text-[10px]">Close</button>
+            <button onclick="toggleModal('settingsModal', false)" class="w-full py-4 text-gray-500 text-xs font-bold mt-10">CLOSE</button>
         </div>
     </div>
 
-    <!-- СТОРІНКА ГРИ -->
-    <div id="gamePage" class="full-modal" style="z-index: 7000;">
-        <div class="max-w-4xl mx-auto" id="gamePageContent"></div>
+    <div id="authModal" class="fixed inset-0 bg-black/95 z-[9000] hidden items-center justify-center p-6">
+        <div class="bg-zinc-900 p-8 rounded-3xl w-full max-w-xs text-center">
+            <h3 class="text-xl font-bold mb-4">Admin Password</h3>
+            <input type="password" id="passInput" class="admin-input" placeholder="Пароль">
+            <button onclick="checkPass()" class="w-full bg-blue-600 py-4 rounded-xl font-bold text-white">LOGIN</button>
+            <button onclick="toggleModal('authModal', false)" class="mt-4 text-gray-500 text-xs">Cancel</button>
+        </div>
+    </div>
+
+    <div id="adminPanel" class="modal-full">
+        <div class="max-w-2xl mx-auto">
+            <h2 class="text-3xl font-black mb-10">ADMIN PANEL</h2>
+            <div class="bg-zinc-800 p-6 rounded-2xl mb-8">
+                <input type="text" id="gName" class="admin-input" placeholder="Назва гри">
+                <input type="text" id="gIcon" class="admin-input" placeholder="URL іконки">
+                <textarea id="gDesc" class="admin-input h-20" placeholder="Опис"></textarea>
+                <button onclick="addGame()" class="w-full bg-blue-600 py-4 rounded-xl font-bold">ОПУБЛІКУВАТИ ДЛЯ ВСІХ</button>
+            </div>
+            <div id="adminList" class="space-y-2"></div>
+            <button onclick="toggleModal('adminPanel', false)" class="w-full mt-10 text-gray-500 text-xs font-bold uppercase">Exit Admin</button>
+        </div>
+    </div>
+
+    <div id="gamePage" class="modal-full" style="z-index: 6000;">
+        <div class="max-w-3xl mx-auto" id="gameContent"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
@@ -114,70 +116,96 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
         let allGames = [];
-        let currentTheme = localStorage.getItem('puredrop_theme') || 'dark';
+        let theme = localStorage.getItem('theme') || 'dark';
 
         // --- ТЕМА ---
-        window.toggleTheme = () => {
-            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            applyTheme();
+        window.switchTheme = () => {
+            theme = theme === 'dark' ? 'light' : 'dark';
+            document.body.className = theme + '-mode';
+            localStorage.setItem('theme', theme);
+            document.getElementById('themeBtn').innerText = theme === 'dark' ? '🌙 DARK MODE' : '☀️ LIGHT MODE';
+        };
+        document.body.className = theme + '-mode';
+
+        // --- КНОПКИ ТА МОДАЛКИ ---
+        window.toggleModal = (id, show) => document.getElementById(id).style.display = show ? 'block' : 'none';
+        window.openAuth = () => {
+            document.getElementById('authModal').style.display = 'flex';
+        };
+        window.checkPass = () => {
+            if(document.getElementById('passInput').value === "puredrop_admin_panel_254") {
+                toggleModal('authModal', false);
+                toggleModal('adminPanel', true);
+            } else { alert("Невірний пароль!"); }
         };
 
-        function applyTheme() {
-            document.body.className = currentTheme + '-theme';
-            localStorage.setItem('puredrop_theme', currentTheme);
-            document.getElementById('themeStatus').innerText = currentTheme === 'dark' ? '🌙 DARK MODE' : '☀️ LIGHT MODE';
-        }
-
-        // --- ЗАВАНТАЖЕННЯ ІГОР ---
-        onSnapshot(query(collection(db, "games"), orderBy("updatedAt", "desc")), (snap) => {
-            allGames = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            renderGames();
+        // --- РОБОТА З ІГРАМИ (ГЛОБАЛЬНО) ---
+        onSnapshot(query(collection(db, "games"), orderBy("date", "desc")), (snap) => {
+            allGames = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            drawGames();
+            drawAdminList();
         });
 
-        window.renderGames = () => {
-            const grid = document.getElementById('games-grid');
-            grid.innerHTML = '';
-            const term = document.getElementById('searchInput').value.toLowerCase();
+        window.addGame = async () => {
+            const data = {
+                name: document.getElementById('gName').value,
+                icon: document.getElementById('gIcon').value,
+                desc: document.getElementById('gDesc').value,
+                date: Date.now()
+            };
+            await addDoc(collection(db, "games"), data);
+            msg("Гру додано для всіх!");
+        };
 
-            allGames.filter(g => g.name.toLowerCase().includes(term)).forEach(g => {
+        window.drawGames = () => {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            const search = document.getElementById('search').value.toLowerCase();
+
+            allGames.filter(g => g.name.toLowerCase().includes(search)).forEach(g => {
                 grid.innerHTML += `
-                    <div class="game-card p-5 cursor-pointer" onclick="openGamePage('${g.id}')">
-                        <img src="${g.icon}" class="w-full aspect-square rounded-[22px] object-cover mb-4 shadow-lg">
-                        <h3 class="font-black text-[10px] uppercase truncate">${g.name}</h3>
+                    <div class="game-card p-4" onclick="openGame('${g.id}')">
+                        <img src="${g.icon}" class="w-full aspect-square rounded-2xl object-cover mb-3">
+                        <p class="font-black text-[10px] uppercase truncate">${g.name}</p>
                     </div>`;
             });
         };
 
-        window.openGamePage = (id) => {
+        window.openGame = (id) => {
             const g = allGames.find(x => x.id === id);
-            // Пряме посилання на Ukraine GTA для всіх кнопок Windows
-            const windowsLink = "https://ukraine-gta.com.ua/uagta_online_signed.exe";
-
-            document.getElementById('gamePageContent').innerHTML = `
-                <button onclick="closeGamePage()" class="mb-10 text-gray-500 font-black uppercase text-[10px]">← BACK</button>
-                <div class="flex flex-col md:flex-row gap-12 items-center mb-10">
-                    <img src="${g.icon}" class="w-48 h-48 rounded-[48px] shadow-2xl object-cover">
+            document.getElementById('gameContent').innerHTML = `
+                <button onclick="toggleModal('gamePage', false)" class="mb-10 text-gray-500 font-bold text-xs">← НАЗАД</button>
+                <div class="flex flex-col md:flex-row gap-10 items-center mb-10">
+                    <img src="${g.icon}" class="w-40 h-40 rounded-[40px] shadow-2xl">
                     <div class="text-center md:text-left">
-                        <h2 class="text-5xl font-black italic uppercase mb-6">${g.name}</h2>
-                        <div class="flex gap-4">
-                            <a href="${windowsLink}" target="_blank" class="bg-blue-600 px-10 py-4 rounded-xl font-black text-xs text-white">DOWNLOAD WINDOWS</a>
-                        </div>
+                        <h2 class="text-4xl font-black italic uppercase">${g.name}</h2>
+                        <a href="https://ukraine-gta.com.ua/uagta_online_signed.exe" target="_blank" class="inline-block mt-6 bg-blue-600 px-10 py-4 rounded-xl font-bold">СКАЧАТИ WINDOWS</a>
                     </div>
                 </div>
-                <p class="text-gray-400 text-lg leading-relaxed mb-10">${g.desc || ''}</p>
+                <p class="text-gray-400 leading-relaxed">${g.desc}</p>
             `;
-            document.getElementById('gamePage').style.display = 'block';
+            toggleModal('gamePage', true);
         };
 
-        // Базові функції
-        window.openSettings = () => document.getElementById('settingsModal').style.display = 'block';
-        window.closeSettings = () => document.getElementById('settingsModal').style.display = 'none';
-        window.closeGamePage = () => document.getElementById('gamePage').style.display = 'none';
+        window.drawAdminList = () => {
+            const list = document.getElementById('adminList');
+            list.innerHTML = '';
+            allGames.forEach(g => {
+                list.innerHTML += `<div class="flex justify-between items-center bg-black/20 p-3 rounded-lg">
+                    <span class="text-xs font-bold">${g.name}</span>
+                    <button onclick="delGame('${g.id}')" class="text-red-500 text-[10px] font-bold">ВИДАЛИТИ</button>
+                </div>`;
+            });
+        };
 
-        // Ініціалізація
-        applyTheme();
+        window.delGame = async (id) => { if(confirm("Видалити?")) await deleteDoc(doc(db, "games", id)); };
+
+        function msg(m) {
+            const a = document.getElementById('customAlert');
+            a.innerText = m; a.style.display = 'block';
+            setTimeout(() => a.style.display='none', 3000);
+        }
     </script>
 </body>
 </html>
