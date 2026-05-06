@@ -3,47 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Сонечко — Glass Edition</title>
+    <title>Сонечко — Інтернет-магазин</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --glass: rgba(255, 255, 255, 0.1); --blur: blur(15px); }
-        body { 
-            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
-            min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif; color: #1a1a1a;
-        }
-        .glass { background: var(--glass); backdrop-filter: var(--blur); border: 1px solid rgba(255,255,255,0.2); border-radius: 24px; }
-        .btn-glass { background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.3); transition: 0.3s; }
-        .btn-glass:hover { background: rgba(255,255,255,0.4); transform: scale(1.05); }
-        
-        .modal { position: fixed; inset: 0; z-index: 1000; display: none; padding: 20px; overflow-y: auto; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); }
-        .active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        :root { --main: #ffffff; --text: #1a1a1a; --accent: #facc15; --bg-alt: #f3f4f6; }
+        .dark-mode { --main: #121212; --text: #f9fafb; --accent: #fbbf24; --bg-alt: #1f2937; }
 
-        input, textarea { background: rgba(255,255,255,0.5) !important; border: 1px solid rgba(255,255,255,0.3) !important; border-radius: 12px !important; padding: 12px !important; outline: none; }
+        body { background: var(--main); color: var(--text); font-family: 'Inter', sans-serif; transition: 0.3s; margin: 0; overflow-x: hidden; }
+        
+        /* ЛОАДЕР */
+        #loader { 
+            position: fixed; inset: 0; background: var(--main); z-index: 9999; 
+            display: flex; align-items: center; justify-content: center; transition: 0.5s;
+        }
+        .loading-text { font-size: 3rem; font-weight: 800; letter-spacing: -2px; position: relative; display: inline-block; color: #ddd; }
+        .loading-text::before {
+            content: "СОНЕЧКО"; position: absolute; left: 0; top: 0; width: 0; height: 100%;
+            background: linear-gradient(to right, #0057b7 50%, #ffd700 50%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            overflow: hidden; animation: fillText 2s forwards cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes fillText { 0% { width: 0; } 100% { width: 100%; } }
+
+        /* МЕНЮ-ГАМБУРГЕР */
+        #sideMenu { 
+            position: fixed; top: 0; left: -320px; width: 300px; height: 100%; 
+            background: var(--main); box-shadow: 20px 0 50px rgba(0,0,0,0.1); 
+            z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 40px 20px; 
+        }
+        #sideMenu.open { left: 0; }
+        .menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1500; display: none; backdrop-filter: blur(4px); }
+
+        /* КАРТКИ */
+        .glass-card { background: var(--bg-alt); border-radius: 24px; border: 1px solid rgba(0,0,0,0.05); transition: 0.3s; }
+        .glass-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+
+        .modal { position: fixed; inset: 0; z-index: 3000; display: none; padding: 20px; background: var(--main); overflow-y: auto; }
+        .active { display: block; animation: slideUp 0.4s ease; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        .admin-small { font-size: 10px; opacity: 0.5; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <!-- НАВІГАЦІЯ -->
-    <nav class="p-6 flex justify-between items-center max-w-7xl mx-auto">
-        <h1 class="text-2xl font-800 tracking-tighter text-white drop-shadow-md">СОНЕЧКО☀️</h1>
-        <div class="flex gap-4" id="navButtons">
-            <button onclick="showPage('authModal')" class="btn-glass px-6 py-2 rounded-full font-bold text-white">УВІЙТИ</button>
-        </div>
-    </nav>
+    <div id="loader">
+        <div class="loading-text">СОНЕЧКО</div>
+    </div>
 
-    <!-- ГОЛОВНИЙ КОНТЕНТ -->
-    <main class="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row gap-8">
-        <aside class="md:w-1/4">
-            <div class="glass p-6 sticky top-10">
+    <div class="menu-overlay" id="overlay" onclick="toggleMenu(false)"></div>
+    <div id="sideMenu">
+        <div class="flex flex-col h-full">
+            <div class="mb-10">
+                <h2 class="text-2xl font-800">МЕНЮ</h2>
+            </div>
+            <nav class="space-y-6 font-semibold">
+                <button onclick="openPage('authPage')" class="block w-full text-left hover:text-yellow-500">Реєстрація / Логін</button>
+                <button onclick="openPage('settingsPage')" class="block w-full text-left hover:text-yellow-500">Налаштування</button>
+                <a href="https://t.me/leytenant_ukra" class="block hover:text-yellow-500">Підтримка Telegram</a>
+            </nav>
+            <div class="mt-auto">
+                <p id="menuUserStatus" class="text-xs opacity-50">Ви не увійшли</p>
+                <button onclick="openAdmin()" class="admin-small mt-2">ADMIN ACCESS</button>
+            </div>
+        </div>
+    </div>
+
+    <header class="p-6 flex justify-between items-center max-w-7xl mx-auto border-b">
+        <button onclick="toggleMenu(true)" class="text-2xl">☰</button>
+        <h1 class="text-2xl font-800 tracking-tighter">СОНЕЧКО☀️</h1>
+        <div id="headerProfile" onclick="openPage('profilePage')" class="w-10 h-10 rounded-full bg-gray-200 cursor-pointer overflow-hidden"></div>
+    </header>
+
+    <div class="max-w-7xl mx-auto p-6">
+        <div class="w-full h-48 rounded-[32px] bg-gradient-to-r from-yellow-400 to-amber-500 flex items-center p-10 text-white relative overflow-hidden">
+            <div class="relative z-10">
+                <h2 class="text-4xl font-800">ЗНИЖКИ 50%</h2>
+                <p class="font-bold opacity-80 uppercase text-xs mt-2">Тільки сьогодні в Бортятині</p>
+            </div>
+            <div class="absolute right-[-20px] bottom-[-20px] text-9xl opacity-20">☀️</div>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto p-6 flex flex-col md:flex-row gap-8">
+        <aside class="md:w-1/4 space-y-6">
+            <div class="glass-card p-6">
                 <h3 class="font-bold mb-4">Пошук</h3>
-                <input type="text" id="search" oninput="renderProducts()" placeholder="Що шукаємо?" class="w-full mb-6">
-                <h3 class="font-bold mb-4">Фільтри</h3>
-                <div class="space-y-2 text-sm font-medium">
-                    <p class="cursor-pointer hover:text-white">🔥 Новинки</p>
-                    <p class="cursor-pointer hover:text-white">🎮 Геймінг</p>
-                    <p class="cursor-pointer hover:text-white">🍎 Продукти</p>
+                <input type="text" id="mainSearch" oninput="renderProducts()" placeholder="Назва товару..." class="w-full p-3 rounded-xl border-none bg-white dark:bg-zinc-800 shadow-sm">
+            </div>
+            <div class="glass-card p-6">
+                <h3 class="font-bold mb-4">Категорії</h3>
+                <div class="space-y-2 text-sm">
+                    <label class="flex gap-2"><input type="checkbox"> Побутова техніка</label>
+                    <label class="flex gap-2"><input type="checkbox"> Електроніка</label>
                 </div>
             </div>
         </aside>
@@ -53,74 +106,74 @@
         </div>
     </main>
 
-    <!-- МОДАЛКА АВТОРИЗАЦІЇ (КРОК 1) -->
-    <div id="authModal" class="modal">
-        <div class="max-w-md mx-auto mt-20 glass p-10 text-center">
-            <h2 class="text-2xl font-800 mb-6 text-white">Реєстрація</h2>
-            <input type="email" id="regEmail" placeholder="Ваша пошта" class="w-full mb-4">
-            <button onclick="nextStep()" class="w-full bg-white text-pink-500 font-bold py-4 rounded-xl shadow-lg">ПРОДОВЖИТИ</button>
-            <button onclick="showPage(null)" class="mt-4 text-white text-xs opacity-60">СКАСУВАТИ</button>
+    <div id="authPage" class="modal p-10">
+        <div class="max-w-md mx-auto text-center">
+            <button onclick="closeAll()" class="mb-10 opacity-50">← Назад</button>
+            <h2 class="text-3xl font-800 mb-6">Вхід через Google</h2>
+            <button onclick="fakeGoogleAuth()" class="w-full border-2 border-black p-4 rounded-2xl font-bold flex items-center justify-center gap-2">
+                <img src="https://www.google.com/favicon.ico" class="w-5"> Продовжити з Google
+            </button>
         </div>
     </div>
 
-    <!-- МОДАЛКА ПРОФІЛЮ (КРОК 2) -->
-    <div id="profileCreateModal" class="modal">
-        <div class="max-w-md mx-auto mt-10 glass p-10 text-center">
-            <h2 class="text-2xl font-800 mb-6 text-white">Створення профілю</h2>
-            <div class="mb-6 relative group inline-block">
-                <img id="tempAvatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="w-24 h-24 rounded-3xl object-cover mx-auto border-4 border-white">
-                <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="handleFile(event)">
-                <button onclick="document.getElementById('fileInput').click()" class="absolute -bottom-2 -right-2 bg-white p-2 rounded-full shadow-md">📸</button>
+    <div id="createProfilePage" class="modal p-10">
+        <div class="max-w-md mx-auto text-center">
+            <h2 class="text-3xl font-800 mb-10">Створити профіль</h2>
+            <div class="relative w-32 h-32 mx-auto mb-8">
+                <img id="tempAvatar" src="https://via.placeholder.com/150" class="w-full h-full rounded-[40px] object-cover border-4 border-yellow-400">
+                <input type="file" id="fileAvatar" class="hidden" onchange="handleFile(this)">
+                <button onclick="document.getElementById('fileAvatar').click()" class="absolute bottom-0 right-0 bg-black text-white p-2 rounded-full">📸</button>
             </div>
-            <input type="text" id="profName" placeholder="Ім'я" class="w-full mb-3">
-            <input type="text" id="profPhone" placeholder="Номер телефону" class="w-full mb-6">
-            <button onclick="finishRegistration()" class="w-full bg-white text-pink-500 font-bold py-4 rounded-xl">СТВОРИТИ АККАУНТ</button>
+            <input type="text" id="regName" placeholder="Ваше ім'я" class="w-full p-4 glass-card mb-4 border-none outline-none">
+            <input type="text" id="regPhone" placeholder="Номер телефону" class="w-full p-4 glass-card mb-8 border-none outline-none">
+            <button onclick="saveNewUser()" class="w-full bg-yellow-400 p-5 rounded-2xl font-black">ЗБЕРЕГТИ</button>
         </div>
     </div>
 
-    <!-- СТОРІНКА ПРОФІЛЮ (ПЕРЕГЛЯД ТА ІНШІ) -->
-    <div id="userProfile" class="modal">
-        <div class="max-w-4xl mx-auto mt-10">
-            <div class="glass p-10 flex flex-col md:flex-row gap-10 items-center">
-                <img id="myAvatar" class="w-40 h-40 rounded-[40px] object-cover shadow-2xl">
-                <div class="text-white">
-                    <h2 id="myName" class="text-4xl font-800"></h2>
-                    <p id="myPhone" class="opacity-80 text-xl"></p>
-                    <div class="flex gap-4 mt-6">
-                        <button onclick="showAdmin()" class="text-[10px] opacity-40">Admin Panel</button>
-                        <button onclick="logout()" class="text-[10px] text-red-200">Вийти</button>
-                    </div>
-                </div>
-            </div>
+    <div id="settingsPage" class="modal p-10">
+        <div class="max-w-2xl mx-auto">
+            <button onclick="closeAll()" class="mb-10">← Закрити</button>
+            <h2 class="text-3xl font-800 mb-8 italic">SETTINGS</h2>
             
-            <h3 class="text-white font-bold mt-10 mb-4 uppercase text-xs tracking-widest">Користувачі Сонечка</h3>
-            <div id="usersList" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4"></div>
-            <button onclick="showPage(null)" class="mt-10 text-white font-bold">← НАЗАД</button>
+            <div class="space-y-6">
+                <button onclick="toggleTheme()" class="w-full p-6 glass-card text-left font-bold flex justify-between">
+                    <span>Тема оформлення</span>
+                    <span id="themeInfo">День ☀️</span>
+                </button>
+                
+                <div class="glass-card p-6">
+                    <h4 class="font-bold mb-4">Вибір мови</h4>
+                    <input type="text" id="langSearch" oninput="filterLangs()" placeholder="Пошук мови..." class="w-full p-3 rounded-xl border mb-4">
+                    <div id="langList" class="grid grid-cols-2 gap-2 h-40 overflow-y-auto"></div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- АДМІНКА -->
-    <div id="adminModal" class="modal">
-        <div class="max-w-xl mx-auto mt-10 glass p-8">
-            <h2 class="text-white font-bold mb-6">Додати новий товар</h2>
-            <div class="space-y-4">
-                <input type="text" id="adTitle" placeholder="Назва" class="w-full">
-                <input type="text" id="adPrice" placeholder="Ціна (напр. 200 грн)" class="w-full">
-                <textarea id="adDesc" placeholder="Опис товару..." class="w-full h-32"></textarea>
-                <div class="flex gap-2">
-                    <input type="file" id="adFile" class="hidden" onchange="handleAdFile(event)">
-                    <button onclick="document.getElementById('adFile').click()" class="bg-white/20 p-4 rounded-xl text-white text-sm">ВИБРАТИ ФОТО</button>
-                    <img id="adPreview" class="h-14 w-14 object-cover rounded-lg hidden">
+    <div id="adminPanel" class="modal p-10">
+        <div class="max-w-2xl mx-auto">
+            <h2 class="text-xs uppercase font-black opacity-30 mb-10">Central Management System</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                <div class="space-y-4">
+                    <input type="text" id="adTitle" placeholder="Назва товару" class="w-full p-3 glass-card border-none">
+                    <input type="text" id="adPrice" placeholder="Ціна" class="w-full p-3 glass-card border-none">
+                    <textarea id="adDesc" placeholder="Опис" class="w-full p-3 glass-card border-none h-20"></textarea>
+                    <input type="file" id="adFile" class="hidden" onchange="handleAdImg(this)">
+                    <button onclick="document.getElementById('adFile').click()" class="w-full p-3 bg-gray-100 text-xs font-bold rounded-xl">ВИБРАТИ ФОТО</button>
+                    <button onclick="publish()" class="w-full bg-black text-white p-4 rounded-xl font-bold">ОПУБЛІКУВАТИ</button>
                 </div>
-                <button onclick="publishProduct()" class="w-full bg-white py-4 rounded-xl font-bold">ОПУБЛІКУВАТИ</button>
-                <button onclick="showPage('userProfile')" class="w-full text-white opacity-50 text-sm py-2">ЗАКРИТИ АДМІНКУ</button>
+                <div class="glass-card p-4 overflow-y-auto max-h-80">
+                    <h4 class="text-[10px] font-bold mb-3">КОРИСТУВАЧІ</h4>
+                    <div id="adminUsersList" class="space-y-2"></div>
+                </div>
             </div>
+            <button onclick="closeAll()" class="admin-small">Close Session</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
@@ -133,121 +186,125 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        let currentImg = "";
-        let adImg = "";
-        let products = [];
+        let store = [];
+        let curAvatar = "";
+        let curAdImg = "";
 
-        // ЛОГІКА ПЕРЕКЛЮЧЕННЯ СТОРІНОК
-        window.showPage = (id) => {
+        // ЛОАДЕР
+        window.addEventListener('load', () => {
+            setTimeout(() => { document.getElementById('loader').style.opacity = '0'; 
+            setTimeout(() => document.getElementById('loader').style.display = 'none', 500); }, 2000);
+        });
+
+        // МЕНЮ
+        window.toggleMenu = (s) => {
+            document.getElementById('sideMenu').classList.toggle('open', s);
+            document.getElementById('overlay').style.display = s ? 'block' : 'none';
+        };
+
+        // СТОРІНКИ
+        window.openPage = (id) => {
+            closeAll();
+            document.getElementById(id).classList.add('active');
+            toggleMenu(false);
+        };
+        window.closeAll = () => {
             document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
-            if(id) document.getElementById(id).classList.add('active');
         };
 
-        // ЗАВАНТАЖЕННЯ ФОТО (ПРОФІЛЬ)
-        window.handleFile = (e) => {
+        // ФОТО
+        window.handleFile = (input) => {
             const reader = new FileReader();
-            reader.onload = (f) => {
-                currentImg = f.target.result;
-                document.getElementById('tempAvatar').src = currentImg;
+            reader.onload = (e) => {
+                curAvatar = e.target.result;
+                document.getElementById('tempAvatar').src = curAvatar;
             };
-            reader.readAsDataURL(e.target.files[0]);
+            reader.readAsDataURL(input.files[0]);
         };
-
-        // ЗАВАНТАЖЕННЯ ФОТО (АДМІНКА)
-        window.handleAdFile = (e) => {
+        window.handleAdImg = (input) => {
             const reader = new FileReader();
-            reader.onload = (f) => {
-                adImg = f.target.result;
-                document.getElementById('adPreview').src = adImg;
-                document.getElementById('adPreview').classList.remove('hidden');
-            };
-            reader.readAsDataURL(e.target.files[0]);
+            reader.onload = (e) => curAdImg = e.target.result;
+            reader.readAsDataURL(input.files[0]);
         };
 
-        // РЕЄСТРАЦІЯ
-        window.nextStep = () => {
-            if(document.getElementById('regEmail').value.includes('@')) showPage('profileCreateModal');
-            else alert("Введіть коректну пошту!");
+        // АВТЕНТИФІКАЦІЯ
+        window.fakeGoogleAuth = () => {
+            const email = prompt("Введіть пошту для Google Login:");
+            if(email) {
+                localStorage.setItem('temp_email', email);
+                openPage('createProfilePage');
+            }
         };
 
-        window.finishRegistration = async () => {
-            const userData = {
-                name: document.getElementById('profName').value,
-                phone: document.getElementById('profPhone').value,
-                email: document.getElementById('regEmail').value,
-                photo: currentImg || "https://via.placeholder.com/100",
+        window.saveNewUser = async () => {
+            const u = {
+                name: document.getElementById('regName').value,
+                phone: document.getElementById('regPhone').value,
+                email: localStorage.getItem('temp_email'),
+                photo: curAvatar,
                 date: Date.now()
             };
-            await addDoc(collection(db, "sonechko_users"), userData);
-            localStorage.setItem('user', JSON.stringify(userData));
+            await addDoc(collection(db, "sonechko_users"), u);
+            localStorage.setItem('sun_user', JSON.stringify(u));
             location.reload();
         };
 
-        // ВИХІД
-        window.logout = () => { localStorage.removeItem('user'); location.reload(); };
-
-        // АДМІНКА
-        window.showAdmin = () => { if(prompt("Введіть код:") === "254") showPage('adminModal'); };
-        window.publishProduct = async () => {
-            await addDoc(collection(db, "sonechko_store"), {
-                title: document.getElementById('adTitle').value,
-                price: document.getElementById('adPrice').value,
-                desc: document.getElementById('adDesc').value,
-                img: adImg,
-                date: Date.now()
-            });
-            alert("Товар додано!");
-            showPage(null);
-        };
-
-        // РЕНДЕР
-        onSnapshot(query(collection(db, "sonechko_store"), orderBy("date", "desc")), (snap) => {
-            products = snap.docs.map(d => d.data());
+        // РЕНДЕР ТОВАРІВ
+        onSnapshot(query(collection(db, "sonechko_items"), orderBy("date", "desc")), (snap) => {
+            store = snap.docs.map(d => ({id: d.id, ...d.data()}));
             renderProducts();
-        });
-
-        onSnapshot(collection(db, "sonechko_users"), (snap) => {
-            const list = document.getElementById('usersList');
-            list.innerHTML = '';
-            snap.forEach(doc => {
-                const u = doc.data();
-                list.innerHTML += `
-                    <div class="text-center">
-                        <img src="${u.photo}" class="w-12 h-12 rounded-xl object-cover mx-auto mb-1 border border-white/30">
-                        <p class="text-[9px] text-white font-bold truncate">${u.name}</p>
-                    </div>`;
-            });
         });
 
         window.renderProducts = () => {
             const grid = document.getElementById('productGrid');
-            const s = document.getElementById('search').value.toLowerCase();
+            const search = document.getElementById('mainSearch').value.toLowerCase();
             grid.innerHTML = '';
-            products.filter(p => p.title.toLowerCase().includes(s)).forEach(p => {
+            store.filter(p => p.title.toLowerCase().includes(search)).forEach(p => {
                 grid.innerHTML += `
-                    <div class="glass p-4 group">
-                        <div class="overflow-hidden rounded-xl h-48 mb-4">
-                            <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                    <div class="glass-card p-4 cursor-pointer" onclick="alert('Відкриваємо деталі...')">
+                        <img src="${p.img}" class="w-full h-40 object-cover rounded-2xl mb-4">
+                        <h4 class="font-bold text-sm truncate">${p.title}</h4>
+                        <div class="flex justify-between mt-2">
+                            <span class="text-yellow-600 font-black">${p.price} грн</span>
+                            <span class="text-[10px] opacity-40">ДЕТАЛЬНІШЕ</span>
                         </div>
-                        <h4 class="text-white font-bold mb-1">${p.title}</h4>
-                        <p class="text-pink-600 font-black text-sm mb-4">${p.price}</p>
-                        <button class="w-full py-2 bg-white/20 rounded-lg text-white text-xs font-bold hover:bg-white hover:text-pink-500 transition">ДЕТАЛЬНІШЕ</button>
                     </div>`;
             });
         };
 
-        // ПЕРЕВІРКА ЛОГІНУ ПРИ ЗАВАНТАЖЕННІ
-        const savedUser = JSON.parse(localStorage.getItem('user'));
-        if(savedUser) {
-            document.getElementById('navButtons').innerHTML = `
-                <button onclick="showPage('userProfile')" class="flex items-center gap-2 btn-glass p-1 pr-4 rounded-full">
-                    <img src="${savedUser.photo}" class="w-8 h-8 rounded-full object-cover">
-                    <span class="text-white text-xs font-bold uppercase tracking-widest">${savedUser.name}</span>
-                </button>
-            `;
-            document.getElementById('myName').innerText = savedUser.name;
-            document.getElementById('myPhone').innerText = savedUser.phone;
-            document.getElementById('myAvatar').src = savedUser.photo;
+        // АДМІНКА
+        window.openAdmin = () => { if(prompt("Pass:") === "254") openPage('adminPanel'); };
+        window.publish = async () => {
+            await addDoc(collection(db, "sonechko_items"), {
+                title: document.getElementById('adTitle').value,
+                price: document.getElementById('adPrice').value,
+                desc: document.getElementById('adDesc').value,
+                img: curAdImg,
+                date: Date.now()
+            });
+            alert("Done!");
+        };
+
+        // МОВИ (ПРИКЛАД)
+        const langs = [
+            {n:"Українська", c:"UA"}, {n:"English", c:"US"}, {n:"Deutsch", c:"DE"}, {n:"Polski", c:"PL"},
+            {n:"Français", c:"FR"}, {n:"Italiano", c:"IT"}, {n:"日本語", c:"JP"}, {n:"Türkçe", c:"TR"}
+        ];
+        window.filterLangs = () => {
+            const s = document.getElementById('langSearch').value.toLowerCase();
+            const list = document.getElementById('langList');
+            list.innerHTML = '';
+            langs.filter(l => l.n.toLowerCase().includes(s)).forEach(l => {
+                list.innerHTML += `<button class="p-3 text-xs bg-gray-50 rounded-xl flex gap-2"><img src="https://flagcdn.com/w20/${l.c.toLowerCase()}.png" class="h-3 my-auto"> ${l.n}</button>`;
+            });
+        };
+        filterLangs();
+
+        // СТАТУС КОРИСТУВАЧА
+        const user = JSON.parse(localStorage.getItem('sun_user'));
+        if(user) {
+            document.getElementById('headerProfile').innerHTML = `<img src="${user.photo}" class="w-full h-full object-cover">`;
+            document.getElementById('menuUserStatus').innerText = `Вітаємо, ${user.name}`;
         }
     </script>
 </body>
