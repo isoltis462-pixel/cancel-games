@@ -3,152 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Сонечко ☀️ — Магазин</title>
+    <title>СОНЕЧКО ☀️ — OFFICIAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;900&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #ffffff; --text: #000000; --card: #f8f8f8; --accent: #facc15; --blur: rgba(255,255,255,0.4); }
-        .dark-mode { --bg: #0a0a0a; --text: #ffffff; --card: #141414; --accent: #fbbf24; --blur: rgba(0,0,0,0.4); }
+        :root { --bg: #ffffff; --text: #000000; --card: #f3f4f6; --accent: #facc15; }
+        .dark-mode { --bg: #0a0a0a; --text: #ffffff; --card: #1a1a1a; --accent: #fbbf24; }
 
-        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.3s; overflow-x: hidden; }
+        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.3s; overflow: hidden; }
         
-        /* НОВА ГАРНА ЗАГРУЗКА */
-        #loader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 1s; }
-        .sun-loader { width: 80px; height: 80px; background: #ffd700; border-radius: 50%; box-shadow: 0 0 50px #ffcc00; animation: sunPulse 2s infinite alternate; margin-bottom: 20px; }
-        @keyframes sunPulse { from { transform: scale(1); filter: brightness(1); } to { transform: scale(1.2); filter: brightness(1.5); } }
-        .loader-logo { font-family: 'Unbounded', sans-serif; font-weight: 900; font-size: 2rem; color: #fff; letter-spacing: 4px; }
+        /* ГАРНИЙ НАПИС */
+        .logo-font { font-family: 'Unbounded', sans-serif; font-weight: 900; letter-spacing: -1px; }
 
-        /* ГАРНИЙ НАПИС СОНЕЧКО */
-        .logo-text { font-family: 'Unbounded', sans-serif; font-weight: 900; background: linear-gradient(45deg, #facc15, #ff8800); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+        /* ЛОАДЕР */
+        #loader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; transition: 0.8s; }
+        .loader-content { text-align: center; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } }
 
-        /* РОЗМИТТЯ ПРИ МЕНЮ */
-        #mainContent { transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-        body.menu-open #mainContent { filter: blur(15px) scale(0.95); pointer-events: none; }
-        body.menu-open #devLock { display: none; }
+        /* ЗАМОК НА САЙТ (В РОЗРОБЦІ) */
+        #siteLock { position: fixed; inset: 0; z-index: 9000; background: rgba(0,0,0,0.8); backdrop-filter: blur(40px); display: flex; align-items: center; justify-content: center; transition: 0.6s; }
+        .lock-box { background: var(--bg); padding: 50px; border-radius: 50px; text-align: center; box-shadow: 0 20px 80px rgba(0,0,0,0.5); max-width: 400px; width: 90%; }
 
-        /* CUSTOM TOAST (БЕЗ GOOGLE) */
-        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-150%); background: #000; color: #fff; padding: 16px 30px; border-radius: 50px; font-weight: 800; z-index: 11000; transition: 0.5s; display: flex; align-items: center; gap: 10px; border: 2px solid #facc15; }
-        #toast.active { transform: translateX(-50%) translateY(0); }
+        /* ПОВІДОМЛЕННЯ */
+        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-150px); background: #000; color: #fff; padding: 15px 40px; border-radius: 100px; font-weight: 800; z-index: 11000; transition: 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); border: 2px solid var(--accent); }
+        #toast.show { transform: translateX(-50%) translateY(0); }
         .dark-mode #toast { background: #fff; color: #000; }
 
-        /* АНІМАЦІЇ */
-        .slide-up { animation: slideUp 0.5s ease-out forwards; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        /* МЕНЮ ТА РОЗМИТТЯ */
+        #mainWrapper { transition: 0.5s ease; }
+        body.menu-open #mainWrapper { filter: blur(20px) scale(0.98); pointer-events: none; }
+        #sideMenu { position: fixed; top: 0; left: -350px; width: 320px; height: 100%; background: var(--bg); z-index: 8000; transition: 0.5s; padding: 40px; border-right: 1px solid rgba(128,128,128,0.2); }
+        #sideMenu.open { left: 0; }
 
-        .bento { background: var(--card); border-radius: 30px; border: 1px solid rgba(128,128,128,0.1); transition: 0.3s; }
-        .modal { position: fixed; inset: 0; z-index: 5000; display: none; background: var(--blur); backdrop-filter: blur(20px); overflow-y: auto; padding: 20px; }
-        .modal.active { display: flex; align-items: center; justify-content: center; }
-        .modal-content { background: var(--bg); width: 100%; max-width: 500px; padding: 40px; border-radius: 40px; box-shadow: 0 30px 60px rgba(0,0,0,0.2); }
-
-        /* КНОПКА GOOGLE */
-        .btn-google { background: #facc15 !important; color: #000 !important; border-radius: 20px; font-weight: 900; transition: 0.3s; width: 100%; padding: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-google:hover { transform: scale(1.02); box-shadow: 0 10px 30px rgba(250, 204, 21, 0.4); }
-
-        #devLock { position: fixed; inset: 0; z-index: 9000; display: flex; align-items: center; justify-content: center; background: var(--bg); transition: 0.8s; }
+        .bento { background: var(--card); border-radius: 30px; border: 1px solid rgba(128,128,128,0.1); }
+        .modal { position: fixed; inset: 0; z-index: 7000; display: none; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        
+        .btn-yellow { background: #facc15 !important; color: #000 !important; font-weight: 900; border-radius: 20px; transition: 0.3s; }
+        .btn-yellow:hover { transform: scale(1.03); box-shadow: 0 10px 20px rgba(250,204,21,0.3); }
     </style>
 </head>
 <body id="body">
 
-    <div id="toast"><span id="toastIcon">☀️</span> <span id="toastMsg">Успішно!</span></div>
+    <div id="toast">✅ Опубліковано!</div>
 
     <div id="loader">
-        <div class="sun-loader"></div>
-        <div class="loader-logo">СОНЕЧКО</div>
-    </div>
-
-    <div id="devLock">
-        <div class="text-center slide-up">
-            <h2 class="logo-text text-4xl mb-6">Sonechko v3</h2>
-            <p class="opacity-50 mb-8 font-bold">DEVELOPER ACCESS ONLY</p>
-            <input type="password" id="devInput" class="w-full p-6 bento text-center text-3xl font-black mb-4 outline-none border-2 border-yellow-400" placeholder="****">
-            <button onclick="unlock()" class="w-full bg-yellow-400 text-black p-6 rounded-3xl font-black text-xl">УВІЙТИ</button>
+        <div class="loader-content">
+            <h1 class="logo-font text-white text-4xl">СОНЕЧКО</h1>
+            <p class="text-yellow-400 font-bold mt-2 tracking-widest">LOADING...</p>
         </div>
     </div>
 
-    <div id="mainContent">
+    <div id="siteLock">
+        <div class="lock-box">
+            <h2 class="logo-font text-2xl mb-2">🚧 В РОЗРОБЦІ</h2>
+            <p class="opacity-50 text-sm mb-8 font-bold">Введіть пароль адміністратора</p>
+            <input type="password" id="passInput" maxlength="4" placeholder="****" 
+                   class="w-full p-5 bento text-center text-4xl font-black mb-6 outline-none border-2 border-yellow-400 focus:border-orange-500 transition-all">
+            <button onclick="checkLock()" class="w-full btn-yellow p-5 text-xl uppercase">Увійти</button>
+        </div>
+    </div>
+
+    <div id="mainWrapper">
         <header class="p-6 flex justify-between items-center max-w-7xl mx-auto">
             <button onclick="toggleMenu(true)" class="w-14 h-14 bento flex items-center justify-center text-2xl">☰</button>
-            <h1 class="logo-text text-3xl tracking-tighter">СОНЕЧКО</h1>
-            <div onclick="openPage('authPage')" class="w-14 h-14 rounded-2xl bento overflow-hidden cursor-pointer">
-                <img src="https://cdn-icons-png.flaticon.com/512/1144/1144760.png" id="avatarImg" class="w-full h-full object-cover">
+            <h1 class="logo-font text-2xl text-yellow-500">СОНЕЧКО</h1>
+            <div onclick="openPage('profilePage')" class="w-14 h-14 rounded-2xl bento overflow-hidden cursor-pointer">
+                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" id="userIcon" class="w-full h-full object-cover">
             </div>
         </header>
 
-        <main class="max-w-7xl mx-auto p-6 space-y-10">
-            <div class="w-full h-64 rounded-[40px] bg-gradient-to-r from-yellow-400 to-orange-500 p-12 text-white relative overflow-hidden shadow-2xl slide-up">
-                <h2 class="text-5xl font-900 italic mb-2">SALE -50%</h2>
-                <p class="font-bold opacity-80 uppercase tracking-widest">Тільки для своїх</p>
-                <div class="absolute right-[-20px] bottom-[-20px] opacity-20 text-[15rem]">☀️</div>
+        <main class="max-w-7xl mx-auto p-6 space-y-8">
+            <div id="promoBanner" class="w-full h-48 rounded-[40px] bg-gradient-to-br from-yellow-400 to-orange-500 p-10 text-white flex flex-col justify-center shadow-xl">
+                <h2 class="text-4xl font-900 italic">NEW ITEMS</h2>
+                <p class="font-bold opacity-80 uppercase">Магазин від Лейтенанта</p>
             </div>
 
-            <div class="bento p-2 flex items-center gap-4 px-6 slide-up">
-                <span class="text-xl">🔍</span>
-                <input type="text" id="searchInput" oninput="filterItems()" placeholder="Я шукаю..." class="w-full p-4 bg-transparent outline-none font-bold">
+            <div class="bento p-2 flex items-center px-6">
+                <span class="mr-3">🔍</span>
+                <input type="text" id="search" oninput="draw()" placeholder="Пошук..." class="w-full p-4 bg-transparent outline-none font-bold">
             </div>
 
-            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
+            <div id="grid" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
         </main>
     </div>
 
-    <div id="sideMenu" class="fixed inset-y-0 left-[-350px] w-[320px] bg-[var(--bg)] z-[6000] transition-all duration-500 p-10 border-r border-yellow-400/20 shadow-2xl">
+    <div id="sideMenu">
         <div class="flex justify-between items-center mb-16">
-            <h2 class="logo-text text-2xl">MENU</h2>
-            <button onclick="toggleMenu(false)" class="text-3xl">✕</button>
+            <h2 class="logo-font text-xl">МЕНЮ</h2>
+            <button onclick="toggleMenu(false)" class="text-2xl">✕</button>
         </div>
-        <div class="space-y-10 font-black text-xl italic uppercase">
-            <button onclick="openPage('authPage')" class="block hover:text-yellow-500">Профіль</button>
-            <button onclick="openPage('settingsPage')" class="block hover:text-yellow-500">Налаштування</button>
-            <button onclick="enterAdmin()" class="block text-red-500">Адмін-панель</button>
+        <div class="space-y-8 font-black text-lg uppercase italic">
+            <button onclick="openPage('profilePage')" class="block hover:text-yellow-500">ПРОФІЛЬ</button>
+            <button onclick="openPage('settingsPage')" class="block hover:text-yellow-500">НАЛАШТУВАННЯ</button>
+            <button onclick="tryAdmin()" class="block text-red-500">АДМІНКА</button>
         </div>
     </div>
 
-    <div id="authPage" class="modal">
-        <div class="modal-content text-center slide-up">
-            <button onclick="closeAll()" class="mb-8 opacity-20 font-black">ЗАКРИТИ</button>
+    <div id="profilePage" class="modal">
+        <div class="bg-[var(--bg)] p-10 rounded-[40px] w-full max-w-sm text-center">
             <div id="authContent">
-                <h2 class="text-3xl font-900 mb-8 uppercase italic">Вхід</h2>
-                <button onclick="signInGoogle()" class="btn-google">
-                    <img src="https://www.google.com/favicon.ico" class="w-6"> Продовжити з Google
+                <h2 class="logo-font text-2xl mb-8">ВХІД</h2>
+                <button onclick="login()" class="btn-yellow w-full p-5 flex items-center justify-center gap-3">
+                    <img src="https://www.google.com/favicon.ico" class="w-5"> Google Вхід
                 </button>
             </div>
+            <button onclick="closeAll()" class="mt-8 opacity-30 font-bold">ЗАКРИТИ</button>
         </div>
     </div>
 
     <div id="settingsPage" class="modal">
-        <div class="modal-content slide-up">
-            <button onclick="closeAll()" class="mb-8 opacity-20 font-black">ЗАКРИТИ</button>
-            <h2 class="text-3xl font-900 mb-10 italic uppercase">Налаштування</h2>
-            <div class="space-y-6">
-                <div class="bento p-6 flex justify-between items-center cursor-pointer" onclick="toggleTheme()">
-                    <span class="font-black" id="lang_theme">Тема інтерфейсу</span>
-                    <span id="themeVal" class="bg-yellow-400 text-black px-4 py-2 rounded-xl font-black">☀️</span>
+        <div class="bg-[var(--bg)] p-10 rounded-[40px] w-full max-w-md">
+            <h2 class="logo-font text-2xl mb-10 text-center">SETTINGS</h2>
+            <div class="space-y-4">
+                <div onclick="toggleTheme()" class="bento p-6 flex justify-between items-center cursor-pointer">
+                    <span class="font-bold" id="txtTheme">Тема інтерфейсу</span>
+                    <span id="themeIndicator">☀️</span>
                 </div>
                 <div class="bento p-6">
-                    <span class="font-black block mb-4" id="lang_select">Мова</span>
-                    <div class="flex gap-2" id="langContainer"></div>
+                    <span class="font-bold block mb-4" id="txtLang">Мова</span>
+                    <div class="flex gap-2">
+                        <button onclick="setLang('UA')" class="bg-yellow-400 p-3 rounded-xl text-black font-black">UA</button>
+                        <button onclick="setLang('EN')" class="bg-gray-200 p-3 rounded-xl text-black font-black">EN</button>
+                    </div>
                 </div>
             </div>
+            <button onclick="closeAll()" class="w-full mt-10 opacity-30 font-bold">ЗАКРИТИ</button>
         </div>
     </div>
 
     <div id="adminPage" class="modal">
-        <div class="modal-content !max-w-4xl slide-up">
-            <div class="flex justify-between items-center mb-10">
-                <h2 class="logo-text text-2xl">ADMIN TERMINAL</h2>
-                <button onclick="closeAll()" class="font-black text-red-500">EXIT</button>
+        <div class="bg-[var(--bg)] p-8 rounded-[40px] w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="logo-font text-xl">ADMIN PANEL</h2>
+                <button onclick="closeAll()" class="text-red-500 font-black">ВИЙТИ</button>
             </div>
             <div class="grid md:grid-cols-2 gap-10">
                 <div class="space-y-4">
-                    <input type="text" id="adTitle" placeholder="Назва" class="w-full p-5 bento outline-none">
-                    <input type="number" id="adPrice" placeholder="Ціна" class="w-full p-5 bento outline-none">
-                    <textarea id="adDesc" placeholder="Опис..." class="w-full p-5 bento outline-none h-28"></textarea>
-                    <input type="file" id="adFile" class="hidden" onchange="handleFile(this)">
-                    <button onclick="document.getElementById('adFile').click()" class="w-full p-4 border-2 border-dashed rounded-2xl opacity-50 font-bold">Додати фото</button>
-                    <button onclick="publish()" class="w-full bg-black text-white p-6 rounded-3xl font-black">ОПУБЛІКУВАТИ</button>
+                    <input type="text" id="adName" placeholder="Назва товару" class="w-full p-4 bento outline-none">
+                    <input type="number" id="adPrice" placeholder="Ціна" class="w-full p-4 bento outline-none">
+                    <input type="file" id="adFile" class="hidden" onchange="readImg(this)">
+                    <button onclick="document.getElementById('adFile').click()" class="w-full p-4 border-2 border-dashed rounded-2xl font-bold opacity-40">ДОДАТИ ФОТО</button>
+                    <button onclick="send()" class="w-full bg-black text-white p-5 rounded-3xl font-black">ОПУБЛІКУВАТИ</button>
                 </div>
-                <div>
-                    <p class="text-xs font-black opacity-30 mb-4 uppercase">Користувачі (<span id="uCount">0</span>)</p>
-                    <div id="uList" class="space-y-2 h-64 overflow-y-auto pr-2"></div>
+                <div class="bento p-6 h-64 overflow-y-auto">
+                    <p class="text-[10px] font-black opacity-30 mb-4">КОРИСТУВАЧІ (<span id="userCount">0</span>)</p>
+                    <div id="userList" class="space-y-2"></div>
                 </div>
             </div>
         </div>
@@ -157,7 +157,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
@@ -173,126 +173,119 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        let allProducts = []; let adImg = "";
-
-        // ПОВІДОМЛЕННЯ
-        window.notify = (msg) => {
-            const t = document.getElementById('toast');
-            document.getElementById('toastMsg').innerText = msg;
-            t.classList.add('active');
-            setTimeout(() => t.classList.remove('active'), 3000);
-        };
+        let items = []; let imgData = "";
 
         // ЛОАДЕР
         window.onload = () => setTimeout(() => document.getElementById('loader').style.opacity = "0", 2500);
 
-        // ТЕМА (ВСЮДИ)
+        // ЗАМОК (2555)
+        window.checkLock = () => {
+            if(document.getElementById('passInput').value === "2555") {
+                document.getElementById('siteLock').style.opacity = "0";
+                setTimeout(() => document.getElementById('siteLock').style.display = "none", 600);
+                document.body.style.overflow = "auto";
+                localStorage.setItem('unlocked', 'true');
+            } else { alert("❌ Невірний пароль!"); document.getElementById('passInput').value = ""; }
+        };
+        if(localStorage.getItem('unlocked')) {
+            document.getElementById('siteLock').style.display = "none";
+            document.body.style.overflow = "auto";
+        }
+
+        // ПОВІДОМЛЕННЯ
+        window.showMsg = (t) => {
+            const toast = document.getElementById('toast');
+            toast.innerText = t; toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        };
+
+        // ТЕМА
         window.toggleTheme = () => {
             const isDark = document.body.classList.toggle('dark-mode');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            document.getElementById('themeVal').innerText = isDark ? "🌙" : "☀️";
+            document.getElementById('themeIndicator').innerText = isDark ? "🌙" : "☀️";
         };
         if(localStorage.getItem('theme') === 'dark') toggleTheme();
 
-        // ПАРОЛЬ РОЗРОБНИКА
-        window.unlock = () => {
-            if(document.getElementById('devInput').value === "2555") {
-                document.getElementById('devLock').style.opacity = "0";
-                setTimeout(() => document.getElementById('devLock').style.display = "none", 800);
-                localStorage.setItem('access', 'true');
-            } else notify("Невірний пароль! 🔒");
+        // МОВИ
+        window.setLang = (l) => {
+            document.getElementById('txtTheme').innerText = l === 'UA' ? "Тема інтерфейсу" : "Interface Theme";
+            document.getElementById('txtLang').innerText = l === 'UA' ? "Мова" : "Language";
+            showMsg(l === 'UA' ? "Мову змінено!" : "Language Changed!");
         };
-        if(localStorage.getItem('access')) document.getElementById('devLock').style.display = "none";
 
-        // FIREBASE AUTH
-        window.signInGoogle = async () => {
+        // GOOGLE AUTH
+        window.login = async () => {
             try {
                 const res = await signInWithPopup(auth, provider);
                 const u = res.user;
                 const q = query(collection(db, "sonechko_users"), where("uid", "==", u.uid));
                 const s = await getDocs(q);
                 if(s.empty) await addDoc(collection(db, "sonechko_users"), { uid: u.uid, name: u.displayName, photo: u.photoURL, email: u.email });
-                notify("Привіт, " + u.displayName + "!");
+                showMsg("Привіт, " + u.displayName);
                 closeAll();
-            } catch(e) { notify("Помилка входу ❌"); }
+            } catch(e) { showMsg("Помилка входу ❌"); }
         };
 
         onAuthStateChanged(auth, (u) => {
             if(u) {
-                document.getElementById('avatarImg').src = u.photoURL;
+                document.getElementById('userIcon').src = u.photoURL;
                 document.getElementById('authContent').innerHTML = `
-                    <img src="${u.photoURL}" class="w-24 h-24 rounded-full mx-auto mb-6 border-4 border-yellow-400">
-                    <h2 class="text-2xl font-black mb-10">${u.displayName}</h2>
-                    <button onclick="auth.signOut().then(()=>location.reload())" class="bg-red-500 text-white p-5 rounded-3xl font-black w-full">ВИЙТИ</button>
+                    <img src="${u.photoURL}" class="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-yellow-400">
+                    <p class="font-black mb-6">${u.displayName}</p>
+                    <button onclick="auth.signOut().then(()=>location.reload())" class="bg-red-500 text-white p-4 rounded-2xl font-bold w-full">ВИЙТИ</button>
                 `;
             }
         });
 
-        // МОВИ (РЕАЛЬНО РОБЛЯТЬ)
-        const translations = {
-            "UA": { theme: "Тема інтерфейсу", lang: "Мова", msg: "Змінено на Українську" },
-            "US": { theme: "Interface Theme", lang: "Language", msg: "Changed to English" }
-        };
-        window.setLang = (l) => {
-            document.getElementById('lang_theme').innerText = translations[l].theme;
-            document.getElementById('lang_select').innerText = translations[l].lang;
-            notify(translations[l].msg);
-        };
-        document.getElementById('langContainer').innerHTML = `
-            <button onclick="setLang('UA')" class="bento p-4 font-black">UA</button>
-            <button onclick="setLang('US')" class="bento p-4 font-black">US</button>
-        `;
-
-        // МАГАЗИН
+        // МАГАЗИН (FIRESTORE)
         onSnapshot(query(collection(db, "sonechko_items"), orderBy("date", "desc")), (snap) => {
-            allProducts = snap.docs.map(d => ({id: d.id, ...d.data()}));
-            filterItems();
+            items = snap.docs.map(d => d.data());
+            draw();
         });
 
-        window.filterItems = () => {
-            const grid = document.getElementById('productGrid');
-            const search = document.getElementById('searchInput').value.toLowerCase();
+        window.draw = () => {
+            const grid = document.getElementById('grid');
+            const search = document.getElementById('search').value.toLowerCase();
             grid.innerHTML = '';
-            allProducts.filter(p => p.title.toLowerCase().includes(search)).forEach(p => {
+            items.filter(i => i.title.toLowerCase().includes(search)).forEach(i => {
                 grid.innerHTML += `
-                    <div class="bento p-5 slide-up">
-                        <img src="${p.img}" class="w-full h-52 object-cover rounded-[25px] mb-4 shadow-lg">
-                        <h4 class="font-black uppercase text-sm">${p.title}</h4>
-                        <p class="text-yellow-500 font-black text-xl mt-1">${p.price} грн</p>
+                    <div class="bento p-4 slide-up">
+                        <img src="${i.img}" class="w-full h-40 object-cover rounded-2xl mb-4 shadow-md">
+                        <h4 class="font-black text-xs uppercase">${i.title}</h4>
+                        <p class="text-yellow-500 font-black text-lg">${i.price} грн</p>
                     </div>`;
             });
         };
 
-        // АДМІНКА
-        window.enterAdmin = () => { if(prompt("Admin Pass:") === "254") openPage('adminPage'); else notify("Доступ закритий! 🔐"); };
-        window.handleFile = (i) => { const r = new FileReader(); r.onload = (e) => adImg = e.target.result; r.readAsDataURL(i.files[0]); };
-        window.publish = async () => {
-            const t = document.getElementById('adTitle').value;
+        // АДМІНКА (254)
+        window.tryAdmin = () => { if(prompt("Pass:") === "254") openPage('adminPage'); else showMsg("Доступ закритий 🔒"); };
+        window.readImg = (i) => { const r = new FileReader(); r.onload = (e) => imgData = e.target.result; r.readAsDataURL(i.files[0]); };
+        window.send = async () => {
+            const n = document.getElementById('adName').value;
             const p = document.getElementById('adPrice').value;
-            if(!t || !p || !adImg) return notify("Заповни все! ⚠️");
-            await addDoc(collection(db, "sonechko_items"), { title: t, price: p, img: adImg, date: Date.now() });
-            notify("Товар опубліковано! ✅");
+            if(!n || !p || !imgData) return showMsg("Заповни все! ⚠️");
+            await addDoc(collection(db, "sonechko_items"), { title: n, price: p, img: imgData, date: Date.now() });
+            showMsg("✅ Опубліковано!");
             closeAll();
         };
 
-        // КОРИСТУВАЧІ
+        // КОРИСТУВАЧІ В АДМІНЦІ
         onSnapshot(collection(db, "sonechko_users"), (snap) => {
-            document.getElementById('uCount').innerText = snap.size;
-            const list = document.getElementById('uList');
-            list.innerHTML = '';
+            document.getElementById('userCount').innerText = snap.size;
+            const uL = document.getElementById('userList');
+            uL.innerHTML = '';
             snap.forEach(d => {
                 const u = d.data();
-                list.innerHTML += `
-                    <div class="bento p-3 flex items-center gap-3 text-[10px] font-bold">
-                        <img src="${u.photo}" class="w-8 h-8 rounded-full">
-                        <span>${u.name}</span>
-                    </div>`;
+                uL.innerHTML += `<div class="p-2 bento text-[10px] flex items-center gap-2">
+                    <img src="${u.photo}" class="w-6 h-6 rounded-full"> <span>${u.name}</span>
+                </div>`;
             });
         });
 
         // НАВІГАЦІЯ
         window.toggleMenu = (s) => {
-            document.getElementById('sideMenu').style.left = s ? "0" : "-350px";
+            document.getElementById('sideMenu').classList.toggle('open', s);
             document.body.classList.toggle('menu-open', s);
         };
         window.openPage = (id) => { closeAll(); document.getElementById(id).classList.add('active'); toggleMenu(false); };
