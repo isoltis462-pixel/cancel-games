@@ -3,107 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PureDrop Cloud</title>
+    <title>Сонечко — Bento Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --bg: #0b0b0c; --surface: #161618; --text: #ffffff; --accent: #3b82f6; --border: rgba(255,255,255,0.06); 
-        }
-        body.light-mode { 
-            --bg: #f3f4f6; --surface: #ffffff; --text: #111827; --border: rgba(0,0,0,0.1); 
-        }
-
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; transition: 0.3s; margin: 0; }
+        :root { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --accent: #f59e0b; --border: #e2e8f0; }
+        .dark-mode { --bg: #020617; --card: #0f172a; --text: #f1f5f9; --accent: #fbbf24; --border: #1e293b; }
         
-        /* Кнопка Register */
-        .register-btn { position: absolute; top: 20px; right: 20px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #666; cursor: pointer; z-index: 100; border: none; background: none; }
-        .register-btn:hover { color: var(--accent); }
-
-        .game-card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; transition: 0.3s; cursor: pointer; }
-        .game-card:hover { transform: translateY(-5px); border-color: var(--accent); }
-
-        /* Повноекранні вікна */
-        .modal-full { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: none; padding: 40px; overflow-y: auto; }
+        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.4s; overflow-x: hidden; }
+        .bento-card { background: var(--card); border: 1px solid var(--border); border-radius: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); transition: 0.3s; }
+        .bento-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
         
-        .circle-btn { width: 50px; height: 50px; border-radius: 25px; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; margin-top: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-
-        .admin-input { width: 100%; background: #1a1a1c; border: 1px solid #333; padding: 15px; border-radius: 12px; color: white; margin-bottom: 10px; outline: none; }
-        #customAlert { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: none; background: var(--accent); color: white; padding: 10px 20px; border-radius: 10px; font-weight: bold; }
+        .modal { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: none; padding: 20px; overflow-y: auto; }
+        .admin-text { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.6; }
+        
+        /* Анімації */
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .page-active { display: block; animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        .profile-img { width: 100px; height: 100px; border-radius: 40px; object-cover; border: 4px solid var(--accent); }
     </style>
 </head>
-<body class="dark-mode">
+<body>
 
-    <div id="customAlert"></div>
-
-    <button onclick="openAuth()" class="register-btn">Register / Login</button>
-
-    <header class="py-16 text-center">
-        <h1 class="text-6xl font-black italic text-blue-600">PURE<span class="text-white mix-blend-difference">DROP</span></h1>
-        <div class="mt-8 px-4"><input type="text" id="search" oninput="drawGames()" placeholder="Пошук ігор..." class="w-full max-w-md p-4 rounded-2xl border-none outline-none" style="background: var(--surface); color: var(--text);"></div>
-    </header>
-
-    <main class="max-w-6xl mx-auto px-6 pb-20">
-        <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
-    </main>
-
-    <div style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
-        <a href="https://t.me/leytenant_ukra" target="_blank" class="circle-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="#3b82f6"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.24.36-.49.99-.75 3.88-1.69 6.47-2.8 7.76-3.32 3.69-1.5 4.45-1.76 4.96-1.77.11 0 .36.03.52.17.13.12.17.28.19.39.02.09.02.24.01.35z"/></svg>
-        </a>
-        <div class="circle-btn" onclick="toggleModal('settingsModal', true)">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </div>
-    </div>
-
-    <div id="settingsModal" class="modal-full">
-        <div class="max-w-md mx-auto">
-            <h2 class="text-3xl font-black mb-10 italic">SETTINGS</h2>
-            <div class="mb-6">
-                <p class="text-xs font-bold text-gray-500 mb-2">APPEARANCE</p>
-                <button onclick="switchTheme()" class="w-full p-5 rounded-2xl text-left bg-zinc-800 text-white font-bold" id="themeBtn">🌙 DARK MODE</button>
+    <!-- ГОЛОВНИЙ ЕКРАН -->
+    <div id="mainPage" class="p-4 md:p-8">
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-800 tracking-tighter">СОНЕЧКО<span class="text-amber-500">.</span></h1>
+                <p class="text-xs opacity-50 font-bold uppercase">Магазин в м. Бортятин</p>
             </div>
-            <div class="mb-6">
-                <p class="text-xs font-bold text-gray-500 mb-2">LANGUAGE</p>
-                <div class="grid grid-cols-1 gap-2">
-                    <button class="w-full p-4 rounded-xl bg-zinc-800 text-white text-left">🇺🇦 Українська</button>
-                    <button class="w-full p-4 rounded-xl bg-zinc-800 text-white text-left">🇺🇸 English</button>
+            <div class="flex gap-3">
+                <button onclick="openPage('settingsPage')" class="bento-card p-4">⚙️</button>
+                <button onclick="openPage('profilePage')" id="headerAvatar" class="bento-card p-2 w-14 h-14 flex items-center justify-center overflow-hidden">👤</button>
+            </div>
+        </header>
+
+        <div class="flex flex-col md:flex-row gap-6">
+            <!-- ЛІВА ПАНЕЛЬ: ФІЛЬТРИ -->
+            <aside class="md:w-64 space-y-6">
+                <div class="bento-card p-6">
+                    <h3 class="font-bold mb-4">Фільтри</h3>
+                    <div class="space-y-3 text-sm">
+                        <label class="flex items-center gap-2"><input type="checkbox" class="accent-amber-500"> В наявності</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" class="accent-amber-500"> Акція</label>
+                        <hr class="border-border">
+                        <p class="text-xs opacity-50 uppercase">Категорії</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-amber-100 dark:bg-amber-900/30 text-amber-600 px-3 py-1 rounded-full text-xs font-bold cursor-pointer">Ігри</span>
+                            <span class="bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full text-xs font-bold cursor-pointer">Техніка</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- ЦЕНТР: ПОШУК ТА ТОВАРИ -->
+            <div class="flex-1 space-y-6">
+                <input type="text" id="mainSearch" oninput="renderStore()" placeholder="Пошук товарів..." class="bento-card w-full p-6 outline-none text-lg">
+                <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Товари тут -->
                 </div>
             </div>
-            <button onclick="toggleModal('settingsModal', false)" class="w-full py-4 text-gray-500 text-xs font-bold mt-10">CLOSE</button>
         </div>
     </div>
 
-    <div id="authModal" class="fixed inset-0 bg-black/95 z-[9000] hidden items-center justify-center p-6">
-        <div class="bg-zinc-900 p-8 rounded-3xl w-full max-w-xs text-center">
-            <h3 class="text-xl font-bold mb-4">Admin Password</h3>
-            <input type="password" id="passInput" class="admin-input" placeholder="Пароль">
-            <button onclick="checkPass()" class="w-full bg-blue-600 py-4 rounded-xl font-bold text-white">LOGIN</button>
-            <button onclick="toggleModal('authModal', false)" class="mt-4 text-gray-500 text-xs">Cancel</button>
-        </div>
-    </div>
-
-    <div id="adminPanel" class="modal-full">
-        <div class="max-w-2xl mx-auto">
-            <h2 class="text-3xl font-black mb-10">ADMIN PANEL</h2>
-            <div class="bg-zinc-800 p-6 rounded-2xl mb-8">
-                <input type="text" id="gName" class="admin-input" placeholder="Назва гри">
-                <input type="text" id="gIcon" class="admin-input" placeholder="URL іконки">
-                <textarea id="gDesc" class="admin-input h-20" placeholder="Опис"></textarea>
-                <button onclick="addGame()" class="w-full bg-blue-600 py-4 rounded-xl font-bold">ОПУБЛІКУВАТИ ДЛЯ ВСІХ</button>
+    <!-- СТОРІНКА ПРОФІЛЮ -->
+    <div id="profilePage" class="modal">
+        <div class="max-w-md mx-auto py-10">
+            <button onclick="closeAll()" class="mb-8 font-bold opacity-50">← НАЗАД</button>
+            <div class="bento-card p-8 text-center space-y-6">
+                <div class="relative inline-block">
+                    <img id="userPhoto" src="https://via.placeholder.com/100" class="profile-img mx-auto">
+                    <input type="file" id="photoUpload" class="hidden" onchange="uploadPhoto(this)">
+                    <button onclick="document.getElementById('photoUpload').click()" class="absolute bottom-0 right-0 bg-amber-500 p-2 rounded-full text-white shadow-lg">📸</button>
+                </div>
+                <div class="space-y-4">
+                    <input type="text" id="userName" placeholder="Ваше ім'я" class="bento-card w-full p-4 text-center">
+                    <input type="text" id="userPhone" placeholder="+380..." class="bento-card w-full p-4 text-center">
+                    <button onclick="saveProfile()" class="w-full bg-amber-500 p-5 rounded-3xl font-bold text-white">ЗБЕРЕГТИ ПРОФІЛЬ</button>
+                </div>
             </div>
-            <div id="adminList" class="space-y-2"></div>
-            <button onclick="toggleModal('adminPanel', false)" class="w-full mt-10 text-gray-500 text-xs font-bold uppercase">Exit Admin</button>
         </div>
     </div>
 
-    <div id="gamePage" class="modal-full" style="z-index: 6000;">
-        <div class="max-w-3xl mx-auto" id="gameContent"></div>
+    <!-- СТОРІНКА НАЛАШТУВАНЬ ТА МОВ -->
+    <div id="settingsPage" class="modal">
+        <div class="max-w-2xl mx-auto py-10">
+            <button onclick="closeAll()" class="mb-8 font-bold opacity-50">← НАЗАД</button>
+            
+            <div class="space-y-6">
+                <div class="bento-card p-6 flex justify-between items-center">
+                    <span class="font-bold">Тема оформлення</span>
+                    <button onclick="toggleTheme()" class="bg-slate-200 dark:bg-slate-800 p-3 rounded-2xl" id="themeLabel">🌙 Темна</button>
+                </div>
+
+                <div class="bento-card p-6">
+                    <h3 class="font-bold mb-4">Вибір мови</h3>
+                    <input type="text" id="langSearch" oninput="filterLangs()" placeholder="Пошук мови (напр. Ukraine)..." class="w-full p-4 mb-4 bg-slate-50 dark:bg-slate-900 rounded-2xl outline-none border border-border">
+                    <div id="langList" class="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto pr-2">
+                        <!-- Мови тут -->
+                    </div>
+                </div>
+
+                <!-- ПРИХОВАНА АДМІНКА -->
+                <div class="pt-20 text-center">
+                    <button onclick="openAdmin()" class="admin-text">System v2.4.1 Admin Access</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- СТОРІНКА ТОВАРУ (ДЕТАЛЬНА) -->
+    <div id="productDetail" class="modal">
+        <div id="detailContent"></div>
+    </div>
+
+    <!-- АДМІН ПАНЕЛЬ -->
+    <div id="adminPanel" class="modal" style="z-index: 9999;">
+        <div class="max-w-xl mx-auto">
+            <h2 class="admin-text mb-10 text-center">Cloud Database Management</h2>
+            <div class="bento-card p-6 space-y-4">
+                <input type="text" id="adName" class="admin-text w-full p-4 bento-card" placeholder="Назва">
+                <input type="text" id="adPrice" class="admin-text w-full p-4 bento-card" placeholder="Ціна">
+                <textarea id="adDesc" class="admin-text w-full p-4 bento-card h-20" placeholder="Опис"></textarea>
+                <div class="flex gap-2">
+                    <input type="text" id="adImg" class="admin-text flex-1 p-4 bento-card" placeholder="URL фото">
+                    <button class="bg-slate-100 p-4 rounded-2xl text-xs" onclick="alert('Виберіть файл у майбутньому')">📁</button>
+                </div>
+                <button onclick="adminPublish()" class="w-full bg-black text-white p-5 rounded-3xl admin-text">Publish to Store</button>
+            </div>
+            <button onclick="toggleModal('adminPanel', false)" class="w-full mt-10 admin-text">Exit Terminal</button>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
@@ -116,96 +151,128 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        let allGames = [];
-        let theme = localStorage.getItem('theme') || 'dark';
+        let storeData = [];
+        let languages = [
+            {n: "Українська", c: "UA"}, {n: "English", c: "US"}, {n: "Deutsch", c: "DE"}, 
+            {n: "Français", c: "FR"}, {n: "Español", c: "ES"}, {n: "Italiano", c: "IT"},
+            {n: "Polski", c: "PL"}, {n: "日本語", c: "JP"}, {n: "한국어", c: "KR"}
+        ];
 
-        // --- ТЕМА ---
-        window.switchTheme = () => {
-            theme = theme === 'dark' ? 'light' : 'dark';
-            document.body.className = theme + '-mode';
-            localStorage.setItem('theme', theme);
-            document.getElementById('themeBtn').innerText = theme === 'dark' ? '🌙 DARK MODE' : '☀️ LIGHT MODE';
+        // --- ЛОГІКА СТОРІНОК ---
+        window.openPage = (id) => {
+            document.querySelectorAll('.modal').forEach(m => m.classList.remove('page-active'));
+            document.getElementById(id).classList.add('page-active');
+            document.body.style.overflow = 'hidden';
         };
-        document.body.className = theme + '-mode';
-
-        // --- КНОПКИ ТА МОДАЛКИ ---
-        window.toggleModal = (id, show) => document.getElementById(id).style.display = show ? 'block' : 'none';
-        window.openAuth = () => {
-            document.getElementById('authModal').style.display = 'flex';
-        };
-        window.checkPass = () => {
-            if(document.getElementById('passInput').value === "puredrop_admin_panel_254") {
-                toggleModal('authModal', false);
-                toggleModal('adminPanel', true);
-            } else { alert("Невірний пароль!"); }
+        window.closeAll = () => {
+            document.querySelectorAll('.modal').forEach(m => m.classList.remove('page-active'));
+            document.body.style.overflow = 'auto';
         };
 
-        // --- РОБОТА З ІГРАМИ (ГЛОБАЛЬНО) ---
-        onSnapshot(query(collection(db, "games"), orderBy("date", "desc")), (snap) => {
-            allGames = snap.docs.map(d => ({id: d.id, ...d.data()}));
-            drawGames();
-            drawAdminList();
+        // --- ПРОФІЛЬ ---
+        window.saveProfile = () => {
+            localStorage.setItem('sun_name', document.getElementById('userName').value);
+            localStorage.setItem('sun_phone', document.getElementById('userPhone').value);
+            alert("Профіль оновлено!");
+        };
+        window.uploadPhoto = (input) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('userPhoto').src = e.target.result;
+                localStorage.setItem('sun_photo', e.target.result);
+                updateHeaderAvatar();
+            };
+            reader.readAsDataURL(input.files[0]);
+        };
+        function updateHeaderAvatar() {
+            const photo = localStorage.getItem('sun_photo');
+            if(photo) document.getElementById('headerAvatar').innerHTML = `<img src="${photo}" class="w-full h-full object-cover">`;
+        }
+
+        // --- МОВИ ---
+        window.filterLangs = () => {
+            const list = document.getElementById('langList');
+            const search = document.getElementById('langSearch').value.toLowerCase();
+            list.innerHTML = '';
+            languages.filter(l => l.n.toLowerCase().includes(search)).forEach(l => {
+                list.innerHTML += `<button class="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl text-left text-sm flex gap-2">
+                    <img src="https://flagcdn.com/w20/${l.c.toLowerCase()}.png" class="h-4 my-auto"> ${l.n}
+                </button>`;
+            });
+        };
+
+        // --- МАГАЗИН ---
+        onSnapshot(query(collection(db, "sonechko_bento"), orderBy("date", "desc")), (snap) => {
+            storeData = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            renderStore();
         });
 
-        window.addGame = async () => {
-            const data = {
-                name: document.getElementById('gName').value,
-                icon: document.getElementById('gIcon').value,
-                desc: document.getElementById('gDesc').value,
-                date: Date.now()
-            };
-            await addDoc(collection(db, "games"), data);
-            msg("Гру додано для всіх!");
-        };
-
-        window.drawGames = () => {
-            const grid = document.getElementById('grid');
+        window.renderStore = () => {
+            const grid = document.getElementById('productGrid');
+            const search = document.getElementById('mainSearch').value.toLowerCase();
             grid.innerHTML = '';
-            const search = document.getElementById('search').value.toLowerCase();
-
-            allGames.filter(g => g.name.toLowerCase().includes(search)).forEach(g => {
+            storeData.filter(p => p.name.toLowerCase().includes(search)).forEach(p => {
                 grid.innerHTML += `
-                    <div class="game-card p-4" onclick="openGame('${g.id}')">
-                        <img src="${g.icon}" class="w-full aspect-square rounded-2xl object-cover mb-3">
-                        <p class="font-black text-[10px] uppercase truncate">${g.name}</p>
+                    <div class="bento-card p-4 cursor-pointer" onclick="viewDetail('${p.id}')">
+                        <img src="${p.img}" class="w-full h-48 object-cover rounded-2xl mb-4">
+                        <h4 class="font-bold text-sm">${p.name}</h4>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-amber-500 font-bold">${p.price} грн</span>
+                            <span class="text-[10px] opacity-40 uppercase font-black">Купити →</span>
+                        </div>
                     </div>`;
             });
         };
 
-        window.openGame = (id) => {
-            const g = allGames.find(x => x.id === id);
-            document.getElementById('gameContent').innerHTML = `
-                <button onclick="toggleModal('gamePage', false)" class="mb-10 text-gray-500 font-bold text-xs">← НАЗАД</button>
-                <div class="flex flex-col md:flex-row gap-10 items-center mb-10">
-                    <img src="${g.icon}" class="w-40 h-40 rounded-[40px] shadow-2xl">
-                    <div class="text-center md:text-left">
-                        <h2 class="text-4xl font-black italic uppercase">${g.name}</h2>
-                        <a href="https://ukraine-gta.com.ua/uagta_online_signed.exe" target="_blank" class="inline-block mt-6 bg-blue-600 px-10 py-4 rounded-xl font-bold">СКАЧАТИ WINDOWS</a>
+        window.viewDetail = (id) => {
+            const p = storeData.find(x => x.id === id);
+            document.getElementById('detailContent').innerHTML = `
+                <div class="max-w-4xl mx-auto py-10">
+                    <button onclick="closeAll()" class="mb-8 font-bold opacity-50">← ЗАКРИТИ</button>
+                    <div class="grid md:grid-cols-2 gap-10">
+                        <div class="bento-card p-4"><img src="${p.img}" class="w-full rounded-2xl shadow-xl"></div>
+                        <div class="space-y-6">
+                            <h2 class="text-4xl font-black italic">${p.name}</h2>
+                            <p class="text-3xl font-bold text-amber-500">${p.price} грн</p>
+                            <p class="opacity-60 leading-relaxed">${p.desc}</p>
+                            <div class="bento-card p-6 bg-slate-50 dark:bg-slate-900">
+                                <h4 class="font-bold mb-4 text-xs opacity-50">ВІДГУКИ (14)</h4>
+                                <p class="text-sm">"Крутий товар, все прийшло швидко!" — Іван</p>
+                            </div>
+                            <a href="https://t.me/leytenant_ukra" class="block w-full bg-amber-500 text-white text-center py-6 rounded-[30px] font-black text-lg shadow-xl">ЗАМОВИТИ ЗАРАЗ</a>
+                        </div>
                     </div>
-                </div>
-                <p class="text-gray-400 leading-relaxed">${g.desc}</p>
-            `;
-            toggleModal('gamePage', true);
-        };
-
-        window.drawAdminList = () => {
-            const list = document.getElementById('adminList');
-            list.innerHTML = '';
-            allGames.forEach(g => {
-                list.innerHTML += `<div class="flex justify-between items-center bg-black/20 p-3 rounded-lg">
-                    <span class="text-xs font-bold">${g.name}</span>
-                    <button onclick="delGame('${g.id}')" class="text-red-500 text-[10px] font-bold">ВИДАЛИТИ</button>
                 </div>`;
-            });
+            openPage('productDetail');
         };
 
-        window.delGame = async (id) => { if(confirm("Видалити?")) await deleteDoc(doc(db, "games", id)); };
+        // --- АДМІНКА ---
+        window.openAdmin = () => {
+            if(prompt("Enter Terminal Pass:") === "254") openPage('adminPanel');
+        };
+        window.adminPublish = async () => {
+            await addDoc(collection(db, "sonechko_bento"), {
+                name: document.getElementById('adName').value,
+                price: document.getElementById('adPrice').value,
+                desc: document.getElementById('adDesc').value,
+                img: document.getElementById('adImg').value,
+                date: Date.now()
+            });
+            alert("Data Uploaded.");
+        };
 
-        function msg(m) {
-            const a = document.getElementById('customAlert');
-            a.innerText = m; a.style.display = 'block';
-            setTimeout(() => a.style.display='none', 3000);
-        }
+        // Ініціалізація теми та профілю
+        window.toggleTheme = () => {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('sun_theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        };
+        if(localStorage.getItem('sun_theme') === 'dark') document.body.classList.add('dark-mode');
+        
+        document.getElementById('userName').value = localStorage.getItem('sun_name') || '';
+        document.getElementById('userPhone').value = localStorage.getItem('sun_phone') || '';
+        document.getElementById('userPhoto').src = localStorage.getItem('sun_photo') || 'https://via.placeholder.com/100';
+        updateHeaderAvatar();
+        filterLangs();
     </script>
 </body>
 </html>
