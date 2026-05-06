@@ -1,4 +1,122 @@
-async function startCall(){
+[07.05.2026 0:03] Deniska: <!DOCTYPE html><html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Telegram PRO Calls</title>  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>  <style>
+    *{box-sizing:border-box;font-family:Arial}
+    body{margin:0;background:#0b1220;color:white;height:100vh;display:flex;justify-content:center;align-items:center}
+
+    .app{width:1050px;height:680px;background:#0f172a;border-radius:16px;display:flex;overflow:hidden}
+
+    .sidebar{width:32%;background:#111827;padding:10px;overflow-y:auto;border-right:1px solid #1f2937}
+    .chat{width:68%;display:flex;flex-direction:column}
+
+    .item{padding:10px;margin:6px 0;background:#0b1220;border-radius:10px;cursor:pointer}
+    .item:hover{background:#1f2937}
+
+    .header{padding:12px;background:#111827;border-bottom:1px solid #1f2937;display:flex;justify-content:space-between;align-items:center}
+
+    .messages{flex:1;padding:10px;overflow-y:auto}
+
+    .inputBox{display:flex;gap:6px;padding:10px;border-top:1px solid #1f2937}
+
+    input{width:100%;padding:10px;border:none;border-radius:10px;background:#0b1220;color:white}
+
+    button{padding:10px 12px;border:none;border-radius:10px;background:#2563eb;color:white;cursor:pointer}
+    .call{background:#22c55e}
+    .end{background:#ef4444}
+
+    video{width:48%;border-radius:10px;margin:5px}
+
+    .videos{display:flex;justify-content:space-between;flex-wrap:wrap;padding:10px}
+  </style></head>
+<body><div id="login">
+  <h2>Mini Telegram PRO Calls</h2>
+  <button onclick="login()">Увійти</button>
+</div><div class="app" id="app" style="display:none">  <div class="sidebar">
+    <div id="users"></div>
+  </div>  <div class="chat"><div class="header">
+  <div id="title">Чат</div>
+  <div>
+    <button class="call" onclick="startCall()">📞 Call</button>
+    <button class="end" onclick="endCall()">⛔</button>
+  </div>
+</div>
+
+<div class="messages" id="messages"></div>
+
+<div class="inputBox">
+  <input id="text" placeholder="Повідомлення..." onkeypress="if(event.key==='Enter')send()" />
+  <button onclick="send()">➤</button>
+</div>
+
+<div class="videos">
+  <video id="localVideo" autoplay muted></video>
+  <video id="remoteVideo" autoplay></video>
+</div>
+
+  </div>
+</div><script>
+const firebaseConfig={
+  apiKey:"AIzaSyC2fGoE-epXf6a71bvRHFrs0_e8wl5k8No",
+  authDomain:"belegrami-90368.firebaseapp.com",
+  projectId:"belegrami-90368"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.firestore();
+
+let current=null;
+let pc;
+let localStream;
+let roomId;
+
+function login(){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());}
+
+auth.onAuthStateChanged(async u=>{
+  if(!u)return;
+  document.getElementById("login").style.display="none";
+  document.getElementById("app").style.display="flex";
+
+  await db.collection("users").doc(u.uid).set({name:u.displayName},{merge:true});
+  loadUsers();
+
+  listenCalls();
+});
+
+function loadUsers(){
+  db.collection("users").onSnapshot(s=>{
+    let box=document.getElementById("users");
+    box.innerHTML="";
+    s.forEach(d=>{
+      if(d.id===auth.currentUser.uid)return;
+      box.innerHTML+=<div class='item' onclick="openChat('${d.id}','${d.data().name}')">${d.data().name}</div>;
+    });
+  });
+}
+
+function openChat(id,name){
+  current=id;
+  document.getElementById("title").innerText=name;
+  roomId=[auth.currentUser.uid,current].sort().join("_");
+}
+
+function send(){
+  let text=document.getElementById("text").value;
+  if(!text||!current)return;
+
+  db.collection("chats").doc(roomId).collection("m").add({
+    text,
+    uid:auth.currentUser.uid,
+    time:Date.now()
+  });
+
+  document.getElementById("text").value="";
+}
+
+// ---------------- FULL CALLS PRO ----------------
+[07.05.2026 0:03] Deniska: async function startCall(){
   localStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
   document.getElementById("localVideo").srcObject=localStream;
 
