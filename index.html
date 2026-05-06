@@ -1,191 +1,180 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Belegram STAGE 2 FULL</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telegram Web</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <style>
+    :root {
+      --bg-color: #0e1621;
+      --sidebar-bg: #17212b;
+      --light-text: #f5f5f5;
+      --gray-text: #708499;
+      --tg-blue: #2481cc;
+      --my-msg: #2b5278;
+      --peer-msg: #182533;
+      --input-bg: #17212b;
+    }
 
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    * { box-sizing: border-box; font-family: Roboto, system-ui, -apple-system, sans-serif; }
+    body { margin: 0; height: 100vh; background-color: var(--bg-color); color: var(--light-text); display: flex; overflow: hidden; }
 
-<style>
-*{box-sizing:border-box;font-family:Arial}
-body{margin:0;height:100vh;background:#0b1220;color:white;display:flex;justify-content:center;align-items:center}
+    /* AUTH PAGE */
+    #login-page { position: fixed; inset: 0; background: var(--bg-color); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+    .tg-logo { width: 120px; height: 120px; background: var(--tg-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    .btn-google { background: white; color: #000; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 500; cursor: pointer; font-size: 16px; transition: 0.2s; }
+    .btn-google:hover { background: #eee; }
 
-#login{width:360px;padding:20px;background:#111827;border-radius:16px;text-align:center}
-button{padding:10px;border:none;border-radius:10px;background:#2563eb;color:white;width:100%;margin-top:10px;cursor:pointer}
+    /* LAYOUT */
+    .sidebar { width: 300px; background: var(--sidebar-bg); border-right: 1px solid #0b1118; display: flex; flex-direction: column; }
+    .chat-area { flex: 1; display: flex; flex-direction: column; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-blend-mode: overlay; background-color: #0e1621; }
 
-.app{display:none;width:1200px;height:720px;background:#111827;border-radius:16px;overflow:hidden}
-.sidebar{width:30%;background:#0f172a;padding:10px;overflow-y:auto}
-.chat{width:70%;display:flex;flex-direction:column}
-.item{padding:10px;margin:6px 0;background:#1f2937;border-radius:10px;cursor:pointer}
-.header{padding:10px;background:#111827;display:flex;justify-content:space-between}
-.messages{flex:1;padding:10px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
-.msg{padding:8px;border-radius:10px;background:#1f2937;max-width:70%}
-.me{background:#2563eb;align-self:flex-end}
-.inputBox{display:flex;padding:10px;gap:6px}
-input{flex:1;padding:10px;border:none;border-radius:10px;background:#0b1220;color:white}
+    /* SIDEBAR */
+    .sb-header { padding: 12px; display: flex; gap: 10px; }
+    .search-input { flex: 1; background: #242f3d; border: none; border-radius: 20px; padding: 8px 15px; color: white; outline: none; }
+    .contact-list { flex: 1; overflow-y: auto; }
+    .contact { padding: 10px 15px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+    .contact:hover { background: #202b36; }
+    .contact.active { background: var(--tg-blue); }
+    .avatar { width: 48px; height: 48px; border-radius: 50%; background: #5288c1; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
 
-.small{font-size:11px;color:#9ca3af}
+    /* CHAT HEADER */
+    .chat-header { height: 56px; background: var(--sidebar-bg); border-bottom: 1px solid #0b1118; display: flex; align-items: center; padding: 0 20px; }
+    
+    /* MESSAGES */
+    .msg-container { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+    .bubble { max-width: 450px; padding: 8px 12px; border-radius: 12px; font-size: 14.5px; position: relative; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+    .bubble.me { align-self: flex-end; background: var(--my-msg); border-bottom-right-radius: 2px; }
+    .bubble.peer { align-self: flex-start; background: var(--peer-msg); border-bottom-left-radius: 2px; }
+    .m-time { font-size: 11px; color: var(--gray-text); margin-left: 8px; float: right; margin-top: 4px; }
 
-.groupBar{padding:8px;background:#0b1220;display:flex;gap:6px}
-</style>
+    /* INPUT */
+    .input-bar { padding: 10px 20px; background: var(--sidebar-bg); display: flex; align-items: center; gap: 15px; }
+    .input-bar input { flex: 1; background: transparent; border: none; color: white; font-size: 16px; outline: none; }
+    .send-btn { color: var(--tg-blue); cursor: pointer; font-size: 24px; border: none; background: none; }
+  </style>
 </head>
 <body>
 
-<div id="login">
-<h2>Belegram STAGE 2</h2>
-<button onclick="login()">Увійти через Google</button>
+<div id="login-page">
+  <div class="tg-logo">
+    <svg width="60" height="60" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.53-1.39.52-.46-.01-1.33-.26-1.98-.48-.8-.27-1.43-.42-1.37-.89.03-.25.38-.51 1.07-.78 4.2-1.82 7-3.03 8.4-3.61 4-.1.83.1 1.08.1.55 0 1.12.21 1.22.84z"/></svg>
+  </div>
+  <h1 style="margin-bottom: 5px;">Belegram</h1>
+  <p style="color: var(--gray-text); margin-bottom: 30px;">Ввійдіть, щоб почати спілкування</p>
+  <button class="btn-google" onclick="login()">Увійти через Google</button>
 </div>
-
-<div class="app" id="app">
 
 <div class="sidebar">
-<div class="groupBar">
-<button onclick="mode='dm';loadUsers()">DM</button>
-<button onclick="mode='group';loadGroups()">Groups</button>
-</div>
-<div id="users"></div>
-</div>
-
-<div class="chat">
-<div class="header">
-<div id="title">Belegram</div>
-<button onclick="createGroup()">➕</button>
+  <div class="sb-header">
+    <input type="text" class="search-input" placeholder="Пошук" id="search" oninput="loadUsers()">
+  </div>
+  <div class="contact-list" id="contacts"></div>
 </div>
 
-<div class="messages" id="messages"></div>
-
-<div class="inputBox">
-<input id="text" placeholder="Message..." onkeypress="if(event.key==='Enter')send()" />
-<input type="file" id="file" />
-<button onclick="send()">➤</button>
-</div>
-</div>
+<div class="chat-area">
+  <div class="chat-header">
+    <div id="active-user-name" style="font-weight: 500;">Виберіть чат</div>
+  </div>
+  <div class="msg-container" id="chat-box"></div>
+  <div class="input-bar">
+    <input type="text" id="m-input" placeholder="Повідомлення" onkeypress="if(event.key==='Enter')sendMessage()">
+    <button class="send-btn" onclick="sendMessage()">➤</button>
+  </div>
 </div>
 
 <script>
-const firebaseConfig={
-apiKey:"AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
-authDomain:"keysbrawl-c4ae6.firebaseapp.com",
-projectId:"keysbrawl-c4ae6",
-storageBucket:"keysbrawl-c4ae6.appspot.com"
-}
+  const firebaseConfig = {
+    apiKey: "AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
+    authDomain: "keysbrawl-c4ae6.firebaseapp.com",
+    projectId: "keysbrawl-c4ae6",
+    storageBucket: "keysbrawl-c4ae6.firebasestorage.app",
+    messagingSenderId: "1090859079662",
+    appId: "1:1090859079662:web:932bf6463cb0601083a0ff"
+  };
 
-firebase.initializeApp(firebaseConfig)
-const auth=firebase.auth()
-const db=firebase.firestore()
-const storage=firebase.storage()
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  let selectedPeer = null;
 
-let current=null
-let mode='dm'
-let reply=null
+  function login() {
+    auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+  }
 
-// LOGIN
-auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+  auth.onAuthStateChanged(async user => {
+    if (user) {
+      document.getElementById('login-page').style.display = 'none';
+      await db.collection("users").doc(user.uid).set({
+        name: user.displayName,
+        email: user.email,
+        photo: user.photoURL
+      }, { merge: true });
+      loadUsers();
+    }
+  });
 
-// APP
-auth.onAuthStateChanged(u=>{
-if(!u)return
+  function loadUsers() {
+    db.collection("users").onSnapshot(snap => {
+      const list = document.getElementById('contacts');
+      list.innerHTML = "";
+      snap.forEach(doc => {
+        if (doc.id === auth.currentUser.uid) return;
+        const u = doc.data();
+        const div = document.createElement('div');
+        div.className = 'contact';
+        div.innerHTML = `
+          <div class="avatar">${u.name[0]}</div>
+          <div style="flex:1">
+            <div style="font-weight:500">${u.name}</div>
+            <div style="color:var(--gray-text); font-size:13px">натисніть, щоб написати</div>
+          </div>
+        `;
+        div.onclick = () => selectChat(doc.id, u.name);
+        list.appendChild(div);
+      });
+    });
+  }
 
-document.getElementById('login').style.display='none'
-document.getElementById('app').style.display='flex'
+  function selectChat(id, name) {
+    selectedPeer = id;
+    document.getElementById('active-user-name').innerText = name;
+    listenMessages();
+  }
 
-loadUsers()
-requestNotification()
-})
+  function sendMessage() {
+    const input = document.getElementById('m-input');
+    if (!input.value || !selectedPeer) return;
+    const chatId = [auth.currentUser.uid, selectedPeer].sort().join("_");
+    db.collection("chats").doc(chatId).collection("messages").add({
+      text: input.value,
+      sender: auth.currentUser.uid,
+      timestamp: Date.now()
+    });
+    input.value = "";
+  }
 
-// NOTIFICATIONS
-function requestNotification(){
-if(Notification.permission!="granted") Notification.requestPermission()
-}
-
-function notify(text){
-if(Notification.permission=="granted") new Notification("Belegram",{body:text})
-}
-
-// USERS
-function loadUsers(){
-mode='dm'
-db.collection('users').onSnapshot(s=>{
-let box=document.getElementById('users')
-box.innerHTML=''
-s.forEach(d=>{
-if(d.id==auth.currentUser.uid)return
-box.innerHTML+=`<div class='item' onclick="openChat('${d.id}','${d.data().name}')">${d.data().name}</div>`
-})
-})
-}
-
-// GROUPS
-function loadGroups(){
-mode='group'
-db.collection('groups').onSnapshot(s=>{
-let box=document.getElementById('users')
-box.innerHTML=''
-s.forEach(d=>{
-box.innerHTML+=`<div class='item' onclick="openGroup('${d.id}')">${d.data().name}</div>`
-})
-})
-}
-
-function createGroup(){
-let name=prompt('Group name')
-if(!name)return
-db.collection('groups').add({name,users:[auth.currentUser.uid]})
-}
-
-function openGroup(id){current=id;loadMessages(true)}
-function openChat(id,name){current=id;document.getElementById('title').innerText=name;loadMessages(false)}
-
-function chatId(){if(!current)return null;return current}
-
-// SEND (text + image)
-async function send(){
-let t=document.getElementById('text').value
-let f=document.getElementById('file').files[0]
-if(!t && !f)return
-
-let data={text:t,uid:auth.currentUser.uid,time:Date.now(),reply}
-
-if(f){
-try{
-let ref=storage.ref('files/'+Date.now()+f.name)
-await ref.put(f)
-data.file=await ref.getDownloadURL()
-}catch(e){alert('Storage not enabled')}
-}
-
-db.collection(mode=='dm'?'chats':'groupsChats').doc(chatId()).collection('m').add(data)
-
-reply=null
-}
-
-// LOAD MESSAGES
-function loadMessages(isGroup){
-db.collection(isGroup?'groupsChats':'chats').doc(chatId()).collection('m')
-.orderBy('time')
-.onSnapshot(s=>{
-let box=document.getElementById('messages')
-box.innerHTML=''
-
-s.forEach(d=>{
-let m=d.data()
-if(m.uid!=auth.currentUser.uid) notify(m.text||'new message')
-
-box.innerHTML+=`
-<div class='msg ${m.uid==auth.currentUser.uid?'me':''}'>
-${m.reply?'<div class="small">↩ '+m.reply+'</div>':''}
-${m.text||''}
-${m.file?'<br><img src="'+m.file+'" width="120"/>':''}
-</div>`
-})
-})
-}
-
+  function listenMessages() {
+    const chatId = [auth.currentUser.uid, selectedPeer].sort().join("_");
+    db.collection("chats").doc(chatId).collection("messages").orderBy("timestamp").onSnapshot(snap => {
+      const box = document.getElementById('chat-box');
+      box.innerHTML = "";
+      snap.forEach(doc => {
+        const m = doc.data();
+        const isMe = m.sender === auth.currentUser.uid;
+        box.innerHTML += `
+          <div class="bubble ${isMe ? 'me' : 'peer'}">
+            ${m.text}
+            <span class="m-time">${new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+          </div>
+        `;
+      });
+      box.scrollTop = box.scrollHeight;
+    });
+  }
 </script>
-
 </body>
 </html>
