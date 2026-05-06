@@ -3,150 +3,188 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Belegram PRO CALLS</title>
+<title>Belegram STAGE 2 FULL</title>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
 <style>
 *{box-sizing:border-box;font-family:Arial}
 body{margin:0;height:100vh;background:#0b1220;color:white;display:flex;justify-content:center;align-items:center}
 
-.app{width:1200px;height:720px;display:none;background:#111827;border-radius:16px;overflow:hidden}
+#login{width:360px;padding:20px;background:#111827;border-radius:16px;text-align:center}
+button{padding:10px;border:none;border-radius:10px;background:#2563eb;color:white;width:100%;margin-top:10px;cursor:pointer}
+
+.app{display:none;width:1200px;height:720px;background:#111827;border-radius:16px;overflow:hidden}
 .sidebar{width:30%;background:#0f172a;padding:10px;overflow-y:auto}
 .chat{width:70%;display:flex;flex-direction:column}
 .item{padding:10px;margin:6px 0;background:#1f2937;border-radius:10px;cursor:pointer}
 .header{padding:10px;background:#111827;display:flex;justify-content:space-between}
-.messages{flex:1;padding:10px;overflow-y:auto}
-.msg{padding:8px;margin:5px;background:#1f2937;border-radius:10px;max-width:70%}
+.messages{flex:1;padding:10px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.msg{padding:8px;border-radius:10px;background:#1f2937;max-width:70%}
 .me{background:#2563eb;align-self:flex-end}
-.inputBox{display:flex;padding:10px;gap:5px}
-input{flex:1;padding:10px;border-radius:10px;border:none;background:#0b1220;color:white}
-button{padding:10px;border:none;border-radius:10px;background:#2563eb;color:white;cursor:pointer}
-#callBox{position:fixed;top:10px;right:10px;background:#111827;padding:10px;border-radius:10px;display:none}
+.inputBox{display:flex;padding:10px;gap:6px}
+input{flex:1;padding:10px;border:none;border-radius:10px;background:#0b1220;color:white}
+
+.small{font-size:11px;color:#9ca3af}
+
+.groupBar{padding:8px;background:#0b1220;display:flex;gap:6px}
 </style>
 </head>
 <body>
 
+<div id="login">
+<h2>Belegram STAGE 2</h2>
+<button onclick="login()">Увійти через Google</button>
+</div>
+
 <div class="app" id="app">
-<div class="sidebar" id="users"></div>
+
+<div class="sidebar">
+<div class="groupBar">
+<button onclick="mode='dm';loadUsers()">DM</button>
+<button onclick="mode='group';loadGroups()">Groups</button>
+</div>
+<div id="users"></div>
+</div>
 
 <div class="chat">
 <div class="header">
-<div id="title">Chat</div>
-<button onclick="startCall()">📞</button>
+<div id="title">Belegram</div>
+<button onclick="createGroup()">➕</button>
 </div>
 
 <div class="messages" id="messages"></div>
 
 <div class="inputBox">
-<input id="text" placeholder="message..." onkeypress="if(event.key==='Enter')send()" />
+<input id="text" placeholder="Message..." onkeypress="if(event.key==='Enter')send()" />
+<input type="file" id="file" />
 <button onclick="send()">➤</button>
 </div>
 </div>
 </div>
 
-<div id="callBox">📞 Call active <button onclick="endCall()">End</button></div>
-
 <script>
-const firebaseConfig={apiKey:"AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",authDomain:"keysbrawl-c4ae6.firebaseapp.com",projectId:"keysbrawl-c4ae6"}
+const firebaseConfig={
+apiKey:"AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
+authDomain:"keysbrawl-c4ae6.firebaseapp.com",
+projectId:"keysbrawl-c4ae6",
+storageBucket:"keysbrawl-c4ae6.appspot.com"
+}
+
 firebase.initializeApp(firebaseConfig)
 const auth=firebase.auth()
 const db=firebase.firestore()
+const storage=firebase.storage()
 
 let current=null
-let pc=null
-let localStream
+let mode='dm'
+let reply=null
 
-// LOGIN QUICK
-auth.signInAnonymously().then(()=>{
- document.getElementById("app").style.display="flex"
- loadUsers()
+// LOGIN
+auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+
+// APP
+auth.onAuthStateChanged(u=>{
+if(!u)return
+
+document.getElementById('login').style.display='none'
+document.getElementById('app').style.display='flex'
+
+loadUsers()
+requestNotification()
 })
 
-function chatId(){return [auth.currentUser.uid,current].sort().join("_")}
+// NOTIFICATIONS
+function requestNotification(){
+if(Notification.permission!="granted") Notification.requestPermission()
+}
 
-// USERS (demo)
+function notify(text){
+if(Notification.permission=="granted") new Notification("Belegram",{body:text})
+}
+
+// USERS
 function loadUsers(){
- db.collection("users").onSnapshot(s=>{
-  let box=document.getElementById("users")
-  box.innerHTML=""
-  s.forEach(d=>{
-   if(d.id===auth.currentUser.uid)return
-   box.innerHTML+=`<div class='item' onclick="openChat('${d.id}')">${d.id}</div>`
-  })
- })
+mode='dm'
+db.collection('users').onSnapshot(s=>{
+let box=document.getElementById('users')
+box.innerHTML=''
+s.forEach(d=>{
+if(d.id==auth.currentUser.uid)return
+box.innerHTML+=`<div class='item' onclick="openChat('${d.id}','${d.data().name}')">${d.data().name}</div>`
+})
+})
 }
 
-function openChat(id){current=id;loadMessages()}
-
-function send(){
-let t=document.getElementById("text").value
-if(!t||!current)return
-
-let id=chatId()
-db.collection("chats").doc(id).collection("m").add({text:t,uid:auth.currentUser.uid,time:Date.now()})
-document.getElementById("text").value=""
+// GROUPS
+function loadGroups(){
+mode='group'
+db.collection('groups').onSnapshot(s=>{
+let box=document.getElementById('users')
+box.innerHTML=''
+s.forEach(d=>{
+box.innerHTML+=`<div class='item' onclick="openGroup('${d.id}')">${d.data().name}</div>`
+})
+})
 }
 
-function loadMessages(){
-db.collection("chats").doc(chatId()).collection("m").orderBy("time")
+function createGroup(){
+let name=prompt('Group name')
+if(!name)return
+db.collection('groups').add({name,users:[auth.currentUser.uid]})
+}
+
+function openGroup(id){current=id;loadMessages(true)}
+function openChat(id,name){current=id;document.getElementById('title').innerText=name;loadMessages(false)}
+
+function chatId(){if(!current)return null;return current}
+
+// SEND (text + image)
+async function send(){
+let t=document.getElementById('text').value
+let f=document.getElementById('file').files[0]
+if(!t && !f)return
+
+let data={text:t,uid:auth.currentUser.uid,time:Date.now(),reply}
+
+if(f){
+try{
+let ref=storage.ref('files/'+Date.now()+f.name)
+await ref.put(f)
+data.file=await ref.getDownloadURL()
+}catch(e){alert('Storage not enabled')}
+}
+
+db.collection(mode=='dm'?'chats':'groupsChats').doc(chatId()).collection('m').add(data)
+
+reply=null
+}
+
+// LOAD MESSAGES
+function loadMessages(isGroup){
+db.collection(isGroup?'groupsChats':'chats').doc(chatId()).collection('m')
+.orderBy('time')
 .onSnapshot(s=>{
-let box=document.getElementById("messages")
-box.innerHTML=""
+let box=document.getElementById('messages')
+box.innerHTML=''
+
 s.forEach(d=>{
 let m=d.data()
-let cls=m.uid==auth.currentUser.uid?'me':'msg'
-box.innerHTML+=`<div class='msg ${cls}'>${m.text}</div>`
+if(m.uid!=auth.currentUser.uid) notify(m.text||'new message')
+
+box.innerHTML+=`
+<div class='msg ${m.uid==auth.currentUser.uid?'me':''}'>
+${m.reply?'<div class="small">↩ '+m.reply+'</div>':''}
+${m.text||''}
+${m.file?'<br><img src="'+m.file+'" width="120"/>':''}
+</div>`
 })
-box.scrollTop=box.scrollHeight
-})}
-
-// =====================
-// 🔥 REAL DISCORD-LIKE CALLS (WEBRTC)
-// =====================
-
-const servers={iceServers:[{urls:"stun:stun.l.google.com:19302"}]}
-
-async function startCall(){
- document.getElementById("callBox").style.display="block"
-
- localStream=await navigator.mediaDevices.getUserMedia({audio:true,video:true})
-
- pc=new RTCPeerConnection(servers)
- localStream.getTracks().forEach(t=>pc.addTrack(t,localStream))
-
- pc.ontrack=e=>{
-  let v=document.createElement("video")
-  v.srcObject=e.streams[0]
-  v.autoplay=true
-  document.body.appendChild(v)
- }
-
- const offer=await pc.createOffer()
- await pc.setLocalDescription(offer)
-
- db.collection("calls").doc(chatId()).set({offer})
-
- db.collection("calls").doc(chatId()).onSnapshot(async doc=>{
-  let data=doc.data()
-  if(!pc.currentRemoteDescription && data?.answer){
-    await pc.setRemoteDescription(new RTCSessionDescription(data.answer))
-  }
- })
-
- pc.onicecandidate=e=>{
-  if(e.candidate){
-    db.collection("calls").doc(chatId()).update({candidate:e.candidate.toJSON()})
-  }
- }
+})
 }
 
-function endCall(){
- if(pc) pc.close()
- document.getElementById("callBox").style.display="none"
-}
 </script>
 
 </body>
