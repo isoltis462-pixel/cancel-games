@@ -2,48 +2,51 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Сонечко — Інтернет-магазин</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Сонечко — Магазин твого настрою</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --main: #ffffff; --text: #1a1a1a; --accent: #facc15; --bg-alt: #f3f4f6; }
-        .dark-mode { --main: #121212; --text: #f9fafb; --accent: #fbbf24; --bg-alt: #1f2937; }
+        :root { --main: #ffffff; --text: #1a1a1a; --accent: #facc15; --bg-alt: #f3f4f6; --glass: rgba(255,255,255,0.7); }
+        .dark-mode { --main: #0f172a; --text: #f8fafc; --accent: #fbbf24; --bg-alt: #1e293b; --glass: rgba(15,23,42,0.7); }
 
-        body { background: var(--main); color: var(--text); font-family: 'Inter', sans-serif; transition: 0.3s; margin: 0; overflow-x: hidden; }
+        body { background: var(--main); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.3s; margin: 0; overflow-x: hidden; }
         
-        /* ЛОАДЕР */
+        /* ЛОАДЕР З ВИПРАВЛЕННЯМ */
         #loader { 
             position: fixed; inset: 0; background: var(--main); z-index: 9999; 
-            display: flex; align-items: center; justify-content: center; transition: 0.5s;
+            display: flex; align-items: center; justify-content: center; 
+            transition: opacity 0.8s ease-out, visibility 0.8s;
         }
-        .loading-text { font-size: 3rem; font-weight: 800; letter-spacing: -2px; position: relative; display: inline-block; color: #ddd; }
+        .loader-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+        .loading-text { font-size: 3.5rem; font-weight: 800; letter-spacing: -3px; position: relative; color: #e5e7eb; }
         .loading-text::before {
             content: "СОНЕЧКО"; position: absolute; left: 0; top: 0; width: 0; height: 100%;
             background: linear-gradient(to right, #0057b7 50%, #ffd700 50%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            overflow: hidden; animation: fillText 2s forwards cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden; animation: fillText 2.2s forwards cubic-bezier(0.4, 0, 0.2, 1);
         }
         @keyframes fillText { 0% { width: 0; } 100% { width: 100%; } }
 
-        /* МЕНЮ-ГАМБУРГЕР */
+        /* АНІМОВАНЕ МЕНЮ-ГАМБУРГЕР */
         #sideMenu { 
             position: fixed; top: 0; left: -320px; width: 300px; height: 100%; 
-            background: var(--main); box-shadow: 20px 0 50px rgba(0,0,0,0.1); 
-            z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 40px 20px; 
+            background: var(--main); border-right: 1px solid rgba(0,0,0,0.05);
+            z-index: 2000; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); padding: 40px 25px; 
         }
-        #sideMenu.open { left: 0; }
-        .menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1500; display: none; backdrop-filter: blur(4px); }
+        #sideMenu.open { left: 0; box-shadow: 20px 0 60px rgba(0,0,0,0.1); }
+        .menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 1500; display: none; backdrop-filter: blur(4px); }
 
-        /* КАРТКИ */
-        .glass-card { background: var(--bg-alt); border-radius: 24px; border: 1px solid rgba(0,0,0,0.05); transition: 0.3s; }
-        .glass-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        /* СТИЛЬ BENTO ТА КАРТКИ */
+        .bento-card { background: var(--bg-alt); border-radius: 28px; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(0,0,0,0.03); }
+        .bento-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,0.06); }
 
         .modal { position: fixed; inset: 0; z-index: 3000; display: none; padding: 20px; background: var(--main); overflow-y: auto; }
-        .active { display: block; animation: slideUp 0.4s ease; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .active { display: block; animation: slideUp 0.5s ease forwards; }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        .admin-small { font-size: 10px; opacity: 0.5; cursor: pointer; }
+        .admin-trigger { font-size: 10px; opacity: 0.4; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body>
@@ -55,120 +58,145 @@
     <div class="menu-overlay" id="overlay" onclick="toggleMenu(false)"></div>
     <div id="sideMenu">
         <div class="flex flex-col h-full">
-            <div class="mb-10">
-                <h2 class="text-2xl font-800">МЕНЮ</h2>
+            <div class="flex justify-between items-center mb-12">
+                <h2 class="text-3xl font-800 tracking-tighter">МЕНЮ</h2>
+                <button onclick="toggleMenu(false)" class="text-2xl">✕</button>
             </div>
-            <nav class="space-y-6 font-semibold">
-                <button onclick="openPage('authPage')" class="block w-full text-left hover:text-yellow-500">Реєстрація / Логін</button>
-                <button onclick="openPage('settingsPage')" class="block w-full text-left hover:text-yellow-500">Налаштування</button>
-                <a href="https://t.me/leytenant_ukra" class="block hover:text-yellow-500">Підтримка Telegram</a>
+            <nav class="space-y-8 font-semibold text-lg">
+                <button onclick="openPage('authPage')" class="block w-full text-left hover:text-yellow-500 transition">👤 Профіль / Вхід</button>
+                <button onclick="openPage('settingsPage')" class="block w-full text-left hover:text-yellow-500 transition">⚙️ Налаштування</button>
+                <a href="https://t.me/leytenant_ukra" class="block hover:text-yellow-500 transition">🆘 Підтримка</a>
             </nav>
-            <div class="mt-auto">
-                <p id="menuUserStatus" class="text-xs opacity-50">Ви не увійшли</p>
-                <button onclick="openAdmin()" class="admin-small mt-2">ADMIN ACCESS</button>
+            <div class="mt-auto border-t pt-6">
+                <p id="menuUserStatus" class="text-xs font-bold opacity-40 mb-4 uppercase">Статус: Гість</p>
+                <div onclick="openAdmin()" class="admin-trigger">System Control v2.5</div>
             </div>
         </div>
     </div>
 
-    <header class="p-6 flex justify-between items-center max-w-7xl mx-auto border-b">
-        <button onclick="toggleMenu(true)" class="text-2xl">☰</button>
-        <h1 class="text-2xl font-800 tracking-tighter">СОНЕЧКО☀️</h1>
-        <div id="headerProfile" onclick="openPage('profilePage')" class="w-10 h-10 rounded-full bg-gray-200 cursor-pointer overflow-hidden"></div>
+    <header class="p-6 sticky top-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-[1000] border-b border-black/5">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <button onclick="toggleMenu(true)" class="w-12 h-12 bento-card flex items-center justify-center text-xl">☰</button>
+            <h1 class="text-2xl font-800 tracking-tighter cursor-pointer" onclick="location.reload()">СОНЕЧКО☀️</h1>
+            <div id="headerProfile" onclick="openPage('profilePage')" class="w-12 h-12 rounded-2xl bento-card cursor-pointer overflow-hidden flex items-center justify-center">👤</div>
+        </div>
     </header>
 
-    <div class="max-w-7xl mx-auto p-6">
-        <div class="w-full h-48 rounded-[32px] bg-gradient-to-r from-yellow-400 to-amber-500 flex items-center p-10 text-white relative overflow-hidden">
+    <main class="max-w-7xl mx-auto p-6 space-y-10">
+        <div class="w-full h-56 rounded-[40px] bg-gradient-to-br from-yellow-300 via-amber-400 to-orange-400 flex items-center p-12 text-white relative overflow-hidden shadow-2xl shadow-yellow-500/20">
             <div class="relative z-10">
-                <h2 class="text-4xl font-800">ЗНИЖКИ 50%</h2>
-                <p class="font-bold opacity-80 uppercase text-xs mt-2">Тільки сьогодні в Бортятині</p>
+                <h2 class="text-5xl font-800 italic">SALE -50%</h2>
+                <p class="font-bold opacity-90 uppercase text-sm mt-3 tracking-widest">Тільки в Бортятині та Онлайн</p>
             </div>
-            <div class="absolute right-[-20px] bottom-[-20px] text-9xl opacity-20">☀️</div>
+            <div class="absolute right-[-40px] bottom-[-40px] text-[15rem] opacity-20">☀️</div>
         </div>
-    </div>
 
-    <main class="max-w-7xl mx-auto p-6 flex flex-col md:flex-row gap-8">
-        <aside class="md:w-1/4 space-y-6">
-            <div class="glass-card p-6">
-                <h3 class="font-bold mb-4">Пошук</h3>
-                <input type="text" id="mainSearch" oninput="renderProducts()" placeholder="Назва товару..." class="w-full p-3 rounded-xl border-none bg-white dark:bg-zinc-800 shadow-sm">
-            </div>
-            <div class="glass-card p-6">
-                <h3 class="font-bold mb-4">Категорії</h3>
-                <div class="space-y-2 text-sm">
-                    <label class="flex gap-2"><input type="checkbox"> Побутова техніка</label>
-                    <label class="flex gap-2"><input type="checkbox"> Електроніка</label>
+        <div class="flex flex-col md:flex-row gap-10">
+            <aside class="md:w-1/4 space-y-6">
+                <div class="bento-card p-6">
+                    <h3 class="font-bold mb-4 text-xs uppercase opacity-50">Що ви шукаєте?</h3>
+                    <input type="text" id="mainSearch" oninput="renderStore()" placeholder="Назва товару..." class="w-full p-4 rounded-2xl border-none bg-white dark:bg-slate-800 shadow-inner outline-none">
                 </div>
-            </div>
-        </aside>
+                <div class="bento-card p-8">
+                    <h3 class="font-bold mb-6 text-xs uppercase opacity-50">Категорії</h3>
+                    <div class="space-y-4 font-semibold text-sm">
+                        <div class="flex items-center justify-between cursor-pointer hover:text-yellow-500"><span>Всі товари</span> <span class="opacity-30">→</span></div>
+                        <div class="flex items-center justify-between cursor-pointer hover:text-yellow-500"><span>Електроніка</span> <span class="opacity-30">→</span></div>
+                        <div class="flex items-center justify-between cursor-pointer hover:text-yellow-500"><span>Аксесуари</span> <span class="opacity-30">→</span></div>
+                    </div>
+                </div>
+            </aside>
 
-        <div class="flex-1">
-            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            <div class="flex-1">
+                <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    </div>
+            </div>
         </div>
     </main>
 
     <div id="authPage" class="modal p-10">
-        <div class="max-w-md mx-auto text-center">
-            <button onclick="closeAll()" class="mb-10 opacity-50">← Назад</button>
-            <h2 class="text-3xl font-800 mb-6">Вхід через Google</h2>
-            <button onclick="fakeGoogleAuth()" class="w-full border-2 border-black p-4 rounded-2xl font-bold flex items-center justify-center gap-2">
-                <img src="https://www.google.com/favicon.ico" class="w-5"> Продовжити з Google
-            </button>
+        <div class="max-w-md mx-auto text-center py-20">
+            <button onclick="closeAll()" class="mb-10 text-xs font-black opacity-30 uppercase tracking-widest">← Назад на головну</button>
+            <h2 class="text-4xl font-800 mb-4">Вхід у кабінет</h2>
+            <p class="opacity-50 mb-10 text-sm">Використовуйте пошту для швидкої реєстрації</p>
+            <input type="email" id="authEmail" placeholder="Ваша пошта (example@gmail.com)" class="w-full p-5 bento-card mb-6 border-none text-center">
+            <button onclick="startAuth()" class="w-full bg-yellow-400 p-6 rounded-3xl font-black text-lg shadow-xl shadow-yellow-500/30">ПРОДОВЖИТИ</button>
         </div>
     </div>
 
     <div id="createProfilePage" class="modal p-10">
-        <div class="max-w-md mx-auto text-center">
-            <h2 class="text-3xl font-800 mb-10">Створити профіль</h2>
-            <div class="relative w-32 h-32 mx-auto mb-8">
-                <img id="tempAvatar" src="https://via.placeholder.com/150" class="w-full h-full rounded-[40px] object-cover border-4 border-yellow-400">
-                <input type="file" id="fileAvatar" class="hidden" onchange="handleFile(this)">
-                <button onclick="document.getElementById('fileAvatar').click()" class="absolute bottom-0 right-0 bg-black text-white p-2 rounded-full">📸</button>
+        <div class="max-w-md mx-auto text-center py-10">
+            <h2 class="text-3xl font-800 mb-10">Налаштуйте профіль</h2>
+            <div class="relative w-40 h-40 mx-auto mb-10">
+                <img id="tempAvatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="w-full h-full rounded-[50px] object-cover border-8 border-white shadow-2xl">
+                <input type="file" id="fileAvatar" class="hidden" accept="image/*" onchange="previewFile(this)">
+                <button onclick="document.getElementById('fileAvatar').click()" class="absolute -bottom-2 -right-2 bg-yellow-400 p-4 rounded-2xl shadow-lg">📸</button>
             </div>
-            <input type="text" id="regName" placeholder="Ваше ім'я" class="w-full p-4 glass-card mb-4 border-none outline-none">
-            <input type="text" id="regPhone" placeholder="Номер телефону" class="w-full p-4 glass-card mb-8 border-none outline-none">
-            <button onclick="saveNewUser()" class="w-full bg-yellow-400 p-5 rounded-2xl font-black">ЗБЕРЕГТИ</button>
+            <div class="space-y-4">
+                <input type="text" id="regName" placeholder="Ім'я та Прізвище" class="w-full p-5 bento-card border-none outline-none text-center font-bold">
+                <input type="text" id="regPhone" placeholder="+380..." class="w-full p-5 bento-card border-none outline-none text-center font-bold">
+                <button onclick="finishReg()" class="w-full bg-black text-white p-6 rounded-3xl font-black mt-6">ЗБЕРЕГТИ ДАНІ</button>
+            </div>
         </div>
     </div>
 
     <div id="settingsPage" class="modal p-10">
         <div class="max-w-2xl mx-auto">
-            <button onclick="closeAll()" class="mb-10">← Закрити</button>
-            <h2 class="text-3xl font-800 mb-8 italic">SETTINGS</h2>
+            <button onclick="closeAll()" class="mb-12 font-bold opacity-30 tracking-widest uppercase text-xs">← Close Settings</button>
+            <h2 class="text-4xl font-800 mb-12 italic">НАЛАШТУВАННЯ</h2>
             
-            <div class="space-y-6">
-                <button onclick="toggleTheme()" class="w-full p-6 glass-card text-left font-bold flex justify-between">
-                    <span>Тема оформлення</span>
-                    <span id="themeInfo">День ☀️</span>
-                </button>
+            <div class="space-y-8">
+                <div class="bento-card p-8 flex justify-between items-center cursor-pointer" onclick="toggleTheme()">
+                    <div>
+                        <h4 class="font-bold">Тема інтерфейсу</h4>
+                        <p class="text-xs opacity-50" id="themeStatus">Зараз: Світла</p>
+                    </div>
+                    <div class="w-14 h-8 bg-gray-200 dark:bg-slate-700 rounded-full p-1 transition">
+                        <div id="themeCircle" class="w-6 h-6 bg-white rounded-full shadow-md transition transform translate-x-0"></div>
+                    </div>
+                </div>
                 
-                <div class="glass-card p-6">
-                    <h4 class="font-bold mb-4">Вибір мови</h4>
-                    <input type="text" id="langSearch" oninput="filterLangs()" placeholder="Пошук мови..." class="w-full p-3 rounded-xl border mb-4">
-                    <div id="langList" class="grid grid-cols-2 gap-2 h-40 overflow-y-auto"></div>
+                <div class="bento-card p-8">
+                    <h4 class="font-bold mb-6">Мова / Language</h4>
+                    <input type="text" id="langSearch" oninput="renderLangs()" placeholder="Пошук мови..." class="w-full p-4 bg-white dark:bg-slate-800 rounded-2xl mb-6 outline-none border border-black/5">
+                    <div id="langGrid" class="grid grid-cols-2 gap-3 max-h-56 overflow-y-auto pr-2">
+                        </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="adminPanel" class="modal p-10">
-        <div class="max-w-2xl mx-auto">
-            <h2 class="text-xs uppercase font-black opacity-30 mb-10">Central Management System</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                <div class="space-y-4">
-                    <input type="text" id="adTitle" placeholder="Назва товару" class="w-full p-3 glass-card border-none">
-                    <input type="text" id="adPrice" placeholder="Ціна" class="w-full p-3 glass-card border-none">
-                    <textarea id="adDesc" placeholder="Опис" class="w-full p-3 glass-card border-none h-20"></textarea>
-                    <input type="file" id="adFile" class="hidden" onchange="handleAdImg(this)">
-                    <button onclick="document.getElementById('adFile').click()" class="w-full p-3 bg-gray-100 text-xs font-bold rounded-xl">ВИБРАТИ ФОТО</button>
-                    <button onclick="publish()" class="w-full bg-black text-white p-4 rounded-xl font-bold">ОПУБЛІКУВАТИ</button>
+    <div id="adminPanel" class="modal p-10" style="background: #fdfdfd;">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex justify-between items-end mb-12">
+                <h2 class="admin-trigger opacity-100 text-lg">Admin Dashboard v2.5</h2>
+                <button onclick="closeAll()" class="text-red-500 font-bold text-xs uppercase">Exit Terminal</button>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-10">
+                <div class="space-y-5">
+                    <h3 class="font-bold text-sm opacity-40 uppercase">Додати товар</h3>
+                    <input type="text" id="adTitle" placeholder="Назва" class="w-full p-4 bento-card border-none outline-none">
+                    <input type="text" id="adPrice" placeholder="Ціна (грн)" class="w-full p-4 bento-card border-none outline-none">
+                    <textarea id="adDesc" placeholder="Опис товару..." class="w-full p-4 bento-card border-none outline-none h-32"></textarea>
+                    <div class="flex gap-4 items-center">
+                        <input type="file" id="adFile" class="hidden" onchange="handleAdFile(this)">
+                        <button onclick="document.getElementById('adFile').click()" class="bg-gray-100 px-6 py-4 rounded-2xl text-xs font-bold uppercase">Вибрати фото</button>
+                        <img id="adPreview" class="w-16 h-16 object-cover rounded-xl hidden">
+                    </div>
+                    <button onclick="publishItem()" class="w-full bg-black text-white p-6 rounded-3xl font-bold uppercase tracking-widest">Опублікувати</button>
                 </div>
-                <div class="glass-card p-4 overflow-y-auto max-h-80">
-                    <h4 class="text-[10px] font-bold mb-3">КОРИСТУВАЧІ</h4>
-                    <div id="adminUsersList" class="space-y-2"></div>
+                <div>
+                    <h3 class="font-bold text-sm opacity-40 uppercase mb-5">Користувачі & Статус</h3>
+                    <div id="adminUsers" class="space-y-3 max-h-[500px] overflow-y-auto">
+                        </div>
                 </div>
             </div>
-            <button onclick="closeAll()" class="admin-small">Close Session</button>
         </div>
+    </div>
+
+    <div id="productDetail" class="modal">
+        <div id="productContent" class="max-w-5xl mx-auto py-10"></div>
     </div>
 
     <script type="module">
@@ -186,126 +214,184 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        let store = [];
-        let curAvatar = "";
-        let curAdImg = "";
+        let items = [];
+        let profilePic = "";
+        let adminPic = "";
 
-        // ЛОАДЕР
-        window.addEventListener('load', () => {
-            setTimeout(() => { document.getElementById('loader').style.opacity = '0'; 
-            setTimeout(() => document.getElementById('loader').style.display = 'none', 500); }, 2000);
-        });
+        // ФІКС ЛОАДЕРА
+        function hideLoader() {
+            const loader = document.getElementById('loader');
+            if(loader) loader.classList.add('loader-hidden');
+        }
+        window.addEventListener('load', () => setTimeout(hideLoader, 2500));
+        setTimeout(hideLoader, 5000); // Запасний варіант
 
-        // МЕНЮ
+        // НАВІГАЦІЯ
         window.toggleMenu = (s) => {
             document.getElementById('sideMenu').classList.toggle('open', s);
             document.getElementById('overlay').style.display = s ? 'block' : 'none';
         };
-
-        // СТОРІНКИ
         window.openPage = (id) => {
             closeAll();
             document.getElementById(id).classList.add('active');
             toggleMenu(false);
+            window.scrollTo(0,0);
         };
         window.closeAll = () => {
             document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
         };
 
-        // ФОТО
-        window.handleFile = (input) => {
+        // ТЕМА
+        window.toggleTheme = () => {
+            const isDark = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('sun_theme', isDark ? 'dark' : 'light');
+            updateThemeUI();
+        };
+        function updateThemeUI() {
+            const isDark = document.body.classList.contains('dark-mode');
+            document.getElementById('themeStatus').innerText = isDark ? "Зараз: Темна" : "Зараз: Світла";
+            document.getElementById('themeCircle').style.transform = isDark ? "translateX(24px)" : "translateX(0)";
+        }
+        if(localStorage.getItem('sun_theme') === 'dark') { document.body.classList.add('dark-mode'); updateThemeUI(); }
+
+        // ОБРОБКА ФОТО (ГАЛЕРЕЯ)
+        window.previewFile = (input) => {
             const reader = new FileReader();
             reader.onload = (e) => {
-                curAvatar = e.target.result;
-                document.getElementById('tempAvatar').src = curAvatar;
+                profilePic = e.target.result;
+                document.getElementById('tempAvatar').src = profilePic;
             };
             reader.readAsDataURL(input.files[0]);
         };
-        window.handleAdImg = (input) => {
+        window.handleAdFile = (input) => {
             const reader = new FileReader();
-            reader.onload = (e) => curAdImg = e.target.result;
+            reader.onload = (e) => {
+                adminPic = e.target.result;
+                const pre = document.getElementById('adPreview');
+                pre.src = adminPic; pre.classList.remove('hidden');
+            };
             reader.readAsDataURL(input.files[0]);
         };
 
-        // АВТЕНТИФІКАЦІЯ
-        window.fakeGoogleAuth = () => {
-            const email = prompt("Введіть пошту для Google Login:");
-            if(email) {
-                localStorage.setItem('temp_email', email);
+        // АВТОРИЗАЦІЯ ТА ПРОФІЛЬ
+        window.startAuth = () => {
+            const mail = document.getElementById('authEmail').value;
+            if(mail.includes('@')) {
+                localStorage.setItem('sun_temp_mail', mail);
                 openPage('createProfilePage');
-            }
+            } else alert("Введіть коректну пошту!");
         };
 
-        window.saveNewUser = async () => {
+        window.finishReg = async () => {
             const u = {
                 name: document.getElementById('regName').value,
                 phone: document.getElementById('regPhone').value,
-                email: localStorage.getItem('temp_email'),
-                photo: curAvatar,
+                email: localStorage.getItem('sun_temp_mail'),
+                photo: profilePic || "https://via.placeholder.com/150",
                 date: Date.now()
             };
             await addDoc(collection(db, "sonechko_users"), u);
-            localStorage.setItem('sun_user', JSON.stringify(u));
+            localStorage.setItem('sun_session', JSON.stringify(u));
             location.reload();
         };
 
-        // РЕНДЕР ТОВАРІВ
+        // МАГАЗИН (RENDER)
         onSnapshot(query(collection(db, "sonechko_items"), orderBy("date", "desc")), (snap) => {
-            store = snap.docs.map(d => ({id: d.id, ...d.data()}));
-            renderProducts();
+            items = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            renderStore();
         });
 
-        window.renderProducts = () => {
+        window.renderStore = () => {
             const grid = document.getElementById('productGrid');
             const search = document.getElementById('mainSearch').value.toLowerCase();
             grid.innerHTML = '';
-            store.filter(p => p.title.toLowerCase().includes(search)).forEach(p => {
+            items.filter(i => i.title.toLowerCase().includes(search)).forEach(i => {
                 grid.innerHTML += `
-                    <div class="glass-card p-4 cursor-pointer" onclick="alert('Відкриваємо деталі...')">
-                        <img src="${p.img}" class="w-full h-40 object-cover rounded-2xl mb-4">
-                        <h4 class="font-bold text-sm truncate">${p.title}</h4>
-                        <div class="flex justify-between mt-2">
-                            <span class="text-yellow-600 font-black">${p.price} грн</span>
-                            <span class="text-[10px] opacity-40">ДЕТАЛЬНІШЕ</span>
+                    <div class="bento-card p-5 cursor-pointer group" onclick="viewProduct('${i.id}')">
+                        <div class="h-52 overflow-hidden rounded-[24px] mb-5">
+                            <img src="${i.img}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                        </div>
+                        <h4 class="font-800 text-sm uppercase tracking-tight truncate">${i.title}</h4>
+                        <div class="flex justify-between items-center mt-3">
+                            <span class="text-yellow-600 font-900">${i.price} грн</span>
+                            <span class="text-[9px] font-black opacity-30 uppercase tracking-widest">Переглянути →</span>
                         </div>
                     </div>`;
             });
         };
 
+        window.viewProduct = (id) => {
+            const i = items.find(x => x.id === id);
+            document.getElementById('productContent').innerHTML = `
+                <div class="flex flex-col md:flex-row gap-12">
+                    <div class="md:w-1/2"><img src="${i.img}" class="w-full rounded-[40px] shadow-2xl"></div>
+                    <div class="md:w-1/2 space-y-8">
+                        <button onclick="closeAll()" class="text-xs font-bold opacity-30 uppercase tracking-widest">← Назад</button>
+                        <h2 class="text-5xl font-800 italic tracking-tighter">${i.title}</h2>
+                        <p class="text-3xl font-black text-yellow-500">${i.price} грн</p>
+                        <p class="opacity-60 leading-relaxed text-lg">${i.desc}</p>
+                        <div class="pt-10 border-t space-y-4">
+                            <a href="https://t.me/leytenant_ukra" class="block w-full bg-black text-white text-center py-6 rounded-3xl font-black text-xl shadow-2xl">КУПИТИ ЗАРАЗ</a>
+                            <div class="p-6 bento-card text-xs opacity-50 text-center">Відгуки з'являться після перевірки модератором</div>
+                        </div>
+                    </div>
+                </div>`;
+            openPage('productDetail');
+        };
+
         // АДМІНКА
-        window.openAdmin = () => { if(prompt("Pass:") === "254") openPage('adminPanel'); };
-        window.publish = async () => {
+        window.openAdmin = () => { if(prompt("Terminal Password:") === "254") openPage('adminPanel'); };
+        window.publishItem = async () => {
             await addDoc(collection(db, "sonechko_items"), {
                 title: document.getElementById('adTitle').value,
                 price: document.getElementById('adPrice').value,
                 desc: document.getElementById('adDesc').value,
-                img: curAdImg,
+                img: adminPic,
                 date: Date.now()
             });
-            alert("Done!");
+            alert("Товар на вітрині!");
+            closeAll();
         };
 
-        // МОВИ (ПРИКЛАД)
-        const langs = [
-            {n:"Українська", c:"UA"}, {n:"English", c:"US"}, {n:"Deutsch", c:"DE"}, {n:"Polski", c:"PL"},
-            {n:"Français", c:"FR"}, {n:"Italiano", c:"IT"}, {n:"日本語", c:"JP"}, {n:"Türkçe", c:"TR"}
-        ];
-        window.filterLangs = () => {
+        // МОВИ
+        const allLangs = [{n:"Українська", c:"UA"}, {n:"English", c:"US"}, {n:"Deutsch", c:"DE"}, {n:"Polski", c:"PL"}, {n:"Español", c:"ES"}, {n:"Français", c:"FR"}];
+        window.renderLangs = () => {
             const s = document.getElementById('langSearch').value.toLowerCase();
-            const list = document.getElementById('langList');
-            list.innerHTML = '';
-            langs.filter(l => l.n.toLowerCase().includes(s)).forEach(l => {
-                list.innerHTML += `<button class="p-3 text-xs bg-gray-50 rounded-xl flex gap-2"><img src="https://flagcdn.com/w20/${l.c.toLowerCase()}.png" class="h-3 my-auto"> ${l.n}</button>`;
+            const g = document.getElementById('langGrid');
+            g.innerHTML = '';
+            allLangs.filter(l => l.n.toLowerCase().includes(s)).forEach(l => {
+                g.innerHTML += `<div class="p-4 bento-card text-xs font-bold flex gap-3 items-center cursor-pointer hover:bg-yellow-400 hover:text-black">
+                    <img src="https://flagcdn.com/w20/${l.c.toLowerCase()}.png" class="h-3"> ${l.n}
+                </div>`;
             });
         };
-        filterLangs();
+        renderLangs();
 
-        // СТАТУС КОРИСТУВАЧА
-        const user = JSON.parse(localStorage.getItem('sun_user'));
-        if(user) {
-            document.getElementById('headerProfile').innerHTML = `<img src="${user.photo}" class="w-full h-full object-cover">`;
-            document.getElementById('menuUserStatus').innerText = `Вітаємо, ${user.name}`;
+        // ПЕРЕВІРКА СЕСІЇ
+        const session = JSON.parse(localStorage.getItem('sun_session'));
+        if(session) {
+            document.getElementById('headerProfile').innerHTML = `<img src="${session.photo}" class="w-full h-full object-cover">`;
+            document.getElementById('menuUserStatus').innerText = `Статус: ${session.name}`;
         }
+
+        // ПЕРЕГЛЯД КОРИСТУВАЧІВ В АДМІНЦІ
+        onSnapshot(collection(db, "sonechko_users"), (snap) => {
+            const list = document.getElementById('adminUsers');
+            list.innerHTML = '';
+            snap.forEach(doc => {
+                const u = doc.data();
+                list.innerHTML += `<div class="p-4 bento-card flex justify-between items-center">
+                    <div class="flex gap-3 items-center">
+                        <img src="${u.photo}" class="w-10 h-10 rounded-xl object-cover">
+                        <div>
+                            <p class="text-xs font-black uppercase">${u.name}</p>
+                            <p class="text-[10px] opacity-40">${u.phone}</p>
+                        </div>
+                    </div>
+                    <button class="text-red-500 font-black text-[10px]">BAN</button>
+                </div>`;
+            });
+        });
     </script>
 </body>
 </html>
