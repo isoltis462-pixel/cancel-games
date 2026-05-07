@@ -2,207 +2,167 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<title>☀️ Sonechko Shop PRO</title>
+<title>Сонечко Shop</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js"></script>
 
 <style>
-body { font-family: Arial; margin:0; background:#fff7cc; }
+body {
+  margin:0;
+  font-family: Arial;
+  background: linear-gradient(120deg,#ffefba,#ffffff);
+  animation: bg 10s infinite alternate;
+}
+
+@keyframes bg {
+  from {filter:hue-rotate(0deg);}
+  to {filter:hue-rotate(40deg);}
+}
 
 header {
-  background: orange;
-  padding: 15px;
-  color: white;
+  padding:20px;
+  background:#ffcc00;
   display:flex;
   justify-content:space-between;
+  align-items:center;
+  animation: slideDown 1s;
 }
 
-.container { padding:20px; }
+@keyframes slideDown {
+  from {transform:translateY(-100px); opacity:0;}
+  to {transform:translateY(0); opacity:1;}
+}
 
-.grid { display:flex; flex-wrap:wrap; gap:10px; }
-
-.card {
-  background:white;
+button {
   padding:10px;
-  width:180px;
+  border:none;
+  cursor:pointer;
   border-radius:10px;
+  transition:0.3s;
 }
 
-.card img { width:100%; border-radius:8px; }
+button:hover {
+  transform:scale(1.05);
+}
 
-button { padding:6px; margin-top:5px; cursor:pointer; }
+.product {
+  background:white;
+  padding:15px;
+  margin:10px;
+  border-radius:15px;
+  box-shadow:0 0 10px rgba(0,0,0,0.1);
+  animation: fadeIn 1s;
+}
 
-.adminPanel {
+@keyframes fadeIn {
+  from {opacity:0; transform:scale(0.9);}
+  to {opacity:1; transform:scale(1);}
+}
+
+#adminPanel {
   display:none;
-  background:white;
-  padding:10px;
-  margin-top:10px;
-  border-radius:10px;
+  background:#fff;
+  padding:20px;
 }
-
-.hidden { display:none; }
 </style>
 </head>
 
 <body>
 
 <header>
-  <h2>☀️ Sonechko Shop</h2>
-
-  <div>
-    <button onclick="googleLogin()">Google</button>
-    <button onclick="toggleAdmin()">Admin</button>
-    <button onclick="openCart()">🛒</button>
-  </div>
+<h2>🌞 Сонечко Shop</h2>
+<div>
+<button onclick="login()">Google Login</button>
+<button onclick="logout()">Вийти</button>
+</div>
 </header>
 
-<div class="container">
+<div id="user"></div>
 
-<h3 id="user">Не увійшли</h3>
+<div id="products"></div>
 
-<div class="adminPanel" id="adminPanel">
-  <h3>🧑‍💼 Адмінка</h3>
-  <input id="name" placeholder="Назва">
-  <input id="price" placeholder="Ціна">
-  <input id="img" placeholder="Фото URL">
-  <button onclick="addProduct()">Додати товар</button>
+<div id="adminPanel">
+<h3>Адмін панель</h3>
+<input id="name" placeholder="Назва товару">
+<input id="price" placeholder="Ціна">
+<button onclick="addProduct()">Додати</button>
 </div>
 
-<h3>🛍 Товари</h3>
-<div class="grid" id="products"></div>
-
-<h3>🛒 Кошик</h3>
-<div id="cart"></div>
-
-<button onclick="checkout()" style="background:green;color:white;">
-💳 Оформити замовлення
-</button>
-
-</div>
-
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
+<script>
+// ===== FIREBASE CONFIG =====
 const firebaseConfig = {
   apiKey: "AIzaSyB2qAWXjhRsKASf9Urz_j3OtX_ERv9LKGk",
   authDomain: "sonechko-c1d59.firebaseapp.com",
   projectId: "sonechko-c1d59",
-  storageBucket: "sonechko-c1d59.firebasestorage.app",
-  messagingSenderId: "154000560138",
-  appId: "1:154000560138:web:3150ce210a405435b58ff3",
-  measurementId: "G-CHBK537FEV"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const provider = new GoogleAuthProvider();
+firebase.initializeApp(firebaseConfig);
 
-let user = null;
-let cart = [];
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-// 🔐 ТІЛЬКИ ТИ (адмін email)
-const ADMIN_EMAIL = "isoltis462@gmail.com";
+// ===== GOOGLE LOGIN =====
+function login(){
+  let provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider);
+}
 
-window.googleLogin = async function() {
-  const res = await signInWithPopup(auth, provider);
-  user = res.user;
+function logout(){
+  auth.signOut();
+}
 
-  document.getElementById("user").innerText =
-    "👤 " + user.email;
+// ===== USER STATE =====
+auth.onAuthStateChanged(user=>{
+  if(user){
+    document.getElementById("user").innerHTML = "Вхід: " + user.email;
 
-  loadProducts();
-};
+    // ADMIN ONLY
+    if(user.email === "isoltis462@gmail.com"){
+      document.getElementById("adminPanel").style.display = "block";
+    }
 
-window.toggleAdmin = function() {
-  if (!user || user.email !== ADMIN_EMAIL) {
-    alert("⛔ Нема доступу");
-    return;
+  } else {
+    document.getElementById("user").innerHTML = "Гість";
+    document.getElementById("adminPanel").style.display = "none";
   }
+});
 
-  const panel = document.getElementById("adminPanel");
-  panel.style.display = panel.style.display === "block" ? "none" : "block";
-};
+// ===== ADD PRODUCT =====
+function addProduct(){
+  let name = document.getElementById("name").value;
+  let price = document.getElementById("price").value;
 
-window.addProduct = async function() {
-  await addDoc(collection(db, "products"), {
-    name: name.value,
-    price: price.value,
-    img: img.value
+  db.collection("products").add({
+    name,
+    price
   });
 
-  loadProducts();
-};
+  alert("Додано!");
+}
 
-async function loadProducts() {
-  const snap = await getDocs(collection(db, "products"));
-  const box = document.getElementById("products");
-
-  box.innerHTML = "";
-
-  snap.forEach(d => {
-    const p = d.data();
-
-    box.innerHTML += `
-      <div class="card">
-        <img src="${p.img}">
+// ===== LOAD PRODUCTS =====
+db.collection("products").onSnapshot(snap=>{
+  let html = "";
+  snap.forEach(doc=>{
+    let p = doc.data();
+    html += `
+      <div class="product">
         <h3>${p.name}</h3>
         <p>${p.price} грн</p>
-        <button onclick="addToCart('${p.name}', ${p.price})">
-          Купити
-        </button>
+        <button onclick="buy('${p.name}',${p.price})">Купити</button>
       </div>
     `;
   });
+  document.getElementById("products").innerHTML = html;
+});
+
+// ===== FAKE PAYMENT =====
+function buy(name,price){
+  alert("Оплата для: " + name + " = " + price + " грн\n(тут підключимо Stripe/LiqPay)");
 }
-
-window.addToCart = function(name, price) {
-  cart.push({name, price});
-  renderCart();
-};
-
-function renderCart() {
-  const box = document.getElementById("cart");
-  box.innerHTML = "";
-
-  cart.forEach(i => {
-    box.innerHTML += `<p>${i.name} - ${i.price} грн</p>`;
-  });
-}
-
-window.openCart = function() {
-  alert("Кошик відкритий нижче ↓");
-};
-
-window.checkout = function() {
-  if (!user) {
-    alert("Увійди спочатку");
-    return;
-  }
-
-  if (cart.length === 0) {
-    alert("Кошик пустий");
-    return;
-  }
-
-  // 💳 РЕАЛЬНА ОПЛАТА (заглушка під Stripe/LiqPay)
-  alert("💳 Оплата успішна (DEMO)\nДалі можна підключити Stripe або LiqPay");
-
-  cart = [];
-  renderCart();
-};
-
 </script>
 
 </body>
