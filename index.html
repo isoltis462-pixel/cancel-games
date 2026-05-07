@@ -1,316 +1,155 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Retro Tetris</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>3D Crowd Runner</title>
     <style>
-        body {
-            background: #202028;
-            color: #fff;
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-
-        #game-container {
-            position: relative;
-            border: 2px solid #fff;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
-
-        canvas {
-            display: block;
-            background-color: #000;
-        }
-
-        .stats {
-            position: absolute;
-            top: 0;
-            right: -120px;
-            text-align: left;
-        }
-
-        #score { font-size: 24px; }
-
-        /* Кнопки для телефону */
-        .controls {
-            display: grid;
-            grid-template-columns: repeat(3, 60px);
-            grid-gap: 10px;
-            margin-top: 20px;
-        }
-
-        .btn {
-            width: 60px;
-            height: 60px;
-            background: #444;
-            border: none;
-            color: white;
-            border-radius: 50%;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none;
-            touch-action: manipulation;
-        }
-
-        .btn:active { background: #666; }
-        .btn-rotate { grid-column: 2; background: #2481cc; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Arial', sans-serif; }
+        #menu, #ui, #game-over { position: fixed; z-index: 10; color: white; text-align: center; width: 100%; }
+        #menu { inset: 0; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        #ui { top: 20px; font-size: 24px; pointer-events: none; }
+        #game-over { display: none; inset: 0; background: rgba(255,0,0,0.4); flex-direction: column; justify-content: center; align-items: center; }
+        .btn { padding: 15px 40px; font-size: 20px; background: #2ecc71; border: none; color: white; border-radius: 30px; cursor: pointer; margin-top: 20px; text-transform: uppercase; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <canvas id="tetris" width="240" height="400"></canvas>
-        <div class="stats">
-            <div>Рахунок:</div>
-            <div id="score">0</div>
-        </div>
+    <div id="ui">Натовп: <span id="count">1</span></div>
+
+    <div id="menu">
+        <h1>CROWD RUNNER 3D</h1>
+        <button class="btn" onclick="startGame()">Старт</button>
     </div>
 
-    <div class="controls">
-        <div></div>
-        <button class="btn btn-rotate" onmousedown="playerRotate(1)">↻</button>
-        <div></div>
-        <button class="btn" onmousedown="playerMove(-1)">←</button>
-        <button class="btn" onmousedown="playerDrop()">↓</button>
-        <button class="btn" onmousedown="playerMove(1)">→</button>
+    <div id="game-over">
+        <h1 id="result">КІНЕЦЬ ГРИ</h1>
+        <button class="btn" onclick="location.reload()">Спробувати знову</button>
     </div>
 
-<script>
-    const canvas = document.getElementById('tetris');
-    const context = canvas.getContext('2d');
-    const scoreElement = document.getElementById('score');
+    <script type="module">
+        import * as THREE from 'https://cdn.skypack.dev/three@0.132.2';
 
-    context.scale(20, 20);
+        let scene, camera, renderer, playerGroup;
+        let crowd = [];
+        let gates = [];
+        let gameActive = false;
+        let speed = 0.15;
+        let score = 1;
 
-    // Очищення ліній
-    function arenaSweep() {
-        let rowCount = 1;
-        outer: for (let y = arena.length - 1; y > 0; --y) {
-            for (let x = 0; x < arena[y].length; ++x) {
-                if (arena[y][x] === 0) {
-                    continue outer;
-                }
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87CEEB);
+            scene.fog = new THREE.Fog(0x87CEEB, 10, 30);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 5, 8);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // Світло
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(5, 10, 5);
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0x404040));
+
+            // Дорога
+            const roadGeo = new THREE.PlaneGeometry(10, 200);
+            const roadMat = new THREE.MeshPhongMaterial({ color: 0xcccccc });
+            const road = new THREE.Mesh(roadGeo, roadMat);
+            road.rotation.x = -Math.PI / 2;
+            scene.add(road);
+
+            // Група гравця
+            playerGroup = new THREE.Group();
+            scene.add(playerGroup);
+            addToCrowd(1);
+
+            spawnGates();
+            animate();
+        }
+
+        function addToCrowd(amount) {
+            const geo = new THREE.SphereGeometry(0.3, 16, 16);
+            const mat = new THREE.MeshPhongMaterial({ color: 0x2481cc });
+            
+            for(let i = 0; i < amount; i++) {
+                if (crowd.length >= 50) break; // Обмеження для стабільності
+                const unit = new THREE.Mesh(geo, mat);
+                unit.position.set((Math.random() - 0.5) * 1.5, 0.3, (Math.random() - 0.5) * 1.5);
+                playerGroup.add(unit);
+                crowd.push(unit);
             }
-            const row = arena.splice(y, 1)[0].fill(0);
-            arena.unshift(row);
-            ++y;
-            player.score += rowCount * 10;
-            rowCount *= 2;
+            score = crowd.length;
+            document.getElementById('count').innerText = score;
         }
-        updateScore();
-    }
 
-    // Перевірка зіткнень
-    function collide(arena, player) {
-        const [m, o] = [player.matrix, player.pos];
-        for (let y = 0; y < m.length; ++y) {
-            for (let x = 0; x < m[y].length; ++x) {
-                if (m[y][x] !== 0 &&
-                   (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
-                    return true;
-                }
+        function spawnGates() {
+            for(let i = 1; i < 15; i++) {
+                const isPlus = Math.random() > 0.5;
+                const value = isPlus ? 5 : 2;
+                
+                const geo = new THREE.BoxGeometry(10, 4, 0.2);
+                const mat = new THREE.MeshPhongMaterial({ 
+                    color: isPlus ? 0x2ecc71 : 0x3498db, 
+                    transparent: true, 
+                    opacity: 0.6 
+                });
+                const gate = new THREE.Mesh(geo, mat);
+                gate.position.set(0, 2, -i * 20);
+                gate.userData = { type: isPlus ? 'plus' : 'mult', value: value, passed: false };
+                scene.add(gate);
+                gates.push(gate);
             }
         }
-        return false;
-    }
 
-    // Створення матриці поля
-    function createMatrix(w, h) {
-        const matrix = [];
-        while (h--) {
-            matrix.push(new Array(w).fill(0));
-        }
-        return matrix;
-    }
-
-    // Створення фігур
-    function createPiece(type) {
-        if (type === 'I') {
-            return [
-                [0, 1, 0, 0],
-                [0, 1, 0, 0],
-                [0, 1, 0, 0],
-                [0, 1, 0, 0],
-            ];
-        } else if (type === 'L') {
-            return [
-                [0, 2, 0],
-                [0, 2, 0],
-                [0, 2, 2],
-            ];
-        } else if (type === 'J') {
-            return [
-                [0, 3, 0],
-                [0, 3, 0],
-                [3, 3, 0],
-            ];
-        } else if (type === 'O') {
-            return [
-                [4, 4],
-                [4, 4],
-            ];
-        } else if (type === 'Z') {
-            return [
-                [5, 5, 0],
-                [0, 5, 5],
-                [0, 0, 0],
-            ];
-        } else if (type === 'S') {
-            return [
-                [0, 6, 6],
-                [6, 6, 0],
-                [0, 0, 0],
-            ];
-        } else if (type === 'T') {
-            return [
-                [0, 7, 0],
-                [7, 7, 7],
-                [0, 0, 0],
-            ];
-        }
-    }
-
-    function draw() {
-        context.fillStyle = '#000';
-        context.fillRect(0, 0, canvas.width, canvas.height);
-
-        drawMatrix(arena, {x: 0, y: 0});
-        drawMatrix(player.matrix, player.pos);
-    }
-
-    function drawMatrix(matrix, offset) {
-        const colors = [
-            null, '#FF0D72', '#0DC2FF', '#0DFF72',
-            '#F538FF', '#FF8E0D', '#FFE138', '#3877FF',
-        ];
-        matrix.forEach((row, y) => {
-            row.forEach((value, x) => {
-                if (value !== 0) {
-                    context.fillStyle = colors[value];
-                    context.fillRect(x + offset.x, y + offset.y, 1, 1);
-                }
-            });
+        // Керування
+        let targetX = 0;
+        window.addEventListener('mousemove', (e) => {
+            targetX = (e.clientX / window.innerWidth - 0.5) * 8;
         });
-    }
-
-    function merge(arena, player) {
-        player.matrix.forEach((row, y) => {
-            row.forEach((value, x) => {
-                if (value !== 0) {
-                    arena[y + player.pos.y][x + player.pos.x] = value;
-                }
-            });
+        window.addEventListener('touchmove', (e) => {
+            targetX = (e.touches[0].clientX / window.innerWidth - 0.5) * 8;
         });
-    }
 
-    function rotate(matrix, dir) {
-        for (let y = 0; y < matrix.length; ++y) {
-            for (let x = 0; x < y; ++x) {
-                [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
+        window.startGame = () => {
+            document.getElementById('menu').style.display = 'none';
+            gameActive = true;
+        };
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if(gameActive) {
+                // Рух вперед
+                playerGroup.position.z -= speed;
+                camera.position.z -= speed;
+
+                // Рух вправо-вліво
+                playerGroup.position.x += (targetX - playerGroup.position.x) * 0.1;
+
+                // Перевірка воріт
+                gates.forEach(gate => {
+                    if(!gate.userData.passed && Math.abs(playerGroup.position.z - gate.position.z) < 0.5) {
+                        gate.userData.passed = true;
+                        if(gate.userData.type === 'plus') addToCrowd(gate.userData.value);
+                        else addToCrowd(crowd.length * (gate.userData.value - 1));
+                    }
+                });
+
+                // Кінець дистанції
+                if(playerGroup.position.z < -280) {
+                    gameActive = false;
+                    document.getElementById('game-over').style.display = 'flex';
+                    document.getElementById('result').innerText = "ПЕРЕМОГА! Твій натовп: " + crowd.length;
+                }
             }
-        }
-        if (dir > 0) {
-            matrix.forEach(row => row.reverse());
-        } else {
-            matrix.reverse();
-        }
-    }
-
-    function playerDrop() {
-        player.pos.y++;
-        if (collide(arena, player)) {
-            player.pos.y--;
-            merge(arena, player);
-            playerReset();
-            arenaSweep();
-            updateScore();
-        }
-        dropCounter = 0;
-    }
-
-    function playerMove(offset) {
-        player.pos.x += offset;
-        if (collide(arena, player)) {
-            player.pos.x -= offset;
-        }
-    }
-
-    function playerReset() {
-        const pieces = 'TJLOSZI';
-        player.matrix = createPiece(pieces[pieces.length * Math.random() | 0]);
-        player.pos.y = 0;
-        player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
-        if (collide(arena, player)) {
-            arena.forEach(row => row.fill(0));
-            player.score = 0;
-            updateScore();
-        }
-    }
-
-    function playerRotate(dir) {
-        const pos = player.pos.x;
-        let offset = 1;
-        rotate(player.matrix, dir);
-        while (collide(arena, player)) {
-            player.pos.x += offset;
-            offset = -(offset + (offset > 0 ? 1 : -1));
-            if (offset > player.matrix[0].length) {
-                rotate(player.matrix, -dir);
-                player.pos.x = pos;
-                return;
-            }
-        }
-    }
-
-    let dropCounter = 0;
-    let dropInterval = 1000;
-    let lastTime = 0;
-
-    function update(time = 0) {
-        const deltaTime = time - lastTime;
-        lastTime = time;
-
-        dropCounter += deltaTime;
-        if (dropCounter > dropInterval) {
-            playerDrop();
+            renderer.render(scene, camera);
         }
 
-        draw();
-        requestAnimationFrame(update);
-    }
-
-    function updateScore() {
-        scoreElement.innerText = player.score;
-    }
-
-    const arena = createMatrix(12, 20);
-
-    const player = {
-        pos: {x: 0, y: 0},
-        matrix: null,
-        score: 0,
-    };
-
-    document.addEventListener('keydown', event => {
-        if (event.keyCode === 37) { playerMove(-1); }
-        else if (event.keyCode === 39) { playerMove(1); }
-        else if (event.keyCode === 40) { playerDrop(); }
-        else if (event.keyCode === 81) { playerRotate(-1); }
-        else if (event.keyCode === 38 || event.keyCode === 87) { playerRotate(1); }
-    });
-
-    playerReset();
-    updateScore();
-    update();
-</script>
+        init();
+    </script>
 </body>
 </html>
