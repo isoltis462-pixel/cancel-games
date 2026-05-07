@@ -1,245 +1,208 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UA Mista — Всі населені пункти України</title>
-    <style>
-        :root {
-            --ukraine-yellow: #FFD700;
-            --ukraine-blue: #0057B7;
-            --dark-bg: #1a1a1a;
-            --panel-bg: #2d2d2d;
-        }
+<meta charset="UTF-8">
+<title>☀️ Sonechko Shop PRO</title>
 
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background: var(--dark-bg);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
+<style>
+body { font-family: Arial; margin:0; background:#fff7cc; }
 
-        header {
-            background: var(--ukraine-blue);
-            padding: 15px 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
+header {
+  background: orange;
+  padding: 15px;
+  color: white;
+  display:flex;
+  justify-content:space-between;
+}
 
-        .logo { font-size: 26px; font-weight: bold; letter-spacing: 1px; }
+.container { padding:20px; }
 
-        .main-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
+.grid { display:flex; flex-wrap:wrap; gap:10px; }
 
-        /* Карта */
-        .map-section {
-            flex: 1.5;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+.card {
+  background:white;
+  padding:10px;
+  width:180px;
+  border-radius:10px;
+}
 
-        svg path {
-            fill: #444;
-            stroke: #888;
-            stroke-width: 1;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
+.card img { width:100%; border-radius:8px; }
 
-        svg path:hover {
-            fill: var(--ukraine-yellow);
-            stroke: #000;
-        }
+button { padding:6px; margin-top:5px; cursor:pointer; }
 
-        svg path.active {
-            fill: var(--ukraine-blue);
-            stroke: #fff;
-        }
+.adminPanel {
+  display:none;
+  background:white;
+  padding:10px;
+  margin-top:10px;
+  border-radius:10px;
+}
 
-        /* Список та Фільтри */
-        .list-section {
-            flex: 1;
-            background: var(--panel-bg);
-            display: flex;
-            flex-direction: column;
-            border-left: 2px solid #444;
-        }
-
-        .filter-panel {
-            padding: 20px;
-            background: #333;
-            border-bottom: 1px solid #444;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: none;
-            background: #444;
-            color: white;
-            margin-bottom: 10px;
-        }
-
-        .filters {
-            display: flex;
-            gap: 10px;
-            font-size: 14px;
-        }
-
-        select {
-            background: #444;
-            color: white;
-            border: 1px solid #555;
-            padding: 5px;
-            border-radius: 5px;
-        }
-
-        .city-scroll {
-            flex: 1;
-            overflow-y: auto;
-            padding: 15px;
-        }
-
-        .city-card {
-            background: #3d3d3d;
-            padding: 12px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 4px solid transparent;
-        }
-
-        .city-card:hover { border-left-color: var(--ukraine-yellow); background: #4a4a4a; }
-        .city-type { font-size: 11px; text-transform: uppercase; color: #aaa; }
-        
-        .badge {
-            background: var(--ukraine-blue);
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 12px;
-        }
-
-        @media (max-width: 768px) {
-            .main-container { flex-direction: column; }
-            .list-section { height: 50%; }
-        }
-    </style>
+.hidden { display:none; }
+</style>
 </head>
+
 <body>
 
 <header>
-    <div class="logo">UA MISTA</div>
-    <div id="current-region">Оберіть область на карті</div>
+  <h2>☀️ Sonechko Shop</h2>
+
+  <div>
+    <button onclick="googleLogin()">Google</button>
+    <button onclick="toggleAdmin()">Admin</button>
+    <button onclick="openCart()">🛒</button>
+  </div>
 </header>
 
-<div class="main-container">
-    <div class="map-section">
-        <svg viewBox="0 0 800 500" width="100%" height="100%">
-            <path id="lviv" d="M100,200 L150,180 L180,220 L140,260 L90,240 Z" /> 
-            <path id="kyiv" d="M350,120 L420,100 L450,160 L380,180 Z" />
-            <text x="110" y="220" fill="white" font-size="12">Львівська</text>
-            <text x="370" y="145" fill="white" font-size="12">Київська</text>
-        </svg>
-    </div>
+<div class="container">
 
-    <div class="list-section">
-        <div class="filter-panel">
-            <input type="text" class="search-input" id="search" placeholder="Пошук (наприклад: Бортятин)..." onkeyup="updateDisplay()">
-            <div class="filters">
-                <select id="type-filter" onchange="updateDisplay()">
-                    <option value="all">Всі типи</option>
-                    <option value="місто">Міста</option>
-                    <option value="село">Села</option>
-                    <option value="смт">СМТ</option>
-                </select>
-                <select id="sort-filter" onchange="updateDisplay()">
-                    <option value="name">За алфавітом</option>
-                    <option value="size">За розміром</option>
-                </select>
-            </div>
-        </div>
-        <div class="city-scroll" id="city-list">
-            </div>
-    </div>
+<h3 id="user">Не увійшли</h3>
+
+<div class="adminPanel" id="adminPanel">
+  <h3>🧑‍💼 Адмінка</h3>
+  <input id="name" placeholder="Назва">
+  <input id="price" placeholder="Ціна">
+  <input id="img" placeholder="Фото URL">
+  <button onclick="addProduct()">Додати товар</button>
 </div>
 
-<script>
-    // Велика база даних
-    const ukraineData = {
-        "lviv": [
-            { name: "Львів", type: "місто", pop: 720000 },
-            { name: "Дрогобич", type: "місто", pop: 75000 },
-            { name: "Бортятин", type: "село", pop: 1100 },
-            { name: "Судова Вишня", type: "місто", pop: 6500 }
-        ],
-        "kyiv": [
-            { name: "Київ", type: "місто", pop: 2800000 },
-            { name: "Біла Церква", type: "місто", pop: 200000 },
-            { name: "Бориспіль", type: "місто", pop: 63000 }
-        ]
-    };
+<h3>🛍 Товари</h3>
+<div class="grid" id="products"></div>
 
-    let selectedRegion = "";
+<h3>🛒 Кошик</h3>
+<div id="cart"></div>
 
-    document.querySelectorAll('path').forEach(p => {
-        p.onclick = () => {
-            document.querySelectorAll('path').forEach(x => x.classList.remove('active'));
-            p.classList.add('active');
-            selectedRegion = p.id;
-            document.getElementById('current-region').innerText = p.id.toUpperCase() + " ОБЛАСТЬ";
-            updateDisplay();
-        };
-    });
+<button onclick="checkout()" style="background:green;color:white;">
+💳 Оформити замовлення
+</button>
 
-    function updateDisplay() {
-        if (!selectedRegion) return;
-        
-        const list = document.getElementById('city-list');
-        const searchTerm = document.getElementById('search').value.toLowerCase();
-        const typeFilter = document.getElementById('type-filter').value;
-        const sortType = document.getElementById('sort-filter').value;
+</div>
 
-        let items = ukraineData[selectedRegion] || [];
+<script type="module">
 
-        // 1. Фільтр пошуку
-        items = items.filter(i => i.name.toLowerCase().includes(searchTerm));
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // 2. Фільтр типу
-        if (typeFilter !== 'all') {
-            items = items.filter(i => i.type === typeFilter);
-        }
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // 3. Сортування
-        if (sortType === 'name') {
-            items.sort((a, b) => a.name.localeCompare(b.name));
-        } else {
-            items.sort((a, b) => b.pop - a.pop);
-        }
+const firebaseConfig = {
+  apiKey: "AIzaSyB2qAWXjhRsKASf9Urz_j3OtX_ERv9LKGk",
+  authDomain: "sonechko-c1d59.firebaseapp.com",
+  projectId: "sonechko-c1d59",
+  storageBucket: "sonechko-c1d59.firebasestorage.app",
+  messagingSenderId: "154000560138",
+  appId: "1:154000560138:web:3150ce210a405435b58ff3",
+  measurementId: "G-CHBK537FEV"
+};
 
-        list.innerHTML = items.map(i => `
-            <div class="city-card">
-                <div>
-                    <span class="city-type">${i.type}</span>
-                    <div style="font-size: 18px; font-weight: bold;">${i.name}</div>
-                </div>
-                <div class="badge">${i.pop.toLocaleString()} чол.</div>
-            </div>
-        `).join('');
-    }
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+let user = null;
+let cart = [];
+
+// 🔐 ТІЛЬКИ ТИ (адмін email)
+const ADMIN_EMAIL = "isoltis462@gmail.com";
+
+window.googleLogin = async function() {
+  const res = await signInWithPopup(auth, provider);
+  user = res.user;
+
+  document.getElementById("user").innerText =
+    "👤 " + user.email;
+
+  loadProducts();
+};
+
+window.toggleAdmin = function() {
+  if (!user || user.email !== ADMIN_EMAIL) {
+    alert("⛔ Нема доступу");
+    return;
+  }
+
+  const panel = document.getElementById("adminPanel");
+  panel.style.display = panel.style.display === "block" ? "none" : "block";
+};
+
+window.addProduct = async function() {
+  await addDoc(collection(db, "products"), {
+    name: name.value,
+    price: price.value,
+    img: img.value
+  });
+
+  loadProducts();
+};
+
+async function loadProducts() {
+  const snap = await getDocs(collection(db, "products"));
+  const box = document.getElementById("products");
+
+  box.innerHTML = "";
+
+  snap.forEach(d => {
+    const p = d.data();
+
+    box.innerHTML += `
+      <div class="card">
+        <img src="${p.img}">
+        <h3>${p.name}</h3>
+        <p>${p.price} грн</p>
+        <button onclick="addToCart('${p.name}', ${p.price})">
+          Купити
+        </button>
+      </div>
+    `;
+  });
+}
+
+window.addToCart = function(name, price) {
+  cart.push({name, price});
+  renderCart();
+};
+
+function renderCart() {
+  const box = document.getElementById("cart");
+  box.innerHTML = "";
+
+  cart.forEach(i => {
+    box.innerHTML += `<p>${i.name} - ${i.price} грн</p>`;
+  });
+}
+
+window.openCart = function() {
+  alert("Кошик відкритий нижче ↓");
+};
+
+window.checkout = function() {
+  if (!user) {
+    alert("Увійди спочатку");
+    return;
+  }
+
+  if (cart.length === 0) {
+    alert("Кошик пустий");
+    return;
+  }
+
+  // 💳 РЕАЛЬНА ОПЛАТА (заглушка під Stripe/LiqPay)
+  alert("💳 Оплата успішна (DEMO)\nДалі можна підключити Stripe або LiqPay");
+
+  cart = [];
+  renderCart();
+};
+
 </script>
 
 </body>
