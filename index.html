@@ -1,273 +1,230 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Belegram Official</title>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
-  <style>
-    :root {
-      --tg-bg: #0e1621;
-      --tg-sidebar: #17212b;
-      --tg-blue: #2b5278;
-      --tg-peer: #182533;
-      --tg-accent: #2481cc;
-      --text: #f5f5f5;
-      --gray: #708499;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Belegram Desktop v4</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <style>
+        :root {
+            --bg-main: #0f1621;
+            --bg-side: #17212b;
+            --bg-active: #242f3d;
+            --accent: #2481cc;
+            --text: #f5f5f5;
+            --gray: #708499;
+        }
 
-    * { box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { margin: 0; height: 100vh; background: var(--tg-bg); color: var(--text); display: flex; overflow: hidden; }
+        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg-main); color: var(--text); font-family: 'Open Sans', sans-serif; overflow: hidden; }
+        
+        .wrapper { display: flex; height: 100vh; width: 100vw; }
 
-    /* Адаптивність */
-    .sidebar { width: 320px; background: var(--tg-sidebar); border-right: 1px solid #0b1118; display: flex; flex-direction: column; z-index: 10; transition: 0.3s; }
-    .main-chat { flex: 1; display: flex; flex-direction: column; position: relative; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-blend-mode: overlay; background-color: var(--tg-bg); }
-    
-    @media (max-width: 768px) {
-      .sidebar { position: fixed; left: -320px; height: 100%; }
-      .sidebar.active { transform: translateX(320px); }
-      .main-chat { width: 100vw; }
-    }
+        /* Ліва панель іконок (як на скріншоті) */
+        .nav-column { width: 70px; background: var(--bg-side); display: flex; flex-direction: column; align-items: center; padding-top: 15px; gap: 20px; border-right: 1px solid #000; }
+        .nav-item { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--gray); font-size: 20px; }
+        .nav-item.active { background: var(--accent); color: white; }
 
-    /* Хедери */
-    .header { height: 56px; background: var(--tg-sidebar); display: flex; align-items: center; padding: 0 15px; gap: 15px; border-bottom: 1px solid #0b1118; }
-    .burger { cursor: pointer; font-size: 22px; color: var(--gray); }
-    .search-box { flex: 1; background: #242f3d; border-radius: 20px; padding: 5px 15px; display: flex; align-items: center; }
-    .search-box input { background: transparent; border: none; color: white; width: 100%; outline: none; font-size: 14px; }
+        /* Список чатів */
+        .chats-column { width: 300px; background: var(--bg-side); border-right: 1px solid #0b1118; display: flex; flex-direction: column; }
+        
+        /* Основне вікно чату */
+        .chat-area { flex: 1; display: flex; flex-direction: column; background: #0e1621 url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-blend-mode: overlay; }
+        
+        .chat-header { height: 56px; background: var(--bg-side); display: flex; align-items: center; padding: 0 20px; justify-content: space-between; border-bottom: 1px solid #0b1118; }
 
-    /* Повідомлення (Твої - сірі зліва, чужі - сині справа) */
-    .msg-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
-    .bubble { max-width: 75%; padding: 8px 12px; border-radius: 12px; font-size: 15px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.2); line-height: 1.4; }
-    .bubble.me { align-self: flex-start; background: var(--tg-peer); border-bottom-left-radius: 2px; }
-    .bubble.peer { align-self: flex-end; background: var(--tg-blue); border-bottom-right-radius: 2px; }
-    .bubble img, .bubble video { max-width: 100%; border-radius: 8px; display: block; margin-top: 5px; }
-    .time { font-size: 10px; color: var(--gray); float: right; margin-top: 4px; margin-left: 8px; }
+        .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+        
+        /* Повідомлення */
+        .msg { max-width: 80%; padding: 8px 15px; border-radius: 12px; position: relative; font-size: 15px; }
+        .msg.sent { align-self: flex-start; background: var(--bg-active); border-bottom-left-radius: 2px; }
+        .msg.received { align-self: flex-end; background: #2b5278; border-bottom-right-radius: 2px; }
+        .msg img { max-width: 100%; border-radius: 8px; }
+        .msg video.circle { width: 200px; height: 200px; border-radius: 50%; object-fit: cover; }
 
-    /* Ввід повідомлень */
-    .input-area { padding: 10px 15px; background: var(--tg-sidebar); display: flex; align-items: center; gap: 12px; }
-    .input-area input { flex: 1; background: transparent; border: none; color: white; font-size: 16px; outline: none; }
-    .icon-btn { color: var(--gray); cursor: pointer; font-size: 22px; transition: 0.2s; }
-    .icon-btn:hover { color: var(--tg-accent); }
+        /* Панель вводу */
+        .input-panel { padding: 10px 20px; background: var(--bg-side); display: flex; align-items: center; gap: 15px; }
+        .input-panel input { flex: 1; background: transparent; border: none; color: white; font-size: 16px; outline: none; }
 
-    /* Списки */
-    .contact-item { padding: 10px 15px; display: flex; align-items: center; gap: 12px; cursor: pointer; border-bottom: 1px solid #0b1118; transition: 0.2s; }
-    .contact-item:hover { background: #202b36; }
-    .avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: var(--tg-accent); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; }
-
-    /* Екран входу */
-    #login-screen { position: fixed; inset: 0; background: var(--tg-bg); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-    .login-logo { width: 120px; height: 120px; background: var(--tg-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
-    
-    /* Налаштування */
-    #settings { position: fixed; inset: 0; background: var(--tg-bg); z-index: 500; display: none; padding: 20px; }
-    .settings-content { max-width: 400px; margin: 0 auto; }
-    .profile-upload { position: relative; width: 100px; height: 100px; margin: 0 auto 20px; cursor: pointer; }
-    .profile-upload img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--tg-accent); }
-    .profile-upload .overlay-icon { position: absolute; bottom: 0; right: 0; background: var(--tg-accent); padding: 5px; border-radius: 50%; font-size: 12px; }
-  </style>
+        /* Модалки */
+        #auth-overlay { position: fixed; inset: 0; background: var(--bg-main); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .auth-box { background: var(--bg-side); padding: 30px; border-radius: 15px; width: 350px; text-align: center; }
+        .auth-box input { width: 100%; padding: 12px; margin: 10px 0; background: var(--bg-active); border: none; color: white; border-radius: 8px; }
+        
+        @media (max-width: 768px) {
+            .nav-column, .chats-column { display: none; } /* Для простоти на мобілці показуємо тільки чат */
+            .nav-column.mobile-show { display: flex; }
+        }
+    </style>
 </head>
 <body>
 
-<div id="login-screen">
-  <div class="login-logo">
-    <svg width="60" height="60" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.53-1.39.52-.46-.01-1.33-.26-1.98-.48-.8-.27-1.43-.42-1.37-.89.03-.25.38-.51 1.07-.78 4.2-1.82 7-3.03 8.4-3.61 4-.1.83.1 1.08.1.55 0 1.12.21 1.22.84z"/></svg>
-  </div>
-  <h1>Belegram</h1>
-  <button onclick="loginGoogle()" style="padding:12px 24px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; background:white; color:black;">Увійти через Google</button>
+<div id="auth-overlay">
+    <div class="auth-box">
+        <h2 style="color:var(--accent)">Belegram</h2>
+        <p>Введіть Email або номер</p>
+        <input type="text" id="auth-login" placeholder="email@example.com">
+        <input type="password" id="auth-pass" placeholder="Пароль">
+        <button onclick="handleAuth()" style="width:100%; padding:12px; background:var(--accent); border:none; color:white; border-radius:8px; cursor:pointer;">Продовжити</button>
+    </div>
 </div>
 
-<div class="sidebar" id="sidebar">
-  <div class="header">
-    <div class="burger" onclick="openSettings()">☰</div>
-    <div class="search-box">
-      <input id="user-search" placeholder="Пошук @username" oninput="searchUsers()">
+<div class="wrapper">
+    <div class="nav-column">
+        <div class="nav-item active">💬</div>
+        <div class="nav-item">👤</div>
+        <div class="nav-item">📢</div>
+        <div class="nav-item" onclick="showSettings()">⚙️</div>
     </div>
-  </div>
-  <div id="contact-list" style="overflow-y:auto; flex:1;"></div>
-</div>
 
-<div class="main-chat">
-  <div class="header">
-    <div class="burger" onclick="toggleSidebar()" id="mobile-burger">☰</div>
-    <div id="chat-title" style="font-weight:bold;">Оберіть чат</div>
-    <div style="flex:1"></div>
-    <div class="icon-btn" onclick="openSettings()">⚙️</div>
-  </div>
-  <div class="msg-box" id="msg-box"></div>
-  <div class="input-area">
-    <label class="icon-btn">📎<input type="file" id="file-input" style="display:none" onchange="sendFile()"></label>
-    <input id="m-input" placeholder="Повідомлення..." onkeypress="if(event.key==='Enter')sendText()">
-    <div class="icon-btn" onclick="sendText()" style="color:var(--tg-accent)">➤</div>
-  </div>
-</div>
+    <div class="chats-column">
+        <div style="padding: 15px;"><input type="text" placeholder="Пошук" style="width:100%; background:var(--bg-active); border:none; padding:8px; border-radius:8px; color:white;"></div>
+        <div id="chat-list"></div>
+    </div>
 
-<div id="settings">
-  <div class="header">
-    <div class="burger" onclick="closeSettings()">←</div>
-    <div style="font-weight:bold">Налаштування</div>
-  </div>
-  <div class="settings-content">
-    <div class="profile-upload" onclick="document.getElementById('avatar-input').click()">
-      <img id="my-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
-      <div class="overlay-icon">📷</div>
-      <input type="file" id="avatar-input" style="display:none" accept="image/*" onchange="uploadAvatar()">
+    <div class="chat-area">
+        <div class="chat-header">
+            <div id="active-user-info"><b>Оберіть чат</b></div>
+            <div style="display:flex; gap:15px; color:var(--gray)">
+                <span onclick="makeCall()" style="cursor:pointer">📞</span>
+                <span style="cursor:pointer">🔍</span>
+            </div>
+        </div>
+        <div class="messages" id="msg-container"></div>
+        <div class="input-panel">
+            <span onclick="sendUrlPhoto()" style="cursor:pointer; font-size:20px;">🔗</span>
+            <input type="text" id="m-input" placeholder="Напишіть повідомлення...">
+            <span id="record-btn" onmousedown="startVoice()" onmouseup="stopVoice()" style="cursor:pointer; font-size:20px;">🎤</span>
+            <span onclick="sendMsg()" style="color:var(--accent); font-size:20px; cursor:pointer;">➤</span>
+        </div>
     </div>
-    <div style="margin-bottom:15px">
-      <label style="color:var(--gray); font-size:12px">ІМ'Я</label>
-      <input id="set-name" style="width:100%; background:#242f3d; border:none; color:white; padding:10px; border-radius:5px; margin-top:5px;">
-    </div>
-    <div style="margin-bottom:20px">
-      <label style="color:var(--gray); font-size:12px">ЮЗЕРНЕЙМ (@)</label>
-      <input id="set-username" style="width:100%; background:#242f3d; border:none; color:white; padding:10px; border-radius:5px; margin-top:5px;">
-    </div>
-    <button onclick="saveProfile()" style="width:100%; background:var(--tg-accent); color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold;">Зберегти зміни</button>
-  </div>
 </div>
 
 <script>
-  // Твій конфіг Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
-    authDomain: "keysbrawl-c4ae6.firebaseapp.com",
-    projectId: "keysbrawl-c4ae6",
-    storageBucket: "keysbrawl-c4ae6.firebasestorage.app",
-    messagingSenderId: "1090859079662",
-    appId: "1:1090859079662:web:932bf6463cb0601083a0ff"
-  };
+    // Ініціалізація Firebase (використовуй свій Config)
+    const firebaseConfig = {
+        apiKey: "AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
+        authDomain: "keysbrawl-c4ae6.firebaseapp.com",
+        projectId: "keysbrawl-c4ae6",
+        storageBucket: "keysbrawl-c4ae6.firebasestorage.app",
+        messagingSenderId: "1090859079662",
+        appId: "1:1090859079662:web:932bf6463cb0601083a0ff"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-  const storage = firebase.storage();
-  let currentPeer = null;
-  let myData = {};
+    let currentChatId = null;
+    let mediaRecorder;
+    let audioChunks = [];
 
-  function loginGoogle() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
-
-  auth.onAuthStateChanged(async u => {
-    if(u) {
-      document.getElementById('login-screen').style.display = 'none';
-      const doc = await db.collection("users").doc(u.uid).get();
-      if(!doc.exists) {
-        myData = { name: u.displayName, username: "user" + Math.floor(Math.random()*9999), photoURL: u.photoURL || "" };
-        await db.collection("users").doc(u.uid).set(myData);
-      } else {
-        myData = doc.data();
-      }
-      document.getElementById('my-avatar').src = myData.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-      document.getElementById('set-name').value = myData.name;
-      document.getElementById('set-username').value = myData.username;
-      loadUsers();
-    }
-  });
-
-  async function uploadAvatar() {
-    const file = document.getElementById('avatar-input').files[0];
-    if(!file) return;
-    const ref = storage.ref(`avatars/${auth.currentUser.uid}`);
-    await ref.put(file);
-    const url = await ref.getDownloadURL();
-    await db.collection("users").doc(auth.currentUser.uid).update({ photoURL: url });
-    document.getElementById('my-avatar').src = url;
-    alert("Аватарку оновлено!");
-  }
-
-  function saveProfile() {
-    const name = document.getElementById('set-name').value;
-    const username = document.getElementById('set-username').value;
-    db.collection("users").doc(auth.currentUser.uid).update({ name, username });
-    closeSettings();
-  }
-
-  function loadUsers() {
-    db.collection("users").onSnapshot(s => {
-      const list = document.getElementById('contact-list');
-      list.innerHTML = "";
-      s.forEach(doc => {
-        if(doc.id === auth.currentUser.uid) return;
-        const u = doc.data();
-        const avatar = u.photoURL ? `<img src="${u.photoURL}" class="avatar">` : `<div class="avatar">${u.name[0]}</div>`;
-        list.innerHTML += `
-          <div class="contact-item" onclick="selectChat('${doc.id}','${u.name}')">
-            ${avatar}
-            <div style="flex:1">
-              <div style="font-weight:bold">${u.name}</div>
-              <div style="color:var(--gray); font-size:13px">@${u.username}</div>
-            </div>
-          </div>`;
-      });
-    });
-  }
-
-  function selectChat(id, name) {
-    currentPeer = id;
-    document.getElementById('chat-title').innerText = name;
-    if(window.innerWidth < 768) toggleSidebar();
-    listenMsgs();
-  }
-
-  function sendText() {
-    const input = document.getElementById('m-input');
-    if(!input.value || !currentPeer) return;
-    saveMsg({ text: input.value, type: 'text' });
-    input.value = "";
-  }
-
-  async function sendFile() {
-    const file = document.getElementById('file-input').files[0];
-    if(!file || !currentPeer) return;
-    const ref = storage.ref(`chats/${Date.now()}_${file.name}`);
-    await ref.put(file);
-    const url = await ref.getDownloadURL();
-    saveMsg({ url: url, type: file.type.includes('image') ? 'image' : 'video' });
-  }
-
-  function saveMsg(data) {
-    const cid = [auth.currentUser.uid, currentPeer].sort().join("_");
-    db.collection("chats").doc(cid).collection("m").add({
-      ...data, sender: auth.currentUser.uid, time: Date.now()
-    });
-  }
-
-  function listenMsgs() {
-    const cid = [auth.currentUser.uid, currentPeer].sort().join("_");
-    db.collection("chats").doc(cid).collection("m").orderBy("time").onSnapshot(s => {
-      const box = document.getElementById('msg-box');
-      box.innerHTML = "";
-      s.forEach(doc => {
-        const m = doc.data();
-        const isMe = m.sender === auth.currentUser.uid;
-        let content = m.text || '';
-        if(m.type === 'image') content = `<img src="${m.url}">`;
-        if(m.type === 'video') content = `<video src="${m.url}" controls></video>`;
-        const timeStr = new Date(m.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        box.innerHTML += `<div class="bubble ${isMe ? 'me' : 'peer'}">${content}<div class="time">${timeStr}</div></div>`;
-      });
-      box.scrollTop = box.scrollHeight;
-    });
-  }
-
-  function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
-  function openSettings() { document.getElementById('settings').style.display = 'block'; }
-  function closeSettings() { document.getElementById('settings').style.display = 'none'; }
-  
-  function searchUsers() {
-    let val = document.getElementById('user-search').value.toLowerCase().replace('@','');
-    db.collection("users").get().then(s => {
-      const list = document.getElementById('contact-list');
-      list.innerHTML = "";
-      s.forEach(doc => {
-        const u = doc.data();
-        if(doc.id !== auth.currentUser.uid && u.username.includes(val)) {
-          const avatar = u.photoURL ? `<img src="${u.photoURL}" class="avatar">` : `<div class="avatar">${u.name[0]}</div>`;
-          list.innerHTML += `<div class="contact-item" onclick="selectChat('${doc.id}','${u.name}')">${avatar}<div><b>${u.name}</b><br><small>@${u.username}</small></div></div>`;
+    // Реєстрація / Вхід
+    async function handleAuth() {
+        const email = document.getElementById('auth-login').value;
+        const pass = document.getElementById('auth-pass').value;
+        try {
+            await auth.signInWithEmailAndPassword(email, pass);
+        } catch(e) {
+            await auth.createUserWithEmailAndPassword(email, pass);
+            alert("Акаунт створено!");
         }
-      });
+    }
+
+    auth.onAuthStateChanged(u => {
+        if(u) {
+            document.getElementById('auth-overlay').style.display = 'none';
+            loadChats();
+        }
     });
-  }
+
+    // Фото через URL
+    function sendUrlPhoto() {
+        const url = prompt("Вставте URL картинки:");
+        if(url && currentChatId) {
+            pushMsg({ type: 'image', content: url });
+        }
+    }
+
+    // Голосові (спрощена логіка)
+    async function startVoice() {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        mediaRecorder.start();
+        document.getElementById('record-btn').style.color = 'red';
+    }
+
+    async function stopVoice() {
+        mediaRecorder.stop();
+        document.getElementById('record-btn').style.color = 'var(--gray)';
+        mediaRecorder.onstop = async () => {
+            const blob = new Blob(audioChunks, { type: 'audio/webm' });
+            const ref = storage.ref(`voice/${Date.now()}.webm`);
+            await ref.put(blob);
+            const url = await ref.getDownloadURL();
+            pushMsg({ type: 'voice', content: url });
+            audioChunks = [];
+        };
+    }
+
+    // Функція дзвоника (заглушка, бо потребує WebRTC серверов)
+    function makeCall() {
+        alert("Виклик користувачу... (Потрібно налаштувати Signaling Server для WebRTC)");
+    }
+
+    function pushMsg(data) {
+        const room = [auth.currentUser.uid, currentChatId].sort().join('_');
+        db.collection('chats').doc(room).collection('m').add({
+            ...data,
+            uid: auth.currentUser.uid,
+            time: Date.now()
+        });
+    }
+
+    function loadChats() {
+        db.collection('users').onSnapshot(s => {
+            const list = document.getElementById('chat-list');
+            list.innerHTML = "";
+            s.forEach(doc => {
+                if(doc.id === auth.currentUser.uid) return;
+                const u = doc.data();
+                list.innerHTML += `<div onclick="openChat('${doc.id}', '${u.name}')" style="padding:15px; cursor:pointer; border-bottom:1px solid #121922;"><b>${u.name}</b></div>`;
+            });
+        });
+    }
+
+    function openChat(id, name) {
+        currentChatId = id;
+        document.getElementById('active-user-info').innerHTML = `<b>${name}</b>`;
+        const room = [auth.currentUser.uid, id].sort().join('_');
+        db.collection('chats').doc(room).collection('m').orderBy('time').onSnapshot(s => {
+            const container = document.getElementById('msg-container');
+            container.innerHTML = "";
+            s.forEach(doc => {
+                const m = doc.data();
+                const side = m.uid === auth.currentUser.uid ? 'sent' : 'received';
+                let html = `<div class="msg ${side}">`;
+                if(m.type === 'image') html += `<img src="${m.content}">`;
+                else if(m.type === 'voice') html += `<audio src="${m.content}" controls></audio>`;
+                else html += m.content;
+                html += `</div>`;
+                container.innerHTML += html;
+            });
+            container.scrollTop = container.scrollHeight;
+        });
+    }
+
+    function sendMsg() {
+        const val = document.getElementById('m-input').value;
+        if(val && currentChatId) {
+            pushMsg({ type: 'text', content: val });
+            document.getElementById('m-input').value = "";
+        }
+    }
 </script>
+
 </body>
 </html>
