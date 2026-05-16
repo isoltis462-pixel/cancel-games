@@ -1,93 +1,336 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abs Workout Challenge</title>
-    <style>
-        :root { --blue-grad: linear-gradient(135deg, #1e40af, #3b82f6); --orange: #ff6d00; }
-        body { background-color: #000; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; display: flex; justify-content: center; }
-        .phone-screen { width: 100%; max-width: 380px; background: #000; min-height: 90vh; border-radius: 35px; padding: 20px; box-sizing: border-box; }
-        
-        /* Хедер з вогнем */
-        .streak-header { text-align: center; margin-bottom: 25px; }
-        .fire-icon { font-size: 50px; display: block; animation: fire-glow 1s infinite alternate; }
-        @keyframes fire-glow { from { transform: scale(1); filter: drop-shadow(0 0 5px #ff6d00); } to { transform: scale(1.1); filter: drop-shadow(0 0 15px #ff2200); } }
-        .streak-txt { font-size: 22px; font-weight: 800; margin-top: 5px; }
-        .reward { color: #4ade80; font-size: 14px; font-weight: bold; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABS Workout</title>
 
-        /* Головна синя картка як на відео */
-        .day-card { background: var(--blue-grad); border-radius: 25px; padding: 25px; margin-bottom: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-        .day-card p { margin: 0; font-size: 14px; opacity: 0.9; text-transform: uppercase; }
-        .day-card h1 { margin: 5px 0 20px 0; font-size: 32px; font-weight: 900; }
-        .btn-start { background: #fff; color: #1e40af; border: none; padding: 12px 35px; border-radius: 30px; font-weight: 900; font-size: 16px; cursor: pointer; }
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
 
-        /* Список вправ */
-        .exercise-item { background: #1a1a1a; border-radius: 18px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; }
-        .ex-icon { width: 55px; height: 55px; background: #2a2a2a; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
-        .ex-info { flex: 1; }
-        .ex-info h4 { margin: 0; font-size: 17px; text-transform: uppercase; }
-        .ex-info p { margin: 3px 0 0; color: #888; font-size: 14px; }
+body{
+background:#000;
+color:white;
+padding:20px;
+min-height:100vh;
+}
 
-        /* Секція Таймера */
-        .timer-ui { margin-top: 30px; text-align: center; border-top: 1px solid #222; padding-top: 20px; }
-        #countdown { font-size: 65px; font-weight: 900; color: var(--orange); margin-bottom: 15px; font-family: monospace; }
-        .btn-go { background: var(--orange); color: white; border: none; width: 100%; padding: 18px; border-radius: 20px; font-size: 22px; font-weight: 900; cursor: pointer; }
-    </style>
+.container{
+max-width:400px;
+margin:auto;
+}
+
+.streak-container{
+display:flex;
+flex-direction:column;
+align-items:center;
+margin-bottom:25px;
+}
+
+.fire{
+font-size:65px;
+animation:pulse 1.5s infinite;
+filter:drop-shadow(0 0 10px orange);
+transition:0.4s;
+}
+
+.fire.inactive{
+opacity:0.3;
+filter:none;
+}
+
+@keyframes pulse{
+0%{
+transform:scale(1);
+}
+50%{
+transform:scale(1.2);
+}
+100%{
+transform:scale(1);
+}
+}
+
+.streak-text{
+margin-top:10px;
+font-size:22px;
+font-weight:bold;
+}
+
+.card{
+background:linear-gradient(135deg,#005eff,#4ea1ff);
+padding:25px;
+border-radius:25px;
+margin-bottom:25px;
+box-shadow:0 0 30px rgba(0,100,255,.4);
+}
+
+.card h1{
+font-size:28px;
+}
+
+.exercise{
+display:flex;
+align-items:center;
+background:#111;
+padding:15px;
+margin-bottom:15px;
+border-radius:18px;
+}
+
+.icon{
+width:55px;
+height:55px;
+background:#222;
+border-radius:15px;
+display:flex;
+justify-content:center;
+align-items:center;
+margin-right:15px;
+font-size:26px;
+}
+
+.timer{
+text-align:center;
+font-size:60px;
+font-weight:bold;
+margin:30px 0;
+}
+
+button{
+width:100%;
+padding:18px;
+border:none;
+border-radius:50px;
+background:#ff7b00;
+color:white;
+font-size:30px;
+font-weight:bold;
+cursor:pointer;
+transition:0.3s;
+}
+
+button:hover{
+transform:scale(1.03);
+}
+
+button:disabled{
+opacity:0.5;
+}
+</style>
 </head>
 <body>
 
-<div class="phone-screen">
-    <div class="streak-header">
-        <span class="fire-icon">🔥</span>
-        <div class="streak-txt">1 DAY STREAK</div>
-        <div class="reward">ЦІЛЬ: 1000 ГРН</div>
-    </div>
+<div class="container">
 
-    <div class="day-card">
-        <p>Day 1 • Beginner</p>
-        <h1>ABS WORKOUT</h1>
-        <button class="btn-start" onclick="alert('Приготуйся! Починаємо через 3.. 2.. 1..')">START</button>
-    </div>
+<div class="streak-container">
+<div id="fire" class="fire inactive">🔥</div>
+<div class="streak-text">
+<span id="days">0</span> Days Streak
+</div>
+</div>
 
-    <div class="exercise-list">
-        <div class="exercise-item">
-            <div class="ex-icon">🏃</div>
-            <div class="ex-info"><h4>High Stepping</h4><p>00:30</p></div>
-        </div>
-        <div class="exercise-item">
-            <div class="ex-icon">🧘</div>
-            <div class="ex-info"><h4>Abdominal Crunches</h4><p>x 20</p></div>
-        </div>
-        <div class="exercise-item">
-            <div class="ex-icon">🦶</div>
-            <div class="ex-info"><h4>Heel Touch</h4><p>x 20</p></div>
-        </div>
-        <div class="exercise-item">
-            <div class="ex-icon">🏔️</div>
-            <div class="ex-info"><h4>Mountain Climber</h4><p>00:30</p></div>
-        </div>
-    </div>
+<div class="card">
+<h1>ABS WORKOUT</h1>
+</div>
 
-    <div class="timer-ui">
-        <div id="countdown">01:00</div>
-        <button class="btn-go" onclick="startTimer()">GO!</button>
-    </div>
-</div><script>
-    function startTimer() {
-        let time = 60;
-        const display = document.getElementById('countdown');
-        const interval = setInterval(() => {
-            time--;
-            let sec = time < 10 ? '0' + time : time;
-            display.textContent = "00:" + sec;
-            if (time <= 0) {
-                clearInterval(interval);
-                display.textContent = "DONE!";
-                alert("КРАСАВА! Ти зробив це! 1000 грн все ближче!");
-            }
-        }, 1000);
-    }
+<div class="exercise">
+<div class="icon">🏃</div>
+<div>High Stepping</div>
+</div>
+
+<div class="exercise">
+<div class="icon">💪</div>
+<div>Abdominal Crunches</div>
+</div>
+
+<div class="exercise">
+<div class="icon">🦶</div>
+<div>Heel Touch</div>
+</div>
+
+<div class="exercise">
+<div class="icon">⛰️</div>
+<div>Mountain Climber</div>
+</div>
+
+<div class="timer" id="timer">
+01:00
+</div>
+
+<button id="goBtn">
+GO!
+</button>
+
+</div>
+
+<script>
+
+let totalSeconds=60;
+let timerRunning=false;
+
+const timer=document.getElementById("timer");
+const button=document.getElementById("goBtn");
+const fire=document.getElementById("fire");
+const daysText=document.getElementById("days");
+
+let streak=Number(localStorage.getItem("streak"))||0;
+let lastDate=localStorage.getItem("lastWorkout");
+
+checkMissedDay();
+updateUI();
+
+function getToday(){
+
+let d=new Date();
+return d.toISOString().split("T")[0];
+
+}
+
+function daysBetween(oldDate,newDate){
+
+let d1=new Date(oldDate);
+let d2=new Date(newDate);
+
+let diff=Math.floor(
+(d2-d1)/(1000*60*60*24)
+);
+
+return diff;
+
+}
+
+function checkMissedDay(){
+
+if(!lastDate)return;
+
+let today=getToday();
+
+let diff=daysBetween(lastDate,today);
+
+if(diff>1){
+
+streak=0;
+
+localStorage.setItem(
+"streak",
+0
+);
+
+}
+
+}
+
+function updateUI(){
+
+daysText.innerText=streak;
+
+if(streak>0){
+
+fire.classList.remove("inactive");
+
+}else{
+
+fire.classList.add("inactive");
+
+}
+
+}
+
+button.onclick=function(){
+
+if(timerRunning) return;
+
+timerRunning=true;
+button.disabled=true;
+
+let seconds=60;
+
+let interval=setInterval(()=>{
+
+seconds--;
+
+let mins=Math.floor(seconds/60);
+
+let sec=seconds%60;
+
+timer.innerText=
+String(mins).padStart(2,"0")
++
+":"
++
+String(sec).padStart(2,"0");
+
+if(seconds<=0){
+
+clearInterval(interval);
+
+completeWorkout();
+
+timer.innerText="01:00";
+
+timerRunning=false;
+button.disabled=false;
+
+}
+
+},1000);
+
+}
+
+function completeWorkout(){
+
+let today=getToday();
+
+if(lastDate){
+
+let diff=daysBetween(
+lastDate,
+today
+);
+
+if(diff===0){
+
+alert(
+"Сьогодні тренування вже зараховано 🔥"
+);
+
+return;
+}
+
+}
+
+streak++;
+
+lastDate=today;
+
+localStorage.setItem(
+"streak",
+streak
+);
+
+localStorage.setItem(
+"lastWorkout",
+today
+);
+
+fire.classList.remove(
+"inactive"
+);
+
+updateUI();
+
+alert(
+"Тренування завершено! +1 день 🔥"
+);
+
+}
+
 </script>
 
 </body>
