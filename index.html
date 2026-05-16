@@ -1,55 +1,356 @@
-export default function TaekwondoAbsChallenge() { const days = [ { day: 'Понеділок', exercise: 'Скручування', reps: '3 × 20', tip: 'Повільно та рівно дихай' }, { day: 'Вівторок', exercise: 'Планка', reps: '3 × 40 сек', tip: 'Тримай спину рівно' }, { day: 'Середа', exercise: 'Велосипед', reps: '3 × 25', tip: 'Не поспішай' }, { day: 'Четвер', exercise: 'Підйом ніг', reps: '3 × 15', tip: 'Не згинай ноги' }, { day: 'П’ятниця', exercise: 'Російські повороти', reps: '3 × 30', tip: 'Тримай баланс' }, { day: 'Субота', exercise: 'Комбо день', reps: '15 хв', tip: 'Виконай всі вправи по колу' }, { day: 'Неділя', exercise: 'Відпочинок', reps: 'Розтяжка', tip: 'Відновлення теж важливе' }, ];
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taekwondo Abs Challenge</title>
 
-return ( <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-red-950 text-white p-6 font-sans"> <div className="max-w-5xl mx-auto"> <div className="text-center mb-10"> <h1 className="text-5xl font-extrabold mb-4 tracking-wide"> 🔥 Taekwondo Abs Challenge 🔥 </h1> <p className="text-gray-300 text-lg"> Підготовка до червня для челенджу на прес 💪 </p> </div>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 
-<div className="grid md:grid-cols-2 gap-6 mb-10">
-      <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-6 shadow-2xl border border-white/10 hover:scale-105 transition">
-        <h2 className="text-2xl font-bold mb-4">🎯 Ціль</h2>
-        <p className="text-gray-300 leading-relaxed">
-          Тренуй прес кожного дня, поступово збільшуй повторення та не забувай про сон і воду.
-        </p>
-      </div>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
 
-      <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-6 shadow-2xl border border-white/10 hover:scale-105 transition">
-        <h2 className="text-2xl font-bold mb-4">⚡ Поради</h2>
-        <ul className="space-y-2 text-gray-300">
-          <li>✅ Розминка перед тренуванням</li>
-          <li>✅ Пий воду</li>
-          <li>✅ Не тренуйся через біль</li>
-          <li>✅ Спи 8+ годин</li>
-        </ul>
-      </div>
-    </div>
+body{
+background:linear-gradient(180deg,#050505,#111,#1a0000);
+color:white;
+padding:20px;
+}
 
-    <div className="grid gap-5">
-      {days.map((item, index) => (
-        <div
-          key={index}
-          className="bg-white/10 border border-white/10 rounded-3xl p-5 flex flex-col md:flex-row md:items-center md:justify-between shadow-xl hover:bg-white/20 transition-all"
-        >
-          <div>
-            <h3 className="text-2xl font-bold text-red-400">{item.day}</h3>
-            <p className="text-lg mt-1">🏋️ {item.exercise}</p>
-          </div>
+.header{
+text-align:center;
+padding:30px 10px;
+animation:fade 1s ease;
+}
 
-          <div className="mt-4 md:mt-0 text-center">
-            <div className="text-3xl font-extrabold">{item.reps}</div>
-            <div className="text-sm text-gray-300 mt-1">{item.tip}</div>
-          </div>
-        </div>
-      ))}
-    </div>
+.header h1{
+font-size:38px;
+font-weight:800;
+color:#ff3b3b;
+text-shadow:0 0 20px #ff0000;
+}
 
-    <div className="mt-12 text-center">
-      <div className="inline-block bg-red-600 hover:bg-red-500 transition px-8 py-4 rounded-2xl text-2xl font-bold shadow-2xl cursor-pointer">
-        💥 СТАТИ МОНСТРОМ ПРЕСУ 💥
-      </div>
-    </div>
+.header p{
+margin-top:10px;
+color:#ccc;
+}
 
-    <div className="mt-10 text-center text-gray-400 text-sm">
-      Зроблено спеціально для тренувань з тхеквандо 🥋
-    </div>
-  </div>
+.stats{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+margin-top:25px;
+}
+
+.card{
+background:rgba(255,255,255,0.08);
+border:1px solid rgba(255,255,255,0.1);
+backdrop-filter:blur(10px);
+padding:20px;
+border-radius:25px;
+box-shadow:0 0 20px rgba(255,0,0,0.15);
+transition:0.3s;
+}
+
+.card:hover{
+transform:translateY(-5px) scale(1.02);
+}
+
+.days{
+margin-top:30px;
+display:flex;
+flex-direction:column;
+gap:15px;
+}
+
+.day{
+background:#121212;
+border-radius:22px;
+padding:18px;
+border:1px solid #222;
+transition:0.3s;
+cursor:pointer;
+}
+
+.day:hover{
+background:#1d1d1d;
+transform:scale(1.01);
+}
+
+.day h2{
+color:#ff4a4a;
+font-size:24px;
+}
+
+.hidden{
+display:none;
+}
+
+.exercise-img{
+width:100%;
+border-radius:20px;
+margin-top:15px;
+}
+
+.progress-box{
+margin-top:25px;
+}
+
+.progress{
+height:22px;
+background:#222;
+border-radius:20px;
+overflow:hidden;
+}
+
+.progress-bar{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,#ff0000,#ff6b6b);
+transition:1s;
+}
+
+.btn{
+margin-top:15px;
+width:100%;
+padding:15px;
+border:none;
+border-radius:18px;
+font-size:18px;
+font-weight:700;
+background:linear-gradient(90deg,#ff0000,#ff4d4d);
+color:white;
+cursor:pointer;
+transition:0.3s;
+}
+
+.btn:hover{
+transform:scale(1.03);
+box-shadow:0 0 20px red;
+}
+
+.timer{
+font-size:40px;
+font-weight:800;
+text-align:center;
+margin-top:20px;
+}
+
+.calendar{
+margin-top:25px;
+display:grid;
+grid-template-columns:repeat(7,1fr);
+gap:8px;
+}
+
+.calendar div{
+background:#171717;
+padding:12px;
+text-align:center;
+border-radius:14px;
+font-size:14px;
+}
+
+.levels{
+display:flex;
+gap:10px;
+margin-top:15px;
+flex-wrap:wrap;
+}
+
+.level{
+flex:1;
+padding:12px;
+text-align:center;
+border-radius:16px;
+background:#202020;
+}
+
+.footer{
+margin-top:40px;
+text-align:center;
+color:#888;
+font-size:14px;
+}
+
+@keyframes fade{
+from{
+opacity:0;
+transform:translateY(20px)
+}
+to{
+opacity:1;
+transform:translateY(0)
+}
+}
+
+@media(max-width:700px){
+.stats{
+grid-template-columns:1fr;
+}
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<h1>🔥 Taekwondo Abs Challenge 🔥</h1>
+<p>Підготовка до червня • Стань монстром пресу 💪</p>
 </div>
 
-); }
+<div class="stats">
+
+<div class="card">
+<h2>🎯 Ціль</h2>
+<p>Тренуйся кожного дня та збільшуй результат.</p>
+</div>
+
+<div class="card">
+<h2>⚡ Поради</h2>
+<p>Сон • Вода • Розминка • Безпека</p>
+</div>
+
+</div>
+
+<div class="card progress-box">
+<h2>📈 Прогрес</h2>
+
+<div class="progress">
+<div class="progress-bar" id="bar"></div>
+</div>
+
+<button class="btn" onclick="increaseProgress()">
+✅ Я потренувався
+</button>
+</div>
+
+<div class="card">
+<h2>⏱ Таймер</h2>
+
+<div class="timer" id="timer">60</div>
+
+<button class="btn" onclick="startTimer()">
+▶ Старт
+</button>
+</div>
+
+<div class="card">
+<h2>🏆 Рівні складності</h2>
+
+<div class="levels">
+<div class="level">🟢 Легкий</div>
+<div class="level">🟠 Середній</div>
+<div class="level">🔴 Жорсткий</div>
+</div>
+</div>
+
+<div class="card">
+<h2>📅 Календар тренувань</h2>
+
+<div class="calendar">
+<div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div>
+<div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div>
+<div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div>
+<div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div>
+</div>
+</div>
+
+<div class="days">
+
+<div class="day" onclick="toggleDay('monday')">
+<h2>Понеділок</h2><div class="hidden" id="monday">
+<p>🏋 Скручування — 3×20</p>
+
+<img class="exercise-img"
+src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1200&auto=format&fit=crop">
+
+<button class="btn" onclick="playSound()">
+🔥 Почати
+</button>
+</div>
+</div>
+
+<div class="day" onclick="toggleDay('tuesday')">
+<h2>Вівторок</h2>
+
+<div class="hidden" id="tuesday">
+<p>🏋 Планка — 3×40 сек</p>
+
+<img class="exercise-img"
+src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=1200&auto=format&fit=crop">
+
+<button class="btn" onclick="playSound()">
+🔥 Почати
+</button>
+</div>
+</div>
+
+<div class="day" onclick="toggleDay('wednesday')">
+<h2>Середа</h2>
+
+<div class="hidden" id="wednesday">
+<p>🏋 Велосипед — 3×25</p>
+
+<img class="exercise-img"
+src="https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=1200&auto=format&fit=crop">
+
+<button class="btn" onclick="playSound()">
+🔥 Почати
+</button>
+</div>
+</div>
+
+</div>
+
+<div class="footer">
+🥋 Nike/UFC стиль • Abs Challenge
+</div>
+
+<audio id="clickSound"
+src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=click-124467.mp3">
+</audio>
+
+<script>
+let progress = 0;
+
+function increaseProgress(){
+if(progress < 100){
+progress += 10;
+document.getElementById('bar').style.width = progress + '%';
+playSound();
+}
+}
+
+function toggleDay(id){
+const el = document.getElementById(id);
+el.classList.toggle('hidden');
+playSound();
+}
+
+function playSound(){
+document.getElementById('clickSound').play();
+}
+
+function startTimer(){
+let time = 60;
+const timer = document.getElementById('timer');
+
+const interval = setInterval(() => {
+time--;
+timer.innerText = time;
+
+if(time <= 0){
+clearInterval(interval);
+alert('🔥 Тренування завершено!');
+}
+},1000);
+}
+</script>
+
+</body>
+</html>
