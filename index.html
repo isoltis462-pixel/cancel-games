@@ -1,336 +1,424 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ABS Workout</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Moja Biedronka Checker</title>
+    
+    <!-- Бібліотека для сканування штрих-кодів -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
 
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
+    <style>
+        :root {
+            --bd-red: #e31b23;
+            --bd-yellow: #fff200;
+            --bd-dark: #222;
+            --panel-bg: rgba(255, 255, 255, 0.95);
+        }
 
-body{
-background:#000;
-color:white;
-padding:20px;
-min-height:100vh;
-}
+        * {
+            box-sizing: border-box;
+        }
 
-.container{
-max-width:400px;
-margin:auto;
-}
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            /* Яскравий фірмовий градієнт */
+            background: linear-gradient(135deg, #e31b23 0%, #ffc800 100%);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
 
-.streak-container{
-display:flex;
-flex-direction:column;
-align-items:center;
-margin-bottom:25px;
-}
+        /* --- АНІМАЦІЯ СОНЕЧОК (БОЖИХ КОРОВОК) --- */
+        .ladybug {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            background: radial-gradient(circle at 30% 30%, #ff3b30, #b30000);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.7;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        /* Крила / лінія посередині */
+        .ladybug::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 17px;
+            width: 1px;
+            height: 35px;
+            background: #000;
+        }
+        /* Голова */
+        .ladybug::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: 12px;
+            width: 11px;
+            height: 8px;
+            background: #000;
+            border-radius: 50% 50% 0 0;
+        }
+        /* Точки на спинці */
+        .bug-dots {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        .bug-dots::before, .bug-dots::after {
+            content: '•';
+            color: black;
+            font-size: 16px;
+            position: absolute;
+        }
+        /* Різні позиції точок */
+        .ladybug:nth-child(1) .bug-dots::before { top: 5px; left: 6px; }
+        .ladybug:nth-child(1) .bug-dots::after { top: 5px; right: 6px; }
+        .ladybug:nth-child(2) .bug-dots::before { top: 15px; left: 4px; }
+        .ladybug:nth-child(2) .bug-dots::after { top: 15px; right: 4px; }
 
-.fire{
-font-size:65px;
-animation:pulse 1.5s infinite;
-filter:drop-shadow(0 0 10px orange);
-transition:0.4s;
-}
+        /* Рух сонечок */
+        @keyframes floatBug1 {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(100px, -80px) rotate(45deg); }
+            100% { transform: translate(-20px, -150px) rotate(10deg); }
+        }
+        @keyframes floatBug2 {
+            0% { transform: translate(0, 0) rotate(180deg); }
+            50% { transform: translate(-120px, -50px) rotate(135deg); }
+            100% { transform: translate(-50px, 120px) rotate(200deg); }
+        }
 
-.fire.inactive{
-opacity:0.3;
-filter:none;
-}
+        .bug1 { bottom: 10%; left: 10%; animation: floatBug1 15s infinite alternate ease-in-out; }
+        .bug2 { top: 15%; right: 10%; animation: floatBug2 18s infinite alternate ease-in-out; }
+        .bug3 { bottom: 20%; right: 15%; animation: floatBug1 22s infinite alternate ease-in-out; }
 
-@keyframes pulse{
-0%{
-transform:scale(1);
-}
-50%{
-transform:scale(1.2);
-}
-100%{
-transform:scale(1);
-}
-}
+        /* --- ОСНОВНИЙ КОНТЕЙНЕР --- */
+        .main-card {
+            width: 100%;
+            max-width: 430px;
+            background: var(--panel-bg);
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+            overflow: hidden;
+            z-index: 10;
+            border: 4px solid var(--bd-yellow);
+        }
 
-.streak-text{
-margin-top:10px;
-font-size:22px;
-font-weight:bold;
-}
+        /* Шапка */
+        .brand-header {
+            background-color: var(--bd-red);
+            padding: 25px 20px;
+            color: white;
+            text-align: center;
+            position: relative;
+        }
+        .brand-header h1 {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .brand-header p {
+            margin: 5px 0 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--bd-yellow);
+        }
 
-.card{
-background:linear-gradient(135deg,#005eff,#4ea1ff);
-padding:25px;
-border-radius:25px;
-margin-bottom:25px;
-box-shadow:0 0 30px rgba(0,100,255,.4);
-}
+        /* Перемикач режимів (Вкладки) */
+        .tab-controls {
+            display: flex;
+            background: #eee;
+            padding: 5px;
+            margin: 20px;
+            border-radius: 12px;
+        }
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 12px 5px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: var(--bd-red);
+            color: white;
+            box-shadow: 0 4px 10px rgba(227, 27, 35, 0.3);
+        }
 
-.card h1{
-font-size:28px;
-}
+        /* Контент вкладки */
+        .tab-content {
+            padding: 0 20px 20px 20px;
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
 
-.exercise{
-display:flex;
-align-items:center;
-background:#111;
-padding:15px;
-margin-bottom:15px;
-border-radius:18px;
-}
+        /* Стиль вікна камери */
+        .camera-wrapper {
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 3px solid #ddd;
+            background: #000;
+            aspect-ratio: 4/3;
+            position: relative;
+        }
+        #reader {
+            width: 100% !important;
+            border: none !important;
+        }
+        #reader video {
+            object-fit: cover !important;
+        }
+        /* Кастомізація внутрішніх кнопок бібліотеки html5-qrcode */
+        #reader button {
+            background: var(--bd-red) !important;
+            color: white !important;
+            border: none !important;
+            padding: 10px 20px !important;
+            border-radius: 8px !important;
+            font-weight: bold !important;
+            cursor: pointer;
+            margin: 10px 0 !important;
+        }
+        #reader select {
+            padding: 6px;
+            border-radius: 6px;
+            margin-top: 5px;
+            width: 90%;
+        }
 
-.icon{
-width:55px;
-height:55px;
-background:#222;
-border-radius:15px;
-display:flex;
-justify-content:center;
-align-items:center;
-margin-right:15px;
-font-size:26px;
-}
+        /* Форма ручного введення */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #ccc;
+            border-radius: 12px;
+            font-size: 18px;
+            text-align: center;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .input-group input:focus {
+            border-color: var(--bd-red);
+            outline: none;
+        }
+        .submit-btn {
+            background: var(--bd-red);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 4px 12px rgba(227,27,35,0.2);
+            transition: background 0.2s;
+        }
+        .submit-btn:hover { background: var(--bd-dark-red); }
 
-.timer{
-text-align:center;
-font-size:60px;
-font-weight:bold;
-margin:30px 0;
-}
+        /* Блок Результатів */
+        .result-box {
+            margin-top: 20px;
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 14px;
+            padding: 15px;
+            text-align: center;
+            display: none;
+        }
+        .result-box.active { display: block; }
+        .card-num-badge {
+            font-size: 18px;
+            font-weight: bold;
+            background: #fff;
+            padding: 6px 15px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        
+        /* Статуси */
+        .status-msg { font-size: 18px; font-weight: bold; margin: 10px 0; }
+        .status-ok { color: #2e7d32; }
+        .status-fail { color: #c62828; }
+        .status-wait { color: #666; font-style: italic; }
 
-button{
-width:100%;
-padding:18px;
-border:none;
-border-radius:50px;
-background:#ff7b00;
-color:white;
-font-size:30px;
-font-weight:bold;
-cursor:pointer;
-transition:0.3s;
-}
-
-button:hover{
-transform:scale(1.03);
-}
-
-button:disabled{
-opacity:0.5;
-}
-</style>
+    </style>
 </head>
 <body>
 
-<div class="container">
+<!-- Анімоване тло із сонечками -->
+<div class="ladybug bug1"><div class="bug-dots"></div></div>
+<div class="ladybug bug2"><div class="bug-dots"></div></div>
+<div class="ladybug bug3"><div class="bug-dots"></div></div>
 
-<div class="streak-container">
-<div id="fire" class="fire inactive">🔥</div>
-<div class="streak-text">
-<span id="days">0</span> Days Streak
-</div>
-</div>
+<div class="main-card">
+    <div class="brand-header">
+        <h1>Moja Biedronka</h1>
+        <p>Сканер та перевірка карток</p>
+    </div>
 
-<div class="card">
-<h1>ABS WORKOUT</h1>
-</div>
+    <!-- Кнопки перемикання режимів -->
+    <div class="tab-controls">
+        <button class="tab-btn active" onclick="switchTab('scan-tab')">📷 Камера</button>
+        <button class="tab-btn" onclick="switchTab('input-tab')">⌨️ Ввести код</button>
+    </div>
 
-<div class="exercise">
-<div class="icon">🏃</div>
-<div>High Stepping</div>
-</div>
+    <!-- ВКЛАДКА 1: СКАНИРОВАНИЕ -->
+    <div id="scan-tab" class="tab-content active">
+        <div class="camera-wrapper">
+            <div id="reader"></div>
+        </div>
+    </div>
 
-<div class="exercise">
-<div class="icon">💪</div>
-<div>Abdominal Crunches</div>
-</div>
+    <!-- ВКЛАДКА 2: РУЧНОЙ ВВОД -->
+    <div id="input-tab" class="tab-content">
+        <div class="input-group">
+            <input type="number" id="manualCodeInput" placeholder="Введіть 13 цифр коду" pattern="\d*">
+            <button class="submit-btn" onclick="processManualInput()">Перевірити картку</button>
+        </div>
+    </div>
 
-<div class="exercise">
-<div class="icon">🦶</div>
-<div>Heel Touch</div>
-</div>
-
-<div class="exercise">
-<div class="icon">⛰️</div>
-<div>Mountain Climber</div>
-</div>
-
-<div class="timer" id="timer">
-01:00
-</div>
-
-<button id="goBtn">
-GO!
-</button>
-
+    <!-- БЛОК РЕЗУЛЬТАТІВ -->
+    <div class="result-box" id="resultBox">
+        <span class="card-num-badge" id="displayCardNum">2300000000000</span>
+        <div id="statusOutput"></div>
+    </div>
 </div>
 
 <script>
+    let html5QrcodeScanner;
+    
+    // Перемикання вкладок
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        event.target.classList.add('active');
 
-let totalSeconds=60;
-let timerRunning=false;
+        // Якщо перемикаємось на ручне введення — зупиняємо камеру, щоб не сідав акумулятор
+        if (tabId === 'input-tab' && html5QrcodeScanner) {
+            html5QrcodeScanner.clear().catch(err => console.log(err));
+        } else if (tabId === 'scan-tab') {
+            initScanner();
+        }
+    }
 
-const timer=document.getElementById("timer");
-const button=document.getElementById("goBtn");
-const fire=document.getElementById("fire");
-const daysText=document.getElementById("days");
+    // Ініціалізація та запуск камери
+    function initScanner() {
+        if (!html5QrcodeScanner) {
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "reader", 
+                { 
+                    fps: 15, 
+                    qrbox: { width: 260, height: 140 },
+                    aspectRatio: 1.333333, // Співвідношення 4:3 для мобільних
+                    supportedScanTypes: [Html5QrcodeSupportedScanTypes.SCAN_TYPE_CAMERA]
+                }, 
+                false
+            );
+        }
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    }
 
-let streak=Number(localStorage.getItem("streak"))||0;
-let lastDate=localStorage.getItem("lastWorkout");
+    // Обробка успішного сканування камерою
+    function onScanSuccess(decodedText) {
+        // Сигналізуємо звуком чи вібрацією за наявності підтримки
+        if (navigator.vibrate) navigator.vibrate(100);
+        
+        showResult(decodedText);
+        
+        // Зупиняємо камеру після успішного сканування
+        html5QrcodeScanner.clear().catch(err => console.log(err));
+    }
 
-checkMissedDay();
-updateUI();
+    function onScanFailure(error) { /* ігноруємо пусті кадри */ }
 
-function getToday(){
+    // Обробка ручного введення тексту
+    function processManualInput() {
+        const inputVal = document.getElementById('manualCodeInput').value.trim();
+        if (inputVal.length < 5) {
+            alert("Будь ласка, введіть коректний номер картки!");
+            return;
+        }
+        showResult(inputVal);
+    }
 
-let d=new Date();
-return d.toISOString().split("T")[0];
+    // Відображення результатів та запуск перевірки статусу
+    function showResult(code) {
+        const resultBox = document.getElementById('resultBox');
+        const displayCardNum = document.getElementById('displayCardNum');
+        
+        displayCardNum.innerText = "Картка: " + code;
+        resultBox.classList.add('active');
+        
+        checkCardApi(code);
+    }
 
-}
+    // Симуляція запиту до зовнішнього сервісу реєстру штрих-кодів (як у попередньому прикладі)
+    async function checkCardApi(cardNumber) {
+        const statusOutput = document.getElementById('statusOutput');
+        statusOutput.innerHTML = '<p class="status-wait">⏳ Перевірка у базі даних...</p>';
 
-function daysBetween(oldDate,newDate){
+        try {
+            const ean = cardNumber.padStart(13, '0');
+            // Використовуємо публічний CORS проксі
+            const proxy = 'https://cors-anywhere.herokuapp.com/';
+            const api = `https://api.upcitemdb.com/prod/trial/lookup?upc=${ean}`;
 
-let d1=new Date(oldDate);
-let d2=new Date(newDate);
+            const response = await fetch(proxy + api);
+            if (!response.ok) throw new Error("Помилка мережі");
+            
+            const data = await response.json();
+            
+            // Перевіряємо, чи є в базі згадки про картки Biedronka
+            const isExist = data.items && data.items.length > 0 && 
+                            data.items.some(i => 
+                                i.title.toLowerCase().includes('biedronka') || 
+                                i.description.toLowerCase().includes('loyalty')
+                            );
 
-let diff=Math.floor(
-(d2-d1)/(1000*60*60*24)
-);
+            if (isExist) {
+                statusOutput.innerHTML = '<p class="status-ok">✅ КАРТКА ДІЙСНА (Активна)</p>';
+            } else {
+                statusOutput.innerHTML = '<p class="status-fail">❌ ЗАБЛОКОВАНА АБО НЕ ІСНУЄ</p>';
+            }
+        } catch (e) {
+            // Заглушка на випадок блокування проксі чи відсутності інтернету
+            statusOutput.innerHTML = '<p class="status-wait">⚠️ Перевірка через API недоступна (Спробуйте пізніше)</p>';
+        }
+    }
 
-return diff;
-
-}
-
-function checkMissedDay(){
-
-if(!lastDate)return;
-
-let today=getToday();
-
-let diff=daysBetween(lastDate,today);
-
-if(diff>1){
-
-streak=0;
-
-localStorage.setItem(
-"streak",
-0
-);
-
-}
-
-}
-
-function updateUI(){
-
-daysText.innerText=streak;
-
-if(streak>0){
-
-fire.classList.remove("inactive");
-
-}else{
-
-fire.classList.add("inactive");
-
-}
-
-}
-
-button.onclick=function(){
-
-if(timerRunning) return;
-
-timerRunning=true;
-button.disabled=true;
-
-let seconds=60;
-
-let interval=setInterval(()=>{
-
-seconds--;
-
-let mins=Math.floor(seconds/60);
-
-let sec=seconds%60;
-
-timer.innerText=
-String(mins).padStart(2,"0")
-+
-":"
-+
-String(sec).padStart(2,"0");
-
-if(seconds<=0){
-
-clearInterval(interval);
-
-completeWorkout();
-
-timer.innerText="01:00";
-
-timerRunning=false;
-button.disabled=false;
-
-}
-
-},1000);
-
-}
-
-function completeWorkout(){
-
-let today=getToday();
-
-if(lastDate){
-
-let diff=daysBetween(
-lastDate,
-today
-);
-
-if(diff===0){
-
-alert(
-"Сьогодні тренування вже зараховано 🔥"
-);
-
-return;
-}
-
-}
-
-streak++;
-
-lastDate=today;
-
-localStorage.setItem(
-"streak",
-streak
-);
-
-localStorage.setItem(
-"lastWorkout",
-today
-);
-
-fire.classList.remove(
-"inactive"
-);
-
-updateUI();
-
-alert(
-"Тренування завершено! +1 день 🔥"
-);
-
-}
-
+    // Запускаємо камеру відразу при завантаженні сторінки
+    window.addEventListener('load', initScanner);
 </script>
 
 </body>
