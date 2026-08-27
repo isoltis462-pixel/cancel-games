@@ -3,400 +3,324 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biedronka Premium Scanner</title>
-    <!-- Підключаємо іконки -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- НАДІЙНИЙ СКАНЕР ШТРИХ-КОДІВ -->
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    
+    <title>Трекер Цлей & Звичок</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-red: #e31b23;
-            --primary-yellow: #fff200;
-            --dark-gray: #1e1e24;
-            --light-bg: #f7f9fa;
-            --success-green: #2ec4b6;
-            --error-orange: #ff9f1c;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #6366f1;
+            --accent-hover: #4f46e5;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --done-color: #ef4444; /* Червоний хрестик */
+            --missed-color: #334155; /* Сірий пропущений */
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, var(--primary-red) 0%, #b80c12 100%);
+            background-color: var(--bg-color);
+            color: var(--text-main);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 15px;
-        }
-
-        .app-container {
-            background: white;
-            width: 100%;
-            max-width: 450px;
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            border: 4px solid var(--primary-yellow);
-        }
-
-        .app-header {
-            background: var(--dark-gray);
-            color: white;
             padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 500px;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
             text-align: center;
-        }
-
-        .app-header h1 {
-            font-size: 22px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .app-header h1 i { color: var(--primary-yellow); }
-        .app-header p { font-size: 13px; color: #a0a0a5; margin-top: 4px; }
-
-        .tabs-nav {
-            display: flex;
-            background: #f1f3f5;
-            padding: 6px;
-            margin: 15px;
-            border-radius: 14px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            border: none;
-            background: transparent;
-            padding: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #6c757d;
-            cursor: pointer;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .tab-btn.active {
-            background: white;
-            color: var(--dark-gray);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-        }
-
-        .tab-content {
-            display: none;
-            padding: 0 15px 15px 15px;
-            flex-direction: column;
-        }
-
-        .tab-content.active { display: flex; }
-
-        .video-wrapper {
-            position: relative;
-            width: 100%;
-            border-radius: 16px;
-            overflow: hidden;
-            background: #000;
-            aspect-ratio: 4/3;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
-        }
-
-        #interactive {
-            width: 100%;
-            height: 100%;
-        }
-
-        #interactive video {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
-        }
-
-        .scanner-laser {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: var(--primary-yellow);
-            box-shadow: 0 0 12px var(--primary-yellow);
-            animation: scanAnim 2s linear infinite;
-            z-index: 10;
-            pointer-events: none;
-        }
-
-        @keyframes scanAnim {
-            0% { top: 0%; }
-            50% { top: 100%; }
-            100% { top: 0%; }
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--text-main);
         }
 
         .input-group {
             display: flex;
-            flex-direction: column;
-            gap: 12px;
-            padding: 10px 0;
+            gap: 10px;
+            margin-bottom: 25px;
         }
 
-        .input-group input {
-            width: 100%;
-            padding: 16px;
-            font-size: 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 14px;
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 2px solid #334155;
+            background: #0f172a;
+            color: #fff;
+            font-size: 1rem;
             outline: none;
-            text-align: center;
-            font-weight: 600;
-            letter-spacing: 1px;
+            transition: border-color 0.3s;
         }
 
-        .input-group input:focus { border-color: var(--primary-red); }
+        input[type="text"]:focus {
+            border-color: var(--accent-color);
+        }
 
-        .submit-btn {
-            background: var(--primary-red);
+        button.btn-primary {
+            background-color: var(--accent-color);
             color: white;
             border: none;
-            padding: 16px;
-            font-size: 16px;
-            font-weight: 700;
-            border-radius: 14px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(227, 27, 35, 0.2);
+            transition: background 0.3s;
         }
 
-        .chat-section {
-            background: var(--light-bg);
-            border-top: 2px solid #edf2f7;
+        button.btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .habit-header {
             display: flex;
-            flex-direction: column;
-            height: 250px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #334155;
         }
 
-        .chat-title {
-            padding: 10px 15px;
-            font-size: 12px;
-            font-weight: 700;
-            color: #a0aec0;
-            text-transform: uppercase;
-            background: white;
-            border-bottom: 1px solid #e2e8f0;
+        .habit-title {
+            font-size: 1.2rem;
+            font-weight: 600;
         }
 
-        .chat-messages {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
+        .month-name {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .day-label {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .day-box {
+            aspect-ratio: 1;
+            background: #0f172a;
+            border-radius: 8px;
             display: flex;
-            flex-direction: column;
-            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            transition: transform 0.1s, background-color 0.3s;
+            border: 1px solid transparent;
         }
 
-        .msg {
-            max-width: 85%;
-            padding: 12px 16px;
-            border-radius: 16px;
-            font-size: 14px;
-            line-height: 1.4;
-            animation: fadeIn 0.3s ease-out forwards;
+        /* Заблоковані майбутні дні */
+        .day-box.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Сьогоднішній день */
+        .day-box.today {
+            border-color: var(--accent-color);
         }
 
-        .msg.bot {
-            background: white;
-            color: var(--dark-gray);
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-            border-left: 4px solid #cbd5e0;
+        .day-box.today:hover:not(.done) {
+            transform: scale(1.05);
         }
 
-        .msg.user {
-            background: var(--dark-gray);
-            color: white;
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
+        /* Виконаний день (Червоний хрестик) */
+        .day-box.done::after {
+            content: '✖';
+            position: absolute;
+            color: var(--done-color);
+            font-size: 1.5rem;
+            font-weight: 900;
+            line-height: 1;
         }
 
-        .msg.bot.loading { border-left-color: var(--primary-yellow); }
-        .msg.bot.success { background: #e6fffa; border-left-color: var(--success-green); color: #006d77; }
-        .msg.bot.error { background: #fffaf0; border-left-color: var(--error-orange); color: #c05621; }
+        /* Пропущений день (Сірий) */
+        .day-box.missed {
+            background-color: var(--missed-color);
+            color: #64748b;
+        }
+
+        .reset-btn {
+            background: transparent;
+            border: 1px solid #334155;
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .reset-btn:hover {
+            color: #ef4444;
+            border-color: #ef4444;
+        }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <div class="app-header">
-        <h1><i class="fa-solid fa-barcode"></i> Biedronka Scanner</h1>
-        <p>Premium перевірка штрих-кодів карток</p>
+<div class="container">
+    <h1>Трекер Звичок</h1>
+
+    <div class="input-group" id="setupForm">
+        <input type="text" id="habitInput" placeholder="Наприклад: 100 віджимань щодня">
+        <button class="btn-primary" onclick="saveHabit()">Старт</button>
     </div>
 
-    <div class="tabs-nav">
-        <button class="tab-btn active" id="btn-scan" onclick="switchTab('scan-tab')">
-            <i class="fa-solid fa-camera"></i> Сканувати
-        </button>
-        <button class="tab-btn" id="btn-input" onclick="switchTab('input-tab')">
-            <i class="fa-solid fa-keyboard"></i> Ввести код
-        </button>
-    </div>
-
-    <div id="scan-tab" class="tab-content active">
-        <div class="video-wrapper">
-            <div id="interactive"></div>
-            <div class="scanner-laser"></div>
-        </div>
-    </div>
-
-    <div id="input-tab" class="tab-content">
-        <div class="input-group">
-            <input type="text" id="manualInput" placeholder="Введіть 13 цифр картки" inputmode="numeric">
-            <button class="submit-btn" onclick="processManualInput()">
-                <i class="fa-solid fa-magnifying-glass"></i> Перевірити картку
-            </button>
-        </div>
-    </div>
-
-    <div class="chat-section">
-        <div class="chat-title">Лог дій / Система сповіщень</div>
-        <div class="chat-messages" id="chatMessages">
-            <div class="msg bot">
-                👋 Привіт! Я готовий до роботи. Піднеси штрих-код картки до камери або введи цифри вручну.
+    <div id="calendarArea" style="display: none;">
+        <div class="habit-header">
+            <div>
+                <div class="habit-title" id="displayTitle">Звичка</div>
+                <div class="month-name" id="monthDisplay">Місяць</div>
             </div>
+            <button class="reset-btn" onclick="resetHabit()">Скинути</button>
         </div>
+
+        <div class="calendar-grid">
+            <div class="day-label">Пн</div>
+            <div class="day-label">Вт</div>
+            <div class="day-label">Ср</div>
+            <div class="day-label">Чт</div>
+            <div class="day-label">Пт</div>
+            <div class="day-label">Сб</div>
+            <div class="day-label">Нд</div>
+        </div>
+
+        <div class="calendar-grid" id="daysContainer"></div>
     </div>
 </div>
 
 <script>
-    const chatMessages = document.getElementById('chatMessages');
-    let html5QrCodeScanner = null;
-    let isCooldown = false;
+    let habitData = JSON.parse(localStorage.getItem('habitTrackerData')) || null;
 
-    function addMessage(text, sender, type = '') {
-        const msgDiv = document.createElement('div');
-        msgDiv.className = `msg ${sender} ${type}`;
-        msgDiv.innerHTML = text;
-        chatMessages.appendChild(msgDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    const todayDate = now.getDate();
 
-    function switchTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        
-        document.getElementById(tabId).classList.add('active');
-        
-        if (tabId === 'scan-tab') {
-            document.getElementById('btn-scan').classList.add('active');
-            startScanner();
+    function init() {
+        if (habitData && habitData.title) {
+            document.getElementById('setupForm').style.display = 'none';
+            document.getElementById('calendarArea').style.display = 'block';
+            document.getElementById('displayTitle').innerText = habitData.title;
+            
+            const monthNames = ["Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень", "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"];
+            document.getElementById('monthDisplay').innerText = `${monthNames[currentMonth]} ${currentYear}`;
+            
+            renderCalendar();
         } else {
-            document.getElementById('btn-input').classList.add('active');
-            stopScanner();
+            document.getElementById('setupForm').style.display = 'flex';
+            document.getElementById('calendarArea').style.display = 'none';
         }
     }
 
-    function startScanner() {
-        if (html5QrCodeScanner) return;
+    function saveHabit() {
+        const input = document.getElementById('habitInput');
+        if (!input.value.trim()) return;
 
-        html5QrCodeScanner = new Html5Qrcode("interactive");
-
-        const config = { 
-            fps: 25, 
-            qrbox: function(viewfinderWidth, viewfinderHeight) {
-                return { width: Math.min(viewfinderWidth * 0.8, 300), height: 120 };
-            },
-            formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.UPC_A ]
+        habitData = {
+            title: input.value.trim(),
+            days: {} // Формат: { "1": "done", "2": "missed" }
         };
 
-        html5QrCodeScanner.start(
-            { facingMode: "environment" }, 
-            config,
-            onScanSuccess,
-            onScanFailure
-        ).then(() => {
-            addMessage("📷 Сканер активовано. Помісти штрих-код у рамку по центру.", "bot");
-        }).catch(err => {
-            console.error(err);
-            addMessage("❌ Помилка камери. Переконайся, що відкрив через HTTPS і надав доступ.", "bot", "error");
-        });
+        localStorage.setItem('habitTrackerData', JSON.stringify(habitData));
+        init();
     }
 
-    function stopScanner() {
-        if (html5QrCodeScanner) {
-            html5QrCodeScanner.stop().then(() => {
-                html5QrCodeScanner = null;
-                addMessage("⏸️ Сканер камери зупинено.", "bot");
-            }).catch(err => console.error("Помилка стопу:", err));
-        }
-    }
+    function renderCalendar() {
+        const container = document.getElementById('daysContainer');
+        container.innerHTML = '';
 
-    function onScanSuccess(decodedText) {
-        if (isCooldown) return; 
-        isCooldown = true;
-
-        // Примусово робимо текст рядком і видаляємо пробіли чи інші невидимі символи
-        let rawCode = String(decodedText).replace(/\s/g, '');
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
         
-        // Виводимо абсолютно чистий рядок тексту
-        addMessage(`📷 Камера зчитала штрих-код: <b>${rawCode}</b>`, "user");
-        checkCardStatus(rawCode);
+        // Зміщення для першого дня місяця (0 - Пн, 6 - Нд)
+        let firstDayIndex = new Date(currentYear, currentMonth, 1).getDay() - 1;
+        if (firstDayIndex === -1) firstDayIndex = 6; 
 
-        setTimeout(() => { isCooldown = false; }, 4000);
-    }
-
-    function onScanFailure(error) {}
-
-    function processManualInput() {
-        const inputField = document.getElementById('manualInput');
-        let code = String(inputField.value).trim().replace(/\s/g, '');
-
-        if (code.length < 5) {
-            addMessage("⚠️ Введено закороткий код. Спробуй ще раз.", "bot", "error");
-            return;
+        // Порожні клітинки до початку місяця
+        for (let i = 0; i < firstDayIndex; i++) {
+            const emptyBox = document.createElement('div');
+            container.appendChild(emptyBox);
         }
 
-        addMessage(`Ввів код вручну: <b>${code}</b>`, "user");
-        inputField.value = "";
-        checkCardStatus(code);
-    }
+        // Рендер днів місяця
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dayBox = document.createElement('div');
+            dayBox.classList.add('day-box');
+            dayBox.innerText = day;
 
-    function checkCardStatus(cardNumber) {
-        // Гарантуємо, що номер є суто текстом
-        const cleanNumber = String(cardNumber);
-        
-        addMessage(`⏳ Перевіряю статус картки <b>${cleanNumber}</b> у базі даних...`, "bot", "loading");
-
-        setTimeout(() => {
-            // Беремо останній символ саме як елемент тексту
-            const lastChar = cleanNumber.slice(-1);
-            
-            if (['0', '2', '4', '6', '8'].includes(lastChar)) {
-                addMessage(`✅ <b>Картка дійсна!</b><br>Статус: АКТИВНА<br>Номер: ${cleanNumber}<br>Можна використовувати на касі.`, "bot", "success");
-                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-            } else {
-                addMessage(`❌ <b>Увага! Картку заблоковано!</b><br>Статус: БЛОКОВАНА / НЕАКТИВНА<br>Код: ${cleanNumber}`, "bot", "error");
-                if (navigator.vibrate) navigator.vibrate(300);
+            if (day === todayDate) {
+                dayBox.classList.add('today');
             }
-        }, 1500);
+
+            // Перевірка статусу з локальної бази
+            if (habitData.days[day] === 'done') {
+                dayBox.classList.add('done');
+            } else if (day < todayDate) {
+                // Якщо день минув і не закреслений — він сірий (пропущений)
+                dayBox.classList.add('missed');
+            } else if (day > todayDate) {
+                // Майбутні дні не можна натискати
+                dayBox.classList.add('disabled');
+            }
+
+            // Клік працює ТІЛЬКИ на сьогоднішній день і тільки якщо він ще не закреслений
+            if (day === todayDate) {
+                dayBox.onclick = () => markToday(dayBox, day);
+            }
+
+            container.appendChild(dayBox);
+        }
     }
 
-    window.addEventListener('load', startScanner);
+    function markToday(element, day) {
+        if (habitData.days[day] === 'done') return; // Якщо вже закреслено
+
+        habitData.days[day] = 'done';
+        element.classList.add('done');
+        element.classList.remove('missed');
+
+        localStorage.setItem('habitTrackerData', JSON.stringify(habitData));
+    }
+
+    function resetHabit() {
+        if (confirm('Скинути цю задачу та весь прогрес?')) {
+            localStorage.removeItem('habitTrackerData');
+            habitData = null;
+            document.getElementById('habitInput').value = '';
+            init();
+        }
+    }
+
+    // Запуск при завантаженні
+    init();
 </script>
 
 </body>
