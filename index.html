@@ -2,325 +2,529 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Трекер Цлей & Звичок</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Habit Pulse — Premium Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --accent-color: #6366f1;
-            --accent-hover: #4f46e5;
+            --bg-dark: #080711;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-shine: rgba(255, 255, 255, 0.05);
+            --primary: #8b5cf6;
+            --primary-glow: rgba(139, 92, 246, 0.4);
+            --accent: #ec4899;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --done-color: #ef4444; /* Червоний хрестик */
-            --missed-color: #334155; /* Сірий пропущений */
+            --done-color: #ef4444;
+            --missed-bg: rgba(255, 255, 255, 0.03);
+            --missed-text: #475569;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: var(--bg-color);
+            background-color: var(--bg-dark);
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
-            padding: 20px;
+            align-items: flex-start;
+            padding: 20px 12px;
+            overflow-x: hidden;
+            position: relative;
         }
 
-        .container {
-            background-color: var(--card-bg);
+        /* Живий анімований неоновий фон */
+        .ambient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            background: #080711;
+        }
+
+        .blob {
+            position: absolute;
+            filter: blur(90px);
+            opacity: 0.6;
+            border-radius: 50%;
+            animation: moveBlobs 20s infinite alternate cubic-bezier(0.45, 0.05, 0.55, 0.95);
+        }
+
+        .blob-1 {
+            top: -10%;
+            left: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+        }
+
+        .blob-2 {
+            bottom: -10%;
+            right: -10%;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, #ec4899 0%, transparent 70%);
+            animation-delay: -5s;
+        }
+
+        .blob-3 {
+            top: 40%;
+            left: 30%;
+            width: 40vw;
+            height: 40vw;
+            background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+            animation-delay: -10s;
+        }
+
+        @keyframes moveBlobs {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(80px, 50px) scale(1.1); }
+            100% { transform: translate(-50px, 100px) scale(0.9); }
+        }
+
+        .app-container {
             width: 100%;
-            max-width: 500px;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 1;
         }
 
-        h1 {
+        header {
             text-align: center;
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            color: var(--text-main);
+            padding: 10px 0;
         }
 
-        .input-group {
+        header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 30%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        /* Картка додавання */
+        .add-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 16px;
             display: flex;
             gap: 10px;
-            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        input[type="text"] {
+        .add-card input {
             flex: 1;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
             padding: 12px 16px;
-            border-radius: 10px;
-            border: 2px solid #334155;
-            background: #0f172a;
             color: #fff;
-            font-size: 1rem;
+            font-size: 0.95rem;
             outline: none;
-            transition: border-color 0.3s;
+            transition: all 0.3s ease;
+            width: 100%;
         }
 
-        input[type="text"]:focus {
-            border-color: var(--accent-color);
+        .add-card input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
         }
 
-        button.btn-primary {
-            background-color: var(--accent-color);
+        .btn-add {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 10px;
-            font-weight: 600;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
             cursor: pointer;
-            transition: background 0.3s;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        button.btn-primary:hover {
-            background-color: var(--accent-hover);
+        .btn-add:active {
+            transform: scale(0.95);
+        }
+
+        /* Картка звички */
+        .habit-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            position: relative;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .habit-header {
             display: flex;
             justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            gap: 10px;
+        }
+
+        .habit-info h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        .streak-tag {
+            display: inline-flex;
             align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #334155;
+            gap: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+            padding: 4px 8px;
+            border-radius: 20px;
+            margin-top: 6px;
+            border: 1px solid rgba(245, 158, 11, 0.2);
         }
 
-        .habit-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-
-        .month-name {
-            font-size: 0.9rem;
+        .btn-delete {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--text-muted);
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s;
         }
 
-        .calendar-grid {
+        .btn-delete:hover {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        /* Прогрес бар */
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        /* Дні тижня та сітка */
+        .week-days {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-            margin-top: 15px;
+            gap: 6px;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 8px;
         }
 
-        .day-label {
-            text-align: center;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            font-weight: 600;
-            margin-bottom: 5px;
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
         }
 
         .day-box {
             aspect-ratio: 1;
-            background: #0f172a;
-            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #cbd5e1;
             position: relative;
             user-select: none;
-            transition: transform 0.1s, background-color 0.3s;
-            border: 1px solid transparent;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        /* Заблоковані майбутні дні */
         .day-box.disabled {
-            opacity: 0.3;
+            opacity: 0.2;
             cursor: not-allowed;
+            border-color: transparent;
         }
 
-        /* Сьогоднішній день */
         .day-box.today {
-            border-color: var(--accent-color);
+            border-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+            color: #fff;
+            cursor: pointer;
         }
 
-        .day-box.today:hover:not(.done) {
-            transform: scale(1.05);
+        .day-box.today:active {
+            transform: scale(0.9);
         }
 
-        /* Виконаний день (Червоний хрестик) */
+        .day-box.done {
+            background: rgba(239, 68, 68, 0.15) !important;
+            border-color: rgba(239, 68, 68, 0.4) !important;
+            color: transparent !important;
+        }
+
         .day-box.done::after {
             content: '✖';
             position: absolute;
-            color: var(--done-color);
-            font-size: 1.5rem;
-            font-weight: 900;
-            line-height: 1;
-        }
-
-        /* Пропущений день (Сірий) */
-        .day-box.missed {
-            background-color: var(--missed-color);
-            color: #64748b;
-        }
-
-        .reset-btn {
-            background: transparent;
-            border: 1px solid #334155;
-            color: var(--text-muted);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            cursor: pointer;
-        }
-
-        .reset-btn:hover {
             color: #ef4444;
-            border-color: #ef4444;
+            font-size: 1.3rem;
+            font-weight: 900;
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+        }
+
+        .day-box.missed {
+            background: var(--missed-bg);
+            color: var(--missed-text);
+            border-color: transparent;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            background: var(--glass-bg);
+            border: 1px dashed var(--glass-border);
+            border-radius: 20px;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Трекер Звичок</h1>
+<div class="ambient-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+</div>
 
-    <div class="input-group" id="setupForm">
-        <input type="text" id="habitInput" placeholder="Наприклад: 100 віджимань щодня">
-        <button class="btn-primary" onclick="saveHabit()">Старт</button>
+<div class="app-container">
+    <header>
+        <h1>Habit Pulse</h1>
+        <p id="currentMonthText">Трекер досягнень</p>
+    </header>
+
+    <!-- Створення нових задач -->
+    <div class="add-card">
+        <input type="text" id="habitInput" placeholder="Нова ціль (напр. Тренування)..." maxlength="30">
+        <button class="btn-add" onclick="addHabit()">+ Додати</button>
     </div>
 
-    <div id="calendarArea" style="display: none;">
-        <div class="habit-header">
-            <div>
-                <div class="habit-title" id="displayTitle">Звичка</div>
-                <div class="month-name" id="monthDisplay">Місяць</div>
-            </div>
-            <button class="reset-btn" onclick="resetHabit()">Скинути</button>
-        </div>
-
-        <div class="calendar-grid">
-            <div class="day-label">Пн</div>
-            <div class="day-label">Вт</div>
-            <div class="day-label">Ср</div>
-            <div class="day-label">Чт</div>
-            <div class="day-label">Пт</div>
-            <div class="day-label">Сб</div>
-            <div class="day-label">Нд</div>
-        </div>
-
-        <div class="calendar-grid" id="daysContainer"></div>
-    </div>
+    <!-- Список усіх звичок -->
+    <div id="habitsContainer"></div>
 </div>
 
 <script>
-    let habitData = JSON.parse(localStorage.getItem('habitTrackerData')) || null;
+    let habits = JSON.parse(localStorage.getItem('habitTracker_multi')) || [];
 
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
     const todayDate = now.getDate();
 
-    function init() {
-        if (habitData && habitData.title) {
-            document.getElementById('setupForm').style.display = 'none';
-            document.getElementById('calendarArea').style.display = 'block';
-            document.getElementById('displayTitle').innerText = habitData.title;
-            
-            const monthNames = ["Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень", "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"];
-            document.getElementById('monthDisplay').innerText = `${monthNames[currentMonth]} ${currentYear}`;
-            
-            renderCalendar();
-        } else {
-            document.getElementById('setupForm').style.display = 'flex';
-            document.getElementById('calendarArea').style.display = 'none';
-        }
+    const monthNames = ["Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень", "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"];
+
+    document.getElementById('currentMonthText').innerText = `${monthNames[currentMonth]} ${currentYear}`;
+
+    function saveToStorage() {
+        localStorage.setItem('habitTracker_multi', JSON.stringify(habits));
     }
 
-    function saveHabit() {
+    function addHabit() {
         const input = document.getElementById('habitInput');
-        if (!input.value.trim()) return;
+        const title = input.value.trim();
+        
+        if (!title) return;
 
-        habitData = {
-            title: input.value.trim(),
-            days: {} // Формат: { "1": "done", "2": "missed" }
+        const newHabit = {
+            id: Date.now(),
+            title: title,
+            days: {} 
         };
 
-        localStorage.setItem('habitTrackerData', JSON.stringify(habitData));
-        init();
+        habits.push(newHabit);
+        saveToStorage();
+        input.value = '';
+        renderHabits();
     }
 
-    function renderCalendar() {
-        const container = document.getElementById('daysContainer');
+    function deleteHabit(id) {
+        if (confirm('Видалити цю звичку?')) {
+            habits = habits.filter(h => h.id !== id);
+            saveToStorage();
+            renderHabits();
+        }
+    }
+
+    function calculateStreak(days) {
+        let streak = 0;
+        for (let d = todayDate; d >= 1; d--) {
+            if (days[d] === 'done') {
+                streak++;
+            } else if (d < todayDate) {
+                break;
+            }
+        }
+        return streak;
+    }
+
+    function toggleDay(habitId, day) {
+        const habit = habits.find(h => h.id === habitId);
+        if (!habit) return;
+
+        if (habit.days[day] === 'done') {
+            delete habit.days[day];
+        } else {
+            habit.days[day] = 'done';
+            // Ефект салюту при успіху
+            confetti({
+                particleCount: 50,
+                spread: 60,
+                origin: { y: 0.8 },
+                colors: ['#8b5cf6', '#ec4899', '#ef4444']
+            });
+        }
+
+        saveToStorage();
+        renderHabits();
+    }
+
+    function renderHabits() {
+        const container = document.getElementById('habitsContainer');
         container.innerHTML = '';
 
+        if (habits.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    Натисни "+ Додати", щоб створити свою першу ціль!
+                </div>
+            `;
+            return;
+        }
+
         const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-        
-        // Зміщення для першого дня місяця (0 - Пн, 6 - Нд)
         let firstDayIndex = new Date(currentYear, currentMonth, 1).getDay() - 1;
-        if (firstDayIndex === -1) firstDayIndex = 6; 
+        if (firstDayIndex === -1) firstDayIndex = 6;
 
-        // Порожні клітинки до початку місяця
-        for (let i = 0; i < firstDayIndex; i++) {
-            const emptyBox = document.createElement('div');
-            container.appendChild(emptyBox);
-        }
+        habits.forEach(habit => {
+            const streak = calculateStreak(habit.days);
+            const doneCount = Object.keys(habit.days).filter(d => habit.days[d] === 'done').length;
+            const progressPercent = Math.round((doneCount / daysInMonth) * 100);
 
-        // Рендер днів місяця
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dayBox = document.createElement('div');
-            dayBox.classList.add('day-box');
-            dayBox.innerText = day;
+            const card = document.createElement('div');
+            card.className = 'habit-card';
 
-            if (day === todayDate) {
-                dayBox.classList.add('today');
+            let daysHTML = '';
+            
+            // Порожні дні зміщення
+            for (let i = 0; i < firstDayIndex; i++) {
+                daysHTML += `<div class="day-box disabled" style="visibility:hidden"></div>`;
             }
 
-            // Перевірка статусу з локальної бази
-            if (habitData.days[day] === 'done') {
-                dayBox.classList.add('done');
-            } else if (day < todayDate) {
-                // Якщо день минув і не закреслений — він сірий (пропущений)
-                dayBox.classList.add('missed');
-            } else if (day > todayDate) {
-                // Майбутні дні не можна натискати
-                dayBox.classList.add('disabled');
+            // Днів місяця
+            for (let day = 1; day <= daysInMonth; day++) {
+                let statusClass = '';
+                let isClickable = false;
+
+                if (habit.days[day] === 'done') {
+                    statusClass = 'done';
+                } else if (day < todayDate) {
+                    statusClass = 'missed';
+                } else if (day > todayDate) {
+                    statusClass = 'disabled';
+                }
+
+                if (day === todayDate) {
+                    statusClass += ' today';
+                    isClickable = true;
+                }
+
+                const clickAttr = isClickable ? `onclick="toggleDay(${habit.id}, ${day})"` : '';
+                
+                daysHTML += `<div class="day-box ${statusClass}" ${clickAttr}>${day}</div>`;
             }
 
-            // Клік працює ТІЛЬКИ на сьогоднішній день і тільки якщо він ще не закреслений
-            if (day === todayDate) {
-                dayBox.onclick = () => markToday(dayBox, day);
-            }
+            card.innerHTML = `
+                <div class="habit-header">
+                    <div class="habit-info">
+                        <h3>${habit.title}</h3>
+                        <div class="streak-tag">🔥 Страйк: ${streak} дн.</div>
+                    </div>
+                    <button class="btn-delete" onclick="deleteHabit(${habit.id})">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </div>
+                
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
+                </div>
 
-            container.appendChild(dayBox);
-        }
+                <div class="week-days">
+                    <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Нд</div>
+                </div>
+
+                <div class="days-grid">
+                    ${daysHTML}
+                </div>
+            `;
+
+            container.appendChild(card);
+        });
     }
 
-    function markToday(element, day) {
-        if (habitData.days[day] === 'done') return; // Якщо вже закреслено
-
-        habitData.days[day] = 'done';
-        element.classList.add('done');
-        element.classList.remove('missed');
-
-        localStorage.setItem('habitTrackerData', JSON.stringify(habitData));
-    }
-
-    function resetHabit() {
-        if (confirm('Скинути цю задачу та весь прогрес?')) {
-            localStorage.removeItem('habitTrackerData');
-            habitData = null;
-            document.getElementById('habitInput').value = '';
-            init();
-        }
-    }
-
-    // Запуск при завантаженні
-    init();
+    // Первинний рендер
+    renderHabits();
 </script>
 
 </body>
