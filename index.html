@@ -1,545 +1,630 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Habit Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Моє Супер Тренування</title>
+    
+    <!-- Бібліотеки для салюту та ШІ (TensorFlow.js) -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    
     <style>
         :root {
+            --bg-color: #0f0c29;
             --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            --text-main: #ffffff;
-            --text-muted: rgba(255, 255, 255, 0.6);
-            --accent: #00ffcc;
-            --cross-color: #ff3366;
-            --missed-bg: #1a1a24;
-            --future-opacity: 0.2;
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent: #ff0055;
+            --accent-glow: rgba(255, 0, 85, 0.5);
+            --success: #00ffcc;
+            --text: #ffffff;
+            --text-dim: rgba(255, 255, 255, 0.5);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Montserrat', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: var(--text);
             min-height: 100vh;
-            background: linear-gradient(115deg, #1f0033, #001a33, #33001b, #002b2b);
-            background-size: 400% 400%;
-            animation: meshGradient 15s ease infinite;
-            color: var(--text-main);
-            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
         }
 
-        @keyframes meshGradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        header {
+        /* --- Дашборд --- */
+        #dashboard {
             width: 100%;
-            max-width: 800px;
-            margin-bottom: 30px;
-            text-align: center;
-            padding: 30px 20px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 24px;
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--glass-shadow);
-        }
-
-        h1 {
-            font-size: 2.2rem;
-            font-weight: 800;
-            margin-bottom: 20px;
-            background: linear-gradient(90deg, #00ffcc, #ff3366);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(255,255,255,0.1);
-        }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-            position: relative;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            padding: 15px 20px;
-            border-radius: 12px;
-            border: 1px solid var(--glass-border);
-            background: rgba(0, 0, 0, 0.2);
-            color: white;
-            font-size: 1rem;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        input[type="text"]:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
-        }
-
-        input[type="text"]::placeholder {
-            color: var(--text-muted);
-        }
-
-        button {
-            padding: 15px 25px;
-            border-radius: 12px;
-            border: none;
-            background: var(--accent);
-            color: #000;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 25px rgba(0, 255, 204, 0.6);
-        }
-
-        #habits-container {
-            width: 100%;
-            max-width: 800px;
+            max-width: 500px;
             display: flex;
             flex-direction: column;
             gap: 20px;
+            z-index: 10;
         }
 
-        .habit-card {
+        .card {
             background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(10px);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
+            border-radius: 20px;
             padding: 25px;
-            box-shadow: var(--glass-shadow);
-            animation: slideUp 0.4s ease-out forwards;
-            position: relative;
-            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        h1 {
+            text-align: center;
+            font-weight: 900;
+            font-size: 2rem;
+            text-transform: uppercase;
+            background: linear-gradient(to right, var(--success), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .habit-header {
+        .streak-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: 700;
         }
 
-        .habit-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-        }
-
-        .delete-btn {
-            background: transparent;
-            color: var(--text-muted);
-            box-shadow: none;
-            padding: 5px 10px;
-            font-size: 1.2rem;
-            border: 1px solid transparent;
-        }
-
-        .delete-btn:hover {
-            color: var(--cross-color);
-            background: rgba(255, 51, 102, 0.1);
-            border-color: var(--cross-color);
-            box-shadow: none;
-        }
-
-        .gamification-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            font-size: 0.9rem;
-        }
-
-        .streak {
-            font-weight: 600;
+        .streak-fire {
             color: #ff9900;
-            text-shadow: 0 0 10px rgba(255, 153, 0, 0.3);
+            text-shadow: 0 0 15px rgba(255, 153, 0, 0.8);
+            animation: pulse 1.5s infinite alternate;
         }
 
-        .progress-wrapper {
-            flex: 1;
-            margin-left: 20px;
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+
+        .routine-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+        .routine-list li {
+            font-size: 1.1rem;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--glass-border);
             display: flex;
-            align-items: center;
-            gap: 10px;
+            justify-content: space-between;
         }
 
-        .progress-bar {
-            flex: 1;
-            height: 8px;
-            background: rgba(255,255,255,0.1);
+        .btn-start {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            border-radius: 15px;
+            border: none;
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 0 20px var(--accent-glow);
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .btn-start:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .btn-notify {
+            background: transparent;
+            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 10px;
             border-radius: 10px;
-            overflow: hidden;
-            position: relative;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
         }
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00ffcc, #00b3ff);
-            width: 0%;
-            border-radius: 10px;
-            transition: width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
+        /* --- Календар --- */
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 8px;
-            margin-top: 10px;
+            margin-top: 15px;
         }
-
-        .weekday {
-            text-align: center;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
         .day-cell {
             aspect-ratio: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            border-radius: 12px;
-            background: rgba(255,255,255,0.08);
-            font-weight: 600;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.3);
+            font-weight: 700;
             font-size: 0.9rem;
             position: relative;
-            transition: all 0.2s ease;
-            user-select: none;
         }
-
-        .day-cell span {
-            z-index: 1;
-        }
-
-        /* State: Future */
-        .day-cell.future {
-            opacity: var(--future-opacity);
-            background: rgba(0,0,0,0.2);
-            cursor: not-allowed;
-        }
-
-        /* State: Missed (Past) */
         .day-cell.missed {
-            background: var(--missed-bg);
-            color: #444;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+            background: #1a1a1a;
+            color: #555;
         }
-
-        /* State: Today */
         .day-cell.today {
-            border: 2px solid var(--accent);
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(0, 255, 204, 0.2), inset 0 0 10px rgba(0, 255, 204, 0.1);
+            border: 2px solid var(--success);
         }
-
-        .day-cell.today:hover {
-            background: rgba(0, 255, 204, 0.15);
-            transform: scale(1.05);
+        .day-cell.completed {
+            background: rgba(0, 255, 204, 0.2);
+            color: var(--success);
         }
-
-        /* State: Completed (Cartoon Cross) */
-        .day-cell .cross {
+        .day-cell.completed::after {
+            content: '🔥';
             position: absolute;
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--cross-color);
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        /* --- Режим Тренування (Камера) --- */
+        #workout-ui {
             display: none;
-            z-index: 2;
-            text-shadow: 2px 2px 0px #000, -1px -1px 0px #fff;
-            transform: scale(0);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 100;
+            flex-direction: column;
         }
 
-        .day-cell.completed .cross {
-            display: block;
-            transform: scale(1) rotate(5deg);
+        .video-container {
+            position: relative;
+            flex: 1;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .day-cell.completed span {
-            opacity: 0.2;
+        video, canvas {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); /* Дзеркальне відображення */
+        }
+        canvas { z-index: 2; }
+
+        .hud {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            text-align: center;
+            width: 90%;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
         }
 
-        @media (max-width: 600px) {
-            .input-group {
-                flex-direction: column;
-            }
-            .gamification-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-            .progress-wrapper {
-                margin-left: 0;
-                width: 100%;
-            }
-            .calendar-grid {
-                gap: 5px;
-            }
-            .day-cell {
-                border-radius: 8px;
-                font-size: 0.8rem;
-            }
-            .day-cell .cross {
-                font-size: 1.4rem;
-            }
+        .hud-exercise { font-size: 2rem; font-weight: 900; color: var(--success); }
+        .hud-counter { font-size: 5rem; font-weight: 900; line-height: 1; margin-top: 10px; }
+        .hud-target { font-size: 1.5rem; color: var(--text-dim); }
+        .hud-hint { font-size: 1rem; color: #ffcc00; margin-top: 5px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px;}
+
+        .rest-screen {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 20;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .rest-timer { font-size: 6rem; font-weight: 900; color: var(--accent); }
+
+        .btn-cancel {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,0,0,0.5);
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            z-index: 10;
+        }
+
+        #loading {
+            display: none;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            z-index: 30;
+            background: rgba(0,0,0,0.8);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Premium Tracker</h1>
-        <div class="input-group">
-            <input type="text" id="habitInput" placeholder="Enter a new habit or goal..." onkeypress="handleEnter(event)">
-            <button onclick="addHabit()">+ Add Habit</button>
+    <!-- ДАШБОРД -->
+    <div id="dashboard">
+        <div class="card">
+            <h1>Моя Рутина</h1>
+            <div class="streak-container">
+                <span>Поточна серія:</span>
+                <span class="streak-fire" id="streak-display">🔥 0 днів</span>
+            </div>
+            <ul class="routine-list">
+                <li><span>🏋️ Присідання</span> <span>25 разів</span></li>
+                <li><span>💪 Віджимання</span> <span>20 разів</span></li>
+                <li><span>⏱️ Планка</span> <span>60 сек</span></li>
+            </ul>
+            <button class="btn-start" onclick="startWorkout()">ПОЧАТИ</button>
+            <button class="btn-notify" onclick="setupNotifications()">🔔 Увімкнути нагадування (16:00)</button>
         </div>
-    </header>
 
-    <div id="habits-container"></div>
+        <div class="card">
+            <h2 style="text-align: center; margin-bottom: 10px;">Календар</h2>
+            <div id="calendar" class="calendar-grid"></div>
+        </div>
+    </div>
+
+    <!-- ІНТЕРФЕЙС ТРЕНУВАННЯ (КАМЕРА) -->
+    <div id="workout-ui">
+        <div class="video-container">
+            <video id="video" playsinline autoplay muted></video>
+            <canvas id="canvas"></canvas>
+            
+            <div id="loading">Завантаження ШІ камери...<br><small>Це може зайняти кілька секунд</small></div>
+
+            <div class="hud" id="hud">
+                <div class="hud-exercise" id="hud-name">Присідання</div>
+                <div class="hud-counter" id="hud-count">0</div>
+                <div class="hud-target" id="hud-target">з 25</div>
+                <div class="hud-hint" id="hud-hint">Станьте так, щоб було видно все тіло</div>
+            </div>
+
+            <div class="rest-screen" id="rest-screen">
+                <h2>ПЕРЕРВА</h2>
+                <div class="rest-timer" id="rest-timer">30</div>
+                <p>Наступне: <span id="next-exercise-name">Віджимання</span></p>
+            </div>
+
+            <button class="btn-cancel" onclick="cancelWorkout()">Скасувати</button>
+        </div>
+    </div>
 
     <script>
-        // State Management
-        let habits = JSON.parse(localStorage.getItem('premiumHabits')) || [];
+        // --- СТАН ТА ДАНІ ---
+        const routine = [
+            { id: 'squats', name: 'Присідання', target: 25, type: 'reps', hint: 'Станьте на повний зріст. Присідайте глибоко.' },
+            { id: 'pushups', name: 'Віджимання', target: 20, type: 'reps', hint: 'Станьте БОКОМ до камери для точного підрахунку.' },
+            { id: 'plank', name: 'Планка', target: 60, type: 'time', hint: 'Тримайте тіло рівно.' }
+        ];
 
-        // Utility: Get standard 'YYYY-MM-DD' string accounting for local timezone
-        const getLocalDateString = (dateObj) => {
-            const year = dateObj.getFullYear();
-            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const day = String(dateObj.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        };
+        let history = JSON.parse(localStorage.getItem('workoutHistory')) || [];
+        const REST_TIME = 15; // Секунд перерви між вправами
+        
+        // Допоміжні функції для дати
+        const getLocalDateStr = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        const todayStr = getLocalDateStr(new Date());
 
-        const today = new Date();
-        const todayStr = getLocalDateString(today);
-        const currentYear = today.getFullYear();
-        const currentMonth = today.getMonth();
-
-        // Save to localStorage
-        const saveHabits = () => {
-            localStorage.setItem('premiumHabits', JSON.stringify(habits));
-        };
-
-        // Add Habit
-        const addHabit = () => {
-            const input = document.getElementById('habitInput');
-            const name = input.value.trim();
-            if (!name) return;
-
-            const newHabit = {
-                id: Date.now().toString(),
-                name: name,
-                completedDates: []
-            };
-
-            habits.unshift(newHabit);
-            saveHabits();
-            input.value = '';
-            renderAll();
-        };
-
-        // Handle Enter Key
-        const handleEnter = (e) => {
-            if (e.key === 'Enter') addHabit();
-        };
-
-        // Delete Habit
-        const deleteHabit = (id) => {
-            habits = habits.filter(h => h.id !== id);
-            saveHabits();
-            renderAll();
-        };
-
-        // Toggle Today's Habit Status
-        const toggleDay = (id, dateStr) => {
-            // Strictly enforce 1-day limit: Only allow toggling today's date
-            if (dateStr !== todayStr) return;
-
-            const habit = habits.find(h => h.id === id);
-            if (!habit) return;
-
-            const dateIndex = habit.completedDates.indexOf(dateStr);
-            let isCompleting = false;
-
-            if (dateIndex === -1) {
-                habit.completedDates.push(dateStr);
-                isCompleting = true;
-            } else {
-                habit.completedDates.splice(dateIndex, 1);
-            }
-
-            saveHabits();
-            renderAll();
-
-            if (isCompleting) {
-                triggerConfetti();
-            }
-        };
-
-        // Confetti Celebration
-        const triggerConfetti = () => {
-            confetti({
-                particleCount: 100,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#00ffcc', '#ff3366', '#ffffff']
-            });
-        };
-
-        // Calculate Streak
-        const calculateStreak = (completedDates) => {
+        // --- ВІДОБРАЖЕННЯ ДАШБОРДУ ---
+        function updateDashboard() {
+            // Рахуємо серію (Streak). Якщо пропустили хоч 1 день, серія згорає.
             let streak = 0;
-            let checkDate = new Date(today);
+            let checkDate = new Date();
             
-            // If today is not completed, start checking from yesterday
-            if (!completedDates.includes(todayStr)) {
+            // Якщо сьогодні ще не зробили, починаємо перевірку з учорашнього дня
+            if (!history.includes(todayStr)) {
                 checkDate.setDate(checkDate.getDate() - 1);
             }
 
             while (true) {
-                const checkStr = getLocalDateString(checkDate);
-                if (completedDates.includes(checkStr)) {
+                if (history.includes(getLocalDateStr(checkDate))) {
                     streak++;
                     checkDate.setDate(checkDate.getDate() - 1);
                 } else {
                     break;
                 }
             }
-            return streak;
-        };
 
-        // Calculate Monthly Progress
-        const calculateProgress = (completedDates, daysInMonth) => {
-            let completedThisMonth = 0;
-            for (let i = 1; i <= daysInMonth; i++) {
-                const d = new Date(currentYear, currentMonth, i);
-                if (completedDates.includes(getLocalDateString(d))) {
-                    completedThisMonth++;
-                }
+            const streakEl = document.getElementById('streak-display');
+            streakEl.innerText = streak > 0 ? `🔥 ${streak} днів` : `0 днів`;
+            if(streak === 0) streakEl.style.color = '#888';
+            else streakEl.style.color = '#ff9900';
+
+            // Малюємо календар (поточний місяць)
+            const cal = document.getElementById('calendar');
+            cal.innerHTML = '';
+            
+            const now = new Date();
+            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            
+            for(let i=1; i<=daysInMonth; i++) {
+                const iterDateStr = getLocalDateStr(new Date(now.getFullYear(), now.getMonth(), i));
+                const isCompleted = history.includes(iterDateStr);
+                const isToday = iterDateStr === todayStr;
+                const isPast = iterDateStr < todayStr;
+
+                let cls = 'day-cell';
+                if(isToday) cls += ' today';
+                if(isCompleted) cls += ' completed';
+                else if(isPast) cls += ' missed';
+
+                cal.innerHTML += `<div class="${cls}">${isCompleted ? '' : i}</div>`;
             }
-            return Math.round((completedThisMonth / daysInMonth) * 100);
-        };
+        }
+        updateDashboard();
 
-        // Render Calendar Grid for a Habit
-        const renderCalendar = (habit) => {
-            const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
-            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-            
-            const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-            let html = '<div class="calendar-grid">';
-            
-            weekdays.forEach(day => {
-                html += `<div class="weekday">${day}</div>`;
+        // --- ЛОГІКА ТРЕНУВАННЯ ТА ШІ КАМЕРИ ---
+        let detector, cameraRunning = false;
+        let currentExerciseIdx = 0;
+        let currentCount = 0;
+        let exerciseState = 'up'; // для відстеження фази руху
+        let isResting = false;
+        let timerInterval;
+
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        async function initAI() {
+            if (detector) return; // Вже завантажено
+            document.getElementById('loading').style.display = 'block';
+            await tf.setBackend('webgl');
+            const model = poseDetection.SupportedModels.BlazePose;
+            const detectorConfig = {
+                runtime: 'tfjs',
+                enableSmoothing: true,
+                modelType: 'lite'
+            };
+            detector = await poseDetection.createDetector(model, detectorConfig);
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        async function setupCamera() {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'user', width: 640, height: 480 }
             });
+            video.srcObject = stream;
+            return new Promise((resolve) => {
+                video.onloadedmetadata = () => {
+                    video.play();
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    resolve();
+                };
+            });
+        }
 
-            // Empty slots for padding
-            for (let i = 0; i < firstDayIndex; i++) {
-                html += `<div></div>`;
+        async function startWorkout() {
+            if(history.includes(todayStr)) {
+                if(!confirm("Ти вже тренувався сьогодні! Хочеш повторити? (У статистику не запишеться двічі)")) return;
             }
+            
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('workout-ui').style.display = 'flex';
+            currentExerciseIdx = 0;
+            cameraRunning = true;
+            
+            await initAI();
+            await setupCamera();
+            startExerciseLogic();
+            requestAnimationFrame(poseDetectionLoop);
+        }
 
-            // Days
-            for (let i = 1; i <= daysInMonth; i++) {
-                const iterDate = new Date(currentYear, currentMonth, i);
-                const iterDateStr = getLocalDateString(iterDate);
-                const isCompleted = habit.completedDates.includes(iterDateStr);
+        function cancelWorkout() {
+            cameraRunning = false;
+            clearInterval(timerInterval);
+            if(video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+            document.getElementById('workout-ui').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'flex';
+        }
+
+        function startExerciseLogic() {
+            const ex = routine[currentExerciseIdx];
+            currentCount = 0;
+            exerciseState = 'up';
+            isResting = false;
+            
+            document.getElementById('rest-screen').style.display = 'none';
+            document.getElementById('hud').style.display = 'block';
+            document.getElementById('hud-name').innerText = ex.name;
+            document.getElementById('hud-hint').innerText = ex.hint;
+            document.getElementById('hud-target').innerText = ex.type === 'reps' ? `з ${ex.target}` : 'сек';
+            
+            updateHUD();
+
+            if (ex.type === 'time') {
+                timerInterval = setInterval(() => {
+                    currentCount++;
+                    updateHUD();
+                    if (currentCount >= ex.target) completeExercise();
+                }, 1000);
+            }
+        }
+
+        function updateHUD() {
+            document.getElementById('hud-count').innerText = currentCount;
+        }
+
+        function completeExercise() {
+            clearInterval(timerInterval);
+            currentExerciseIdx++;
+            
+            if (currentExerciseIdx >= routine.length) {
+                finishFullWorkout();
+            } else {
+                startRestTimer();
+            }
+        }
+
+        function startRestTimer() {
+            isResting = true;
+            document.getElementById('hud').style.display = 'none';
+            const restScreen = document.getElementById('rest-screen');
+            const restTimeEl = document.getElementById('rest-timer');
+            document.getElementById('next-exercise-name').innerText = routine[currentExerciseIdx].name;
+            restScreen.style.display = 'flex';
+
+            let timeLeft = REST_TIME;
+            restTimeEl.innerText = timeLeft;
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                restTimeEl.innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    startExerciseLogic();
+                }
+            }, 1000);
+        }
+
+        function finishFullWorkout() {
+            cameraRunning = false;
+            if(video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+            document.getElementById('workout-ui').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'flex';
+
+            // Зберігаємо прогрес
+            if (!history.includes(todayStr)) {
+                history.push(todayStr);
+                localStorage.setItem('workoutHistory', JSON.stringify(history));
                 
-                let classes = 'day-cell';
-                let onClick = '';
+                // Салют!
+                confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
+            }
+            updateDashboard();
+        }
 
-                // Strip time for exact day comparisons
-                const iterDateOnly = new Date(iterDateStr);
-                const todayDateOnly = new Date(todayStr);
+        // --- ГОЛОВНИЙ ЦИКЛ РОЗПІЗНАВАННЯ ---
+        async function poseDetectionLoop() {
+            if (!cameraRunning) return;
 
-                if (iterDateStr === todayStr) {
-                    classes += ' today';
-                    if (isCompleted) classes += ' completed';
-                    onClick = `onclick="toggleDay('${habit.id}', '${iterDateStr}')"`;
-                } else if (iterDateOnly < todayDateOnly) {
-                    if (isCompleted) {
-                        classes += ' completed';
-                    } else {
-                        classes += ' missed';
-                    }
-                } else {
-                    classes += ' future';
+            if (!isResting) {
+                const poses = await detector.estimatePoses(video);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                if (poses.length > 0) {
+                    const pose = poses[0];
+                    drawSkeleton(pose.keypoints);
+                    
+                    // Логіка підрахунку
+                    if (routine[currentExerciseIdx].id === 'squats') countSquats(pose.keypoints);
+                    if (routine[currentExerciseIdx].id === 'pushups') countPushups(pose.keypoints);
                 }
-
-                html += `
-                    <div class="${classes}" ${onClick}>
-                        <span>${i}</span>
-                        <div class="cross">✖</div>
-                    </div>
-                `;
             }
 
-            html += '</div>';
-            return { html, daysInMonth };
-        };
+            requestAnimationFrame(poseDetectionLoop);
+        }
 
-        // Render Entire UI
-        const renderAll = () => {
-            const container = document.getElementById('habits-container');
-            container.innerHTML = '';
+        // Логіка для присідань
+        function countSquats(keypoints) {
+            // Індекси MediaPipe: 11 (лів. плече), 23 (лів. стегно), 25 (лів. коліно)
+            const hip = keypoints[23] || keypoints[24];
+            const knee = keypoints[25] || keypoints[26];
+            
+            if (hip && knee && hip.score > 0.6 && knee.score > 0.6) {
+                // Якщо стегно опускається близько до коліна по Y
+                const distanceY = Math.abs(hip.y - knee.y);
+                
+                if (distanceY < 50 && exerciseState === 'up') {
+                    exerciseState = 'down'; // Сіли
+                } else if (distanceY > 100 && exerciseState === 'down') {
+                    exerciseState = 'up'; // Встали
+                    currentCount++;
+                    updateHUD();
+                    if(currentCount >= routine[currentExerciseIdx].target) completeExercise();
+                }
+            }
+        }
 
-            habits.forEach(habit => {
-                const { html: calendarHTML, daysInMonth } = renderCalendar(habit);
-                const streak = calculateStreak(habit.completedDates);
-                const progress = calculateProgress(habit.completedDates, daysInMonth);
+        // Логіка для віджимань
+        function countPushups(keypoints) {
+            // Індекси: 11 (плече), 13 (лікоть), 15 (зап'ястя)
+            const shoulder = keypoints[11] || keypoints[12];
+            const elbow = keypoints[13] || keypoints[14];
+            
+            if (shoulder && elbow && shoulder.score > 0.6 && elbow.score > 0.6) {
+                // Віджимання краще рахувати збоку. Коли плече опускається до рівня ліктя
+                const distanceY = shoulder.y - elbow.y;
+                
+                // Значення залежать від камери, але базова евристика:
+                if (distanceY > -20 && exerciseState === 'up') {
+                    exerciseState = 'down'; // Опустились
+                } else if (distanceY < -60 && exerciseState === 'down') {
+                    exerciseState = 'up'; // Піднялись
+                    currentCount++;
+                    updateHUD();
+                    if(currentCount >= routine[currentExerciseIdx].target) completeExercise();
+                }
+            }
+        }
 
-                const card = document.createElement('div');
-                card.className = 'habit-card';
-                card.innerHTML = `
-                    <div class="habit-header">
-                        <div class="habit-title">${habit.name}</div>
-                        <button class="delete-btn" onclick="deleteHabit('${habit.id}')" title="Delete Habit">✖</button>
-                    </div>
-                    <div class="gamification-row">
-                        <div class="streak">🔥 Streak: ${streak} days</div>
-                        <div class="progress-wrapper">
-                            <span>Progress</span>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${progress}%"></div>
-                            </div>
-                            <span>${progress}%</span>
-                        </div>
-                    </div>
-                    ${calendarHTML}
-                `;
-                container.appendChild(card);
+        // Малювання точок на відео
+        function drawSkeleton(keypoints) {
+            ctx.fillStyle = '#00ffcc';
+            ctx.strokeStyle = '#ff0055';
+            ctx.lineWidth = 2;
+
+            keypoints.forEach(point => {
+                if (point.score > 0.5) {
+                    ctx.beginPath();
+                    // Відображаємо дзеркально по X для Canvas
+                    const x = canvas.width - point.x;
+                    ctx.arc(x, point.y, 5, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
             });
-        };
+        }
 
-        // Initial Render
-        renderAll();
+        // --- НАГАДУВАННЯ (Push Notifications) ---
+        function setupNotifications() {
+            if (!("Notification" in window)) {
+                alert("Ваш браузер не підтримує нагадування :(");
+                return;
+            }
+
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    alert("Супер! Нагадування увімкнено. Залиште вкладку браузера відкритою у фоні, щоб отримати сповіщення.");
+                    scheduleDailyNotification();
+                }
+            });
+        }
+
+        function scheduleDailyNotification() {
+            // Перевіряємо кожну хвилину чи настав час 16:00
+            setInterval(() => {
+                const now = new Date();
+                // 16:00
+                if (now.getHours() === 16 && now.getMinutes() === 0 && !history.includes(todayStr)) {
+                    new Notification("🔥 Час Тренування!", {
+                        body: "Твій вогник може згоріти! Заходь та зроби 25 присідань, 20 віджимань та планку.",
+                        icon: "https://cdn-icons-png.flaticon.com/512/763/763116.png"
+                    });
+                }
+            }, 60000); // 60000 мс = 1 хвилина
+        }
+
+        // Запуск перевірки при завантаженні (якщо дозвіл вже є)
+        if (Notification.permission === "granted") {
+            scheduleDailyNotification();
+        }
 
     </script>
 </body>
