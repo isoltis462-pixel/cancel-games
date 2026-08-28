@@ -125,17 +125,6 @@
             box-shadow: 0 0 30px var(--accent-glow);
         }
 
-        .btn-notify {
-            background: transparent;
-            border: 1px solid var(--success);
-            color: var(--success);
-            padding: 10px;
-            border-radius: 10px;
-            width: 100%;
-            margin-top: 10px;
-            cursor: pointer;
-        }
-
         /* --- Календар --- */
         .calendar-grid {
             display: grid;
@@ -197,7 +186,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transform: scaleX(-1); /* Дзеркальне відображення */
+            transform: scaleX(-1);
         }
         canvas { z-index: 2; }
 
@@ -270,10 +259,9 @@
             <ul class="routine-list">
                 <li><span>🏋️ Присідання</span> <span>25 разів</span></li>
                 <li><span>💪 Віджимання</span> <span>20 разів</span></li>
-                <li><span>⏱️ Планка</span> <span>60 сек</span></li>
+                <li><span>🔥 Прес</span> <span>25 разів</span></li>
             </ul>
             <button class="btn-start" onclick="startWorkout()">ПОЧАТИ</button>
-            <button class="btn-notify" onclick="setupNotifications()">🔔 Увімкнути нагадування (16:00)</button>
         </div>
 
         <div class="card">
@@ -282,13 +270,13 @@
         </div>
     </div>
 
-    <!-- ІНТЕРФЕЙС ТРЕНУВАННЯ (КАМЕРА) -->
+    <!-- ІНТЕРФЕЙС ТРЕНУВАННЯ -->
     <div id="workout-ui">
         <div class="video-container">
             <video id="video" playsinline autoplay muted></video>
             <canvas id="canvas"></canvas>
             
-            <div id="loading">Завантаження ШІ камери...<br><small>Це може зайняти кілька секунд</small></div>
+            <div id="loading">Завантаження камери...<br><small>Зачекай секунду</small></div>
 
             <div class="hud" id="hud">
                 <div class="hud-exercise" id="hud-name">Присідання</div>
@@ -310,25 +298,22 @@
     <script>
         // --- СТАН ТА ДАНІ ---
         const routine = [
-            { id: 'squats', name: 'Присідання', target: 25, type: 'reps', hint: 'Станьте на повний зріст. Присідайте глибоко.' },
-            { id: 'pushups', name: 'Віджимання', target: 20, type: 'reps', hint: 'Станьте БОКОМ до камери для точного підрахунку.' },
-            { id: 'plank', name: 'Планка', target: 60, type: 'time', hint: 'Тримайте тіло рівно.' }
+            { id: 'squats', name: 'Присідання', target: 25, hint: 'Станьте на повний зріст. Присідайте глибоко.', startState: 'up' },
+            { id: 'pushups', name: 'Віджимання', target: 20, hint: 'Станьте БОКОМ до камери для точного підрахунку.', startState: 'up' },
+            { id: 'crunches', name: 'Прес', target: 25, hint: 'Ляжте БОКОМ до камери. Піднімайте тулуб до колін.', startState: 'down' }
         ];
 
         let history = JSON.parse(localStorage.getItem('workoutHistory')) || [];
-        const REST_TIME = 15; // Секунд перерви між вправами
+        const REST_TIME = 15; 
         
-        // Допоміжні функції для дати
         const getLocalDateStr = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
         const todayStr = getLocalDateStr(new Date());
 
         // --- ВІДОБРАЖЕННЯ ДАШБОРДУ ---
         function updateDashboard() {
-            // Рахуємо серію (Streak). Якщо пропустили хоч 1 день, серія згорає.
             let streak = 0;
             let checkDate = new Date();
             
-            // Якщо сьогодні ще не зробили, починаємо перевірку з учорашнього дня
             if (!history.includes(todayStr)) {
                 checkDate.setDate(checkDate.getDate() - 1);
             }
@@ -347,7 +332,6 @@
             if(streak === 0) streakEl.style.color = '#888';
             else streakEl.style.color = '#ff9900';
 
-            // Малюємо календар (поточний місяць)
             const cal = document.getElementById('calendar');
             cal.innerHTML = '';
             
@@ -374,7 +358,7 @@
         let detector, cameraRunning = false;
         let currentExerciseIdx = 0;
         let currentCount = 0;
-        let exerciseState = 'up'; // для відстеження фази руху
+        let exerciseState = 'up'; 
         let isResting = false;
         let timerInterval;
 
@@ -383,15 +367,11 @@
         const ctx = canvas.getContext('2d');
 
         async function initAI() {
-            if (detector) return; // Вже завантажено
+            if (detector) return;
             document.getElementById('loading').style.display = 'block';
             await tf.setBackend('webgl');
             const model = poseDetection.SupportedModels.BlazePose;
-            const detectorConfig = {
-                runtime: 'tfjs',
-                enableSmoothing: true,
-                modelType: 'lite'
-            };
+            const detectorConfig = { runtime: 'tfjs', enableSmoothing: true, modelType: 'lite' };
             detector = await poseDetection.createDetector(model, detectorConfig);
             document.getElementById('loading').style.display = 'none';
         }
@@ -438,24 +418,16 @@
         function startExerciseLogic() {
             const ex = routine[currentExerciseIdx];
             currentCount = 0;
-            exerciseState = 'up';
+            exerciseState = ex.startState;
             isResting = false;
             
             document.getElementById('rest-screen').style.display = 'none';
             document.getElementById('hud').style.display = 'block';
             document.getElementById('hud-name').innerText = ex.name;
             document.getElementById('hud-hint').innerText = ex.hint;
-            document.getElementById('hud-target').innerText = ex.type === 'reps' ? `з ${ex.target}` : 'сек';
+            document.getElementById('hud-target').innerText = `з ${ex.target}`;
             
             updateHUD();
-
-            if (ex.type === 'time') {
-                timerInterval = setInterval(() => {
-                    currentCount++;
-                    updateHUD();
-                    if (currentCount >= ex.target) completeExercise();
-                }, 1000);
-            }
         }
 
         function updateHUD() {
@@ -463,9 +435,7 @@
         }
 
         function completeExercise() {
-            clearInterval(timerInterval);
             currentExerciseIdx++;
-            
             if (currentExerciseIdx >= routine.length) {
                 finishFullWorkout();
             } else {
@@ -500,18 +470,14 @@
             document.getElementById('workout-ui').style.display = 'none';
             document.getElementById('dashboard').style.display = 'flex';
 
-            // Зберігаємо прогрес
             if (!history.includes(todayStr)) {
                 history.push(todayStr);
                 localStorage.setItem('workoutHistory', JSON.stringify(history));
-                
-                // Салют!
                 confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
             }
             updateDashboard();
         }
 
-        // --- ГОЛОВНИЙ ЦИКЛ РОЗПІЗНАВАННЯ ---
         async function poseDetectionLoop() {
             if (!cameraRunning) return;
 
@@ -523,29 +489,27 @@
                     const pose = poses[0];
                     drawSkeleton(pose.keypoints);
                     
-                    // Логіка підрахунку
-                    if (routine[currentExerciseIdx].id === 'squats') countSquats(pose.keypoints);
-                    if (routine[currentExerciseIdx].id === 'pushups') countPushups(pose.keypoints);
+                    const exId = routine[currentExerciseIdx].id;
+                    if (exId === 'squats') countSquats(pose.keypoints);
+                    if (exId === 'pushups') countPushups(pose.keypoints);
+                    if (exId === 'crunches') countCrunches(pose.keypoints);
                 }
             }
 
             requestAnimationFrame(poseDetectionLoop);
         }
 
-        // Логіка для присідань
         function countSquats(keypoints) {
-            // Індекси MediaPipe: 11 (лів. плече), 23 (лів. стегно), 25 (лів. коліно)
             const hip = keypoints[23] || keypoints[24];
             const knee = keypoints[25] || keypoints[26];
             
             if (hip && knee && hip.score > 0.6 && knee.score > 0.6) {
-                // Якщо стегно опускається близько до коліна по Y
                 const distanceY = Math.abs(hip.y - knee.y);
                 
                 if (distanceY < 50 && exerciseState === 'up') {
-                    exerciseState = 'down'; // Сіли
+                    exerciseState = 'down';
                 } else if (distanceY > 100 && exerciseState === 'down') {
-                    exerciseState = 'up'; // Встали
+                    exerciseState = 'up';
                     currentCount++;
                     updateHUD();
                     if(currentCount >= routine[currentExerciseIdx].target) completeExercise();
@@ -553,21 +517,17 @@
             }
         }
 
-        // Логіка для віджимань
         function countPushups(keypoints) {
-            // Індекси: 11 (плече), 13 (лікоть), 15 (зап'ястя)
             const shoulder = keypoints[11] || keypoints[12];
             const elbow = keypoints[13] || keypoints[14];
             
             if (shoulder && elbow && shoulder.score > 0.6 && elbow.score > 0.6) {
-                // Віджимання краще рахувати збоку. Коли плече опускається до рівня ліктя
                 const distanceY = shoulder.y - elbow.y;
                 
-                // Значення залежать від камери, але базова евристика:
                 if (distanceY > -20 && exerciseState === 'up') {
-                    exerciseState = 'down'; // Опустились
+                    exerciseState = 'down';
                 } else if (distanceY < -60 && exerciseState === 'down') {
-                    exerciseState = 'up'; // Піднялись
+                    exerciseState = 'up';
                     currentCount++;
                     updateHUD();
                     if(currentCount >= routine[currentExerciseIdx].target) completeExercise();
@@ -575,7 +535,27 @@
             }
         }
 
-        // Малювання точок на відео
+        function countCrunches(keypoints) {
+            const shoulder = keypoints[11] || keypoints[12];
+            const hip = keypoints[23] || keypoints[24];
+            
+            if (shoulder && hip && shoulder.score > 0.6 && hip.score > 0.6) {
+                // Відстань між стегном та плечем по осі Y
+                const distanceY = hip.y - shoulder.y;
+                
+                // Коли ми лежимо, плечі і стегна приблизно на одному рівні
+                // Коли ми піднімаємось (скручуємось), плечі стають вище за стегна
+                if (distanceY > 60 && exerciseState === 'down') {
+                    exerciseState = 'up'; // Підняли тулуб
+                    currentCount++;
+                    updateHUD();
+                    if(currentCount >= routine[currentExerciseIdx].target) completeExercise();
+                } else if (distanceY < 25 && exerciseState === 'up') {
+                    exerciseState = 'down'; // Опустилися назад
+                }
+            }
+        }
+
         function drawSkeleton(keypoints) {
             ctx.fillStyle = '#00ffcc';
             ctx.strokeStyle = '#ff0055';
@@ -584,48 +564,12 @@
             keypoints.forEach(point => {
                 if (point.score > 0.5) {
                     ctx.beginPath();
-                    // Відображаємо дзеркально по X для Canvas
                     const x = canvas.width - point.x;
                     ctx.arc(x, point.y, 5, 0, 2 * Math.PI);
                     ctx.fill();
                 }
             });
         }
-
-        // --- НАГАДУВАННЯ (Push Notifications) ---
-        function setupNotifications() {
-            if (!("Notification" in window)) {
-                alert("Ваш браузер не підтримує нагадування :(");
-                return;
-            }
-
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    alert("Супер! Нагадування увімкнено. Залиште вкладку браузера відкритою у фоні, щоб отримати сповіщення.");
-                    scheduleDailyNotification();
-                }
-            });
-        }
-
-        function scheduleDailyNotification() {
-            // Перевіряємо кожну хвилину чи настав час 16:00
-            setInterval(() => {
-                const now = new Date();
-                // 16:00
-                if (now.getHours() === 16 && now.getMinutes() === 0 && !history.includes(todayStr)) {
-                    new Notification("🔥 Час Тренування!", {
-                        body: "Твій вогник може згоріти! Заходь та зроби 25 присідань, 20 віджимань та планку.",
-                        icon: "https://cdn-icons-png.flaticon.com/512/763/763116.png"
-                    });
-                }
-            }, 60000); // 60000 мс = 1 хвилина
-        }
-
-        // Запуск перевірки при завантаженні (якщо дозвіл вже є)
-        if (Notification.permission === "granted") {
-            scheduleDailyNotification();
-        }
-
     </script>
 </body>
 </html>
