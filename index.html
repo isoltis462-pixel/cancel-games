@@ -260,6 +260,7 @@
                 <li><span>🏋️ Присідання</span> <span>25 разів</span></li>
                 <li><span>💪 Віджимання</span> <span>20 разів</span></li>
                 <li><span>🔥 Прес</span> <span>25 разів</span></li>
+                <li><span>⏱️ Планка</span> <span>30 сек</span></li>
             </ul>
             <button class="btn-start" onclick="startWorkout()">ПОЧАТИ</button>
         </div>
@@ -287,7 +288,7 @@
 
             <div class="rest-screen" id="rest-screen">
                 <h2>ПЕРЕРВА</h2>
-                <div class="rest-timer" id="rest-timer">30</div>
+                <div class="rest-timer" id="rest-timer">15</div>
                 <p>Наступне: <span id="next-exercise-name">Віджимання</span></p>
             </div>
 
@@ -296,11 +297,12 @@
     </div>
 
     <script>
-        // --- СТАН ТА ДАНІ ---
+        // --- СТАН ТА ВПРАВИ ---
         const routine = [
-            { id: 'squats', name: 'Присідання', target: 25, hint: 'Станьте на повний зріст. Присідайте глибоко.', startState: 'up' },
-            { id: 'pushups', name: 'Віджимання', target: 20, hint: 'Станьте БОКОМ до камери для точного підрахунку.', startState: 'up' },
-            { id: 'crunches', name: 'Прес', target: 25, hint: 'Ляжте БОКОМ до камери. Піднімайте тулуб до колін.', startState: 'down' }
+            { id: 'squats', name: 'Присідання', target: 25, type: 'reps', hint: 'Станьте на повний зріст. Робіть глибокий прис.' },
+            { id: 'pushups', name: 'Віджимання', target: 20, type: 'reps', hint: 'Станьте БОКОМ до камери. Згинайте руки повністю.' },
+            { id: 'crunches', name: 'Прес', target: 25, type: 'reps', hint: 'Ляжте БОКОМ. Піднімайте тулуб до колін.' },
+            { id: 'plank', name: 'Планка', target: 30, type: 'time', hint: 'Тримайте тіло рівно. Таймер йде у правильній позі!' }
         ];
 
         let history = JSON.parse(localStorage.getItem('workoutHistory')) || [];
@@ -354,7 +356,7 @@
         }
         updateDashboard();
 
-        // --- ЛОГІКА ТРЕНУВАННЯ ТА ШІ КАМЕРИ ---
+        // --- ШІ КАМЕРА ТА ЛОГІКА ТРЕНУВАННЯ ---
         let detector, cameraRunning = false;
         let currentExerciseIdx = 0;
         let currentCount = 0;
@@ -418,16 +420,21 @@
         function startExerciseLogic() {
             const ex = routine[currentExerciseIdx];
             currentCount = 0;
-            exerciseState = ex.startState;
+            exerciseState = 'up';
             isResting = false;
             
             document.getElementById('rest-screen').style.display = 'none';
             document.getElementById('hud').style.display = 'block';
             document.getElementById('hud-name').innerText = ex.name;
             document.getElementById('hud-hint').innerText = ex.hint;
-            document.getElementById('hud-target').innerText = `з ${ex.target}`;
+            document.getElementById('hud-target').innerText = ex.type === 'reps' ? `з ${ex.target}` : `з ${ex.target} сек`;
             
             updateHUD();
+
+            // Для планки запускаємо окремий розумний таймер
+            if (ex.type === 'time') {
+                startPlankTimer();
+            }
         }
 
         function updateHUD() {
@@ -435,6 +442,7 @@
         }
 
         function completeExercise() {
+            clearInterval(timerInterval);
             currentExerciseIdx++;
             if (currentExerciseIdx >= routine.length) {
                 finishFullWorkout();
@@ -478,6 +486,27 @@
             updateDashboard();
         }
 
+        // ШІ Обчислення кутів для точності
+        function calculateAngle(a, b, c) {
+            const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
+            let angle = Math.abs(radians * 180.0 / Math.PI);
+            if (angle > 180.0) angle = 360 - angle;
+            return angle;
+        }
+
+        let isPlankGood = false;
+        function startPlankTimer() {
+            timerInterval = setInterval(() => {
+                if (isPlankGood) {
+                    currentCount++;
+                    updateHUD();
+                    if (currentCount >= routine[currentExerciseIdx].target) {
+                        completeExercise();
+                    }
+                }
+            }, 1000);
+        }
+
         async function poseDetectionLoop() {
             if (!cameraRunning) return;
 
@@ -489,27 +518,29 @@
                     const pose = poses[0];
                     drawSkeleton(pose.keypoints);
                     
-                    const exId = routine[currentExerciseIdx].id;
-                    if (exId === 'squats') countSquats(pose.keypoints);
-                    if (exId === 'pushups') countPushups(pose.keypoints);
-                    if (exId === 'crunches') countCrunches(pose.keypoints);
+                    const ex = routine[currentExerciseIdx];
+                    if (ex.id === 'squats') countSquats(pose.keypoints);
+                    if (ex.id === 'pushups') countPushups(pose.keypoints);
+                    if (ex.id === 'crunches') countCrunches(pose.keypoints);
+                    if (ex.id === 'plank') checkPlank(pose.keypoints);
                 }
             }
 
             requestAnimationFrame(poseDetectionLoop);
         }
 
-        function countSquats(keypoints) {
-            const hip = keypoints[23] || keypoints[24];
-            const knee = keypoints[25] || keypoints[26];
+        function countSquats(kp) {
+            const hip = kp[23] || kp[24];
+            const knee = kp[25] || kp[26];
+            const ankle = kp[27] || kp[28];
             
-            if (hip && knee && hip.score > 0.6 && knee.score > 0.6) {
-                const distanceY = Math.abs(hip.y - knee.y);
+            if (hip && knee && ankle && hip.score > 0.6 && knee.score > 0.6) {
+                const angle = calculateAngle(hip, knee, ankle);
                 
-                if (distanceY < 50 && exerciseState === 'up') {
-                    exerciseState = 'down';
-                } else if (distanceY > 100 && exerciseState === 'down') {
-                    exerciseState = 'up';
+                if (angle < 110 && exerciseState === 'up') {
+                    exerciseState = 'down'; // Присів
+                } else if (angle > 160 && exerciseState === 'down') {
+                    exerciseState = 'up'; // Встав
                     currentCount++;
                     updateHUD();
                     if(currentCount >= routine[currentExerciseIdx].target) completeExercise();
@@ -517,17 +548,18 @@
             }
         }
 
-        function countPushups(keypoints) {
-            const shoulder = keypoints[11] || keypoints[12];
-            const elbow = keypoints[13] || keypoints[14];
+        function countPushups(kp) {
+            const shoulder = kp[11] || kp[12];
+            const elbow = kp[13] || kp[14];
+            const wrist = kp[15] || kp[16];
             
-            if (shoulder && elbow && shoulder.score > 0.6 && elbow.score > 0.6) {
-                const distanceY = shoulder.y - elbow.y;
+            if (shoulder && elbow && wrist && shoulder.score > 0.6 && elbow.score > 0.6) {
+                const angle = calculateAngle(shoulder, elbow, wrist);
                 
-                if (distanceY > -20 && exerciseState === 'up') {
-                    exerciseState = 'down';
-                } else if (distanceY < -60 && exerciseState === 'down') {
-                    exerciseState = 'up';
+                if (angle < 90 && exerciseState === 'up') {
+                    exerciseState = 'down'; // Зігнув руки
+                } else if (angle > 150 && exerciseState === 'down') {
+                    exerciseState = 'up'; // Випрямив руки
                     currentCount++;
                     updateHUD();
                     if(currentCount >= routine[currentExerciseIdx].target) completeExercise();
@@ -535,33 +567,53 @@
             }
         }
 
-        function countCrunches(keypoints) {
-            const shoulder = keypoints[11] || keypoints[12];
-            const hip = keypoints[23] || keypoints[24];
+        function countCrunches(kp) {
+            const shoulder = kp[11] || kp[12];
+            const hip = kp[23] || kp[24];
+            const knee = kp[25] || kp[26];
             
-            if (shoulder && hip && shoulder.score > 0.6 && hip.score > 0.6) {
-                // Відстань між стегном та плечем по осі Y
-                const distanceY = hip.y - shoulder.y;
+            if (shoulder && hip && knee && shoulder.score > 0.6 && hip.score > 0.6) {
+                const angle = calculateAngle(shoulder, hip, knee);
                 
-                // Коли ми лежимо, плечі і стегна приблизно на одному рівні
-                // Коли ми піднімаємось (скручуємось), плечі стають вище за стегна
-                if (distanceY > 60 && exerciseState === 'down') {
-                    exerciseState = 'up'; // Підняли тулуб
+                if (angle < 75 && exerciseState === 'down') {
+                    exerciseState = 'up'; // Піднявся
                     currentCount++;
                     updateHUD();
                     if(currentCount >= routine[currentExerciseIdx].target) completeExercise();
-                } else if (distanceY < 25 && exerciseState === 'up') {
-                    exerciseState = 'down'; // Опустилися назад
+                } else if (angle > 105 && exerciseState === 'up') {
+                    exerciseState = 'down'; // Лягнув назад
                 }
             }
         }
 
-        function drawSkeleton(keypoints) {
+        function checkPlank(kp) {
+            const shoulder = kp[11] || kp[12];
+            const hip = kp[23] || kp[24];
+            const ankle = kp[27] || kp[28];
+            
+            if (shoulder && hip && ankle && shoulder.score > 0.5 && hip.score > 0.5) {
+                // Перевіряємо горизонтальність (різниця по Y між плечем і стегном має бути мінімальною)
+                const diffY = Math.abs(shoulder.y - hip.y);
+                if (diffY < 60) {
+                    isPlankGood = true;
+                    document.getElementById('hud-hint').innerText = "🔥 Чудово тримайся!";
+                    document.getElementById('hud-hint').style.color = "#00ffcc";
+                } else {
+                    isPlankGood = false;
+                    document.getElementById('hud-hint').innerText = "⚠️ Випрями тіло в одну лінію!";
+                    document.getElementById('hud-hint').style.color = "#ff3366";
+                }
+            } else {
+                isPlankGood = false;
+            }
+        }
+
+        function drawSkeleton(kp) {
             ctx.fillStyle = '#00ffcc';
             ctx.strokeStyle = '#ff0055';
             ctx.lineWidth = 2;
 
-            keypoints.forEach(point => {
+            kp.forEach(point => {
                 if (point.score > 0.5) {
                     ctx.beginPath();
                     const x = canvas.width - point.x;
