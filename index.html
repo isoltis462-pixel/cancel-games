@@ -297,12 +297,11 @@
     </div>
 
     <script>
-        // --- СТАН ТА ВПРАВИ ---
         const routine = [
-            { id: 'squats', name: 'Присідання', target: 25, type: 'reps', hint: 'Станьте на повний зріст. Робіть глибокий прис.' },
-            { id: 'pushups', name: 'Віджимання', target: 20, type: 'reps', hint: 'Станьте БОКОМ до камери. Згинайте руки повністю.' },
-            { id: 'crunches', name: 'Прес', target: 25, type: 'reps', hint: 'Ляжте БОКОМ. Піднімайте тулуб до колін.' },
-            { id: 'plank', name: 'Планка', target: 30, type: 'time', hint: 'Тримайте тіло рівно. Таймер йде у правильній позі!' }
+            { id: 'squats', name: 'Присідання', target: 25, type: 'reps', hint: 'Станьте так, щоб телефон бачив увесь зріст (від ніг до голови).' },
+            { id: 'pushups', name: 'Віджимання', target: 20, type: 'reps', hint: 'Станьте боком або навскіс, щоб руки і тулуб були у кадрі.' },
+            { id: 'crunches', name: 'Прес', target: 25, type: 'reps', hint: 'Ляжте так, щоб плечі і тулуб чітко піднімалися перед камерою.' },
+            { id: 'plank', name: 'Планка', target: 30, type: 'time', hint: 'Замріть у планці — таймер піде автоматично!' }
         ];
 
         let history = JSON.parse(localStorage.getItem('workoutHistory')) || [];
@@ -311,7 +310,6 @@
         const getLocalDateStr = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
         const todayStr = getLocalDateStr(new Date());
 
-        // --- ВІДОБРАЖЕННЯ ДАШБОРДУ ---
         function updateDashboard() {
             let streak = 0;
             let checkDate = new Date();
@@ -356,7 +354,6 @@
         }
         updateDashboard();
 
-        // --- ШІ КАМЕРА ТА ЛОГІКА ТРЕНУВАННЯ ---
         let detector, cameraRunning = false;
         let currentExerciseIdx = 0;
         let currentCount = 0;
@@ -431,7 +428,6 @@
             
             updateHUD();
 
-            // Для планки запускаємо окремий розумний таймер
             if (ex.type === 'time') {
                 startPlankTimer();
             }
@@ -486,7 +482,6 @@
             updateDashboard();
         }
 
-        // ШІ Обчислення кутів для точності
         function calculateAngle(a, b, c) {
             const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
             let angle = Math.abs(radians * 180.0 / Math.PI);
@@ -516,7 +511,7 @@
 
                 if (poses.length > 0) {
                     const pose = poses[0];
-                    drawSkeleton(pose.keypoints);
+                    drawSkeletonWithAngles(pose.keypoints);
                     
                     const ex = routine[currentExerciseIdx];
                     if (ex.id === 'squats') countSquats(pose.keypoints);
@@ -534,13 +529,14 @@
             const knee = kp[25] || kp[26];
             const ankle = kp[27] || kp[28];
             
-            if (hip && knee && ankle && hip.score > 0.6 && knee.score > 0.6) {
+            if (hip && knee && ankle && hip.score > 0.4 && knee.score > 0.4) {
                 const angle = calculateAngle(hip, knee, ankle);
                 
-                if (angle < 110 && exerciseState === 'up') {
-                    exerciseState = 'down'; // Присів
+                // Якщо кут в коліні менше 130 градусів — вважаємо, що присіли
+                if (angle < 130 && exerciseState === 'up') {
+                    exerciseState = 'down';
                 } else if (angle > 160 && exerciseState === 'down') {
-                    exerciseState = 'up'; // Встав
+                    exerciseState = 'up';
                     currentCount++;
                     updateHUD();
                     if(currentCount >= routine[currentExerciseIdx].target) completeExercise();
@@ -553,13 +549,13 @@
             const elbow = kp[13] || kp[14];
             const wrist = kp[15] || kp[16];
             
-            if (shoulder && elbow && wrist && shoulder.score > 0.6 && elbow.score > 0.6) {
+            if (shoulder && elbow && wrist && shoulder.score > 0.4 && elbow.score > 0.4) {
                 const angle = calculateAngle(shoulder, elbow, wrist);
                 
-                if (angle < 90 && exerciseState === 'up') {
-                    exerciseState = 'down'; // Зігнув руки
+                if (angle < 110 && exerciseState === 'up') {
+                    exerciseState = 'down';
                 } else if (angle > 150 && exerciseState === 'down') {
-                    exerciseState = 'up'; // Випрямив руки
+                    exerciseState = 'up';
                     currentCount++;
                     updateHUD();
                     if(currentCount >= routine[currentExerciseIdx].target) completeExercise();
@@ -572,16 +568,16 @@
             const hip = kp[23] || kp[24];
             const knee = kp[25] || kp[26];
             
-            if (shoulder && hip && knee && shoulder.score > 0.6 && hip.score > 0.6) {
+            if (shoulder && hip && knee && shoulder.score > 0.4 && hip.score > 0.4) {
                 const angle = calculateAngle(shoulder, hip, knee);
                 
-                if (angle < 75 && exerciseState === 'down') {
-                    exerciseState = 'up'; // Піднявся
+                if (angle < 90 && exerciseState === 'down') {
+                    exerciseState = 'up';
                     currentCount++;
                     updateHUD();
                     if(currentCount >= routine[currentExerciseIdx].target) completeExercise();
-                } else if (angle > 105 && exerciseState === 'up') {
-                    exerciseState = 'down'; // Лягнув назад
+                } else if (angle > 120 && exerciseState === 'up') {
+                    exerciseState = 'down';
                 }
             }
         }
@@ -589,18 +585,16 @@
         function checkPlank(kp) {
             const shoulder = kp[11] || kp[12];
             const hip = kp[23] || kp[24];
-            const ankle = kp[27] || kp[28];
             
-            if (shoulder && hip && ankle && shoulder.score > 0.5 && hip.score > 0.5) {
-                // Перевіряємо горизонтальність (різниця по Y між плечем і стегном має бути мінімальною)
+            if (shoulder && hip && shoulder.score > 0.4 && hip.score > 0.4) {
                 const diffY = Math.abs(shoulder.y - hip.y);
-                if (diffY < 60) {
+                if (diffY < 80) { // Ширший допуск для горизонтального положення
                     isPlankGood = true;
-                    document.getElementById('hud-hint').innerText = "🔥 Чудово тримайся!";
+                    document.getElementById('hud-hint').innerText = "🔥 Тримайся так!";
                     document.getElementById('hud-hint').style.color = "#00ffcc";
                 } else {
                     isPlankGood = false;
-                    document.getElementById('hud-hint').innerText = "⚠️ Випрями тіло в одну лінію!";
+                    document.getElementById('hud-hint').innerText = "⚠️ Підніми/опусти тазовий відділ в рівну лінію!";
                     document.getElementById('hud-hint').style.color = "#ff3366";
                 }
             } else {
@@ -608,16 +602,37 @@
             }
         }
 
-        function drawSkeleton(kp) {
-            ctx.fillStyle = '#00ffcc';
-            ctx.strokeStyle = '#ff0055';
-            ctx.lineWidth = 2;
+        // Малювання повноцінного каркаса і з'єднувальних ліній (як у фітнес-додатках)
+        function drawSkeletonWithAngles(kp) {
+            const pairs = [
+                [11, 13], [13, 15], // Рука права
+                [12, 14], [14, 16], // Рука ліва
+                [11, 23], [12, 24], // Тулуб
+                [23, 25], [25, 27], // Нога права
+                [24, 26], [26, 28]  // Нога ліва
+            ];
 
-            kp.forEach(point => {
-                if (point.score > 0.5) {
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#00ffcc';
+            ctx.fillStyle = '#ff0055';
+
+            // Малюємо з'єднувальні лінії (скелет)
+            pairs.forEach(([i, j]) => {
+                const p1 = kp[i];
+                const p2 = kp[j];
+                if (p1 && p2 && p1.score > 0.4 && p2.score > 0.4) {
                     ctx.beginPath();
-                    const x = canvas.width - point.x;
-                    ctx.arc(x, point.y, 5, 0, 2 * Math.PI);
+                    ctx.moveTo(canvas.width - p1.x, p1.y);
+                    ctx.lineTo(canvas.width - p2.x, p2.y);
+                    ctx.stroke();
+                }
+            });
+
+            // Малюємо суглоби (точки)
+            kp.forEach(point => {
+                if (point.score > 0.4) {
+                    ctx.beginPath();
+                    ctx.arc(canvas.width - point.x, point.y, 6, 0, 2 * Math.PI);
                     ctx.fill();
                 }
             });
