@@ -1,52 +1,17 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>СВІТАНОК — Головна</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
+<!doctype html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Світанок — інтернет-магазин</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1 8a4 4 0 0 1 8 0z' fill='%23FFC247'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;600;700&family=Unbounded:wght@600&display=swap">
+<link rel="stylesheet" href="style.css"></head>
 <body>
-  <header class="header">
-    <div class="container header-container">
-      <a href="index.html" class="logo">СВІТАНОК</a>
-      <div class="search-bar">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="searchInput" placeholder="Пошук товарів...">
-      </div>
-      <nav class="nav-menu">
-        <a href="index.html" class="nav-link active">Головна</a>
-        <a href="cart.html" class="nav-link">Кошик</a>
-        <a href="profile.html" class="nav-link">Профіль</a>
-      </nav>
-      <div class="header-actions">
-        <a href="cart.html" class="action-btn" title="Кошик">
-          <i class="fa-solid fa-bag-shopping"></i>
-          <span class="action-badge" id="cartCount">0</span>
-        </a>
-      </div>
-    </div>
-  </header>
-
-  <section class="hero">
-    <div class="container hero-content">
-      <h1>СВІТАНОК — початок чогось нового</h1>
-      <p>Сучасний український e-commerce бренд із преміальними товарами для затишку.</p>
-    </div>
-  </section>
-
-  <main class="container" style="padding: 40px 20px;">
-    <h2 style="margin-bottom: 24px; color: var(--secondary);">Каталог товарів</h2>
-    <div class="product-grid" id="productGrid"></div>
-  </main>
-
-  <footer class="footer">
-    <div class="container footer-bottom">
-      <p>&copy; 2026 СВІТАНОК. Усі права захищені.</p>
-    </div>
-  </footer>
-
-  <script src="app.js"></script>
-</body>
-</html>
+<header><a class="logo" href="#/"><i></i>Світанок</a><input id="q" type="search" placeholder="Пошук товарів" aria-label="Пошук"><nav id="nav"></nav></header>
+<main id="app"></main>
+<footer>© Світанок. Доставка Новою Поштою та Укрпоштою по всій Україні.</footer>
+<div id="toast" hidden></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="app.js"></script>
+</body></html>
