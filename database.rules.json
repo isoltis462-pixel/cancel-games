@@ -1,0 +1,7 @@
+{"rules":{
+".read":false,".write":false,
+"products":{".read":true,".write":"root.child('admins/'+auth.uid).val()===true"},
+"admins":{"$u":{".read":"auth.uid===$u"}},
+"users":{"$u":{".read":"auth.uid===$u||root.child('admins/'+auth.uid).val()===true",".write":"auth.uid===$u||root.child('admins/'+auth.uid).val()===true"}},
+"orders":{".read":"root.child('admins/'+auth.uid).val()===true","$o":{".write":"auth!=null&&((!data.exists()&&newData.child('uid').val()===auth.uid)||root.child('admins/'+auth.uid).val()===true)"}}
+}}
